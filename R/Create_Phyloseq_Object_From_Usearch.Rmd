@@ -7,11 +7,11 @@ output: html_notebook
 library(tidyverse)
 library(phyloseq)
 #Your count data table. This can be found on Teton in the folder of each project. This currently has a name like otutable.esv. I manually changed the name to otutable_est.txt.
-count_tab <- read.table("/Users/gordoncuster/Desktop/untitled folder/otutable_esv.txt", header=T, row.names=1, check.names=F)
+count_tab <- read.table("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/otutable_esv.txt", header=T, row.names=1, check.names=F)
 #Your taxonomy table. This is the ouptupt of the assign taxonomy step. The output file is currently named something like OUT.sintax. I manually changed the name to XXX_Taxonomy.txt. 
-tax_tab <- as.matrix(read.table("/Users/gordoncuster/Desktop/untitled folder/Herb1_Taxonomy.txt", header=F, row.names=1, check.names=F, na.strings="", sep="\t"))
+tax_tab <- as.matrix(read.table("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/Herb1_Taxonomy.txt", header=F, row.names=1, check.names=F, na.strings="", sep="\t"))
 #This is your metadata. 
-sample_info_tab <- read.csv("/Users/gordoncuster/Desktop/untitled folder/Herb_Pt_1_IC_anion_cation_import_to_R.csv", header=T)
+sample_info_tab <- read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/Herb_Pt_1_IC_anion_cation_import_to_R.csv", header=T)
 #name rows as the barcodes/sample IDs. 
 rownames(sample_info_tab)<-sample_info_tab$Barcode_ID_G
 ```
@@ -28,7 +28,7 @@ names(count_tab2)<-samp_names
 table(str_split(names(count_tab),pattern = "_", 5, simplify = T)[,4] == names(count_tab2))
 
 #check correlations of technical replicates. I'm choosing to sum below, but it would be good to know this information. 
-#to be added. 
+#to be added.
 
 #sum technical replicates
 count_tab2<-t(rowsum(t(count_tab2), group = colnames(count_tab2), na.rm = T))
@@ -64,9 +64,9 @@ tax_tab2<-as.matrix(tax_tab2)
 tax_tab<-tax_table(tax_tab2)
 #create phyloseq object
 library(phyloseq)
-your_phyloseq_object<-phyloseq(otu_tab, samp_dat, tax_tab)
-
+HerbPt1_PS_Orig<-phyloseq(otu_tab, samp_dat, tax_tab)
 ```
+
 
 
 

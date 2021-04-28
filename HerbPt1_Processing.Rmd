@@ -1,0 +1,16 @@
+---
+title: "HerbPt1 processing"
+output: html_notebook
+---
+
+Pre-analysis filtering of non-bacterial reads
+```{r}
+#21300 taxa in original
+HerbPt1_PS_Orig
+#remove all non-bacterial reads
+#21028 taxa in bacteria only ps object. 272 non-bacterial taxa 
+ps_bac<-subset_taxa(HerbPt1_PS_Orig, Kingdom == "k:Bacteria")
+#create seperate dataframe of archea
+#101 archeal taxa
+ps_archea<-subset_taxa(HerbPt1_PS_Orig, Kingdom=="k:Archaea")
+```
