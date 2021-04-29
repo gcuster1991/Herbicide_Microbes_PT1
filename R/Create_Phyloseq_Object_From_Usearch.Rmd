@@ -48,8 +48,15 @@ cor_df <- data.frame(SampleID = rep(names(cor_df), sapply(cor_df, length)),
 #summary info
 summary(cor_df)
 #look at lowest correlations
-cor_df %>%
+cor_samp_df<- cor_df %>%
    arrange(Correlation,SampleID)
+
+#Look at those samples with a low correlation. I chose 0.6 for now, but this is likely to change.
+low_cor_samp<-cor_samp_df[cor_samp_df$Correlation<0.6,]
+
+low_cor <- colnames(count_tab2) %in% low_cor_samp$SampleID
+low_cor_df <- count_tab2[, low_cor, drop = FALSE]
+View(low_cor_df)
 
 #sum technical replicates
 count_tab2<-t(rowsum(t(count_tab2), group = colnames(count_tab2), na.rm = T))
