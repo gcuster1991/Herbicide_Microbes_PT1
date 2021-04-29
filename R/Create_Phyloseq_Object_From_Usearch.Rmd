@@ -57,6 +57,7 @@ low_cor_samp<-cor_samp_df[cor_samp_df$Correlation<0.6,]
 low_cor <- colnames(count_tab2) %in% low_cor_samp$SampleID
 low_cor_df <- count_tab2[, low_cor, drop = FALSE]
 View(low_cor_df)
+sort(colSums(low_cor_df))
 
 #sum technical replicates
 count_tab2<-t(rowsum(t(count_tab2), group = colnames(count_tab2), na.rm = T))
