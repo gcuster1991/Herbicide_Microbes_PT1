@@ -27,8 +27,32 @@ names(count_tab2)<-samp_names
 #Check to make sure names match up. All values should equal true if the new names are in the correct spot. 
 table(str_split(names(count_tab),pattern = "_", 5, simplify = T)[,4] == names(count_tab2))
 
-#check correlations of technical replicates. I'm choosing to sum below, but it would be good to know this information. 
-#to be added.
+#check correlations of technical replicates.
+cor_mat<-data.frame()
+cor_df<-list()
+for(i in 1:length(samp_names)){
+  for(j in 1:length(samp_names)){
+    if(samp_names[i] == samp_names[j]){
+      if(cor(count_tab2[i], count_tab2[j]) < 0.999){
+          tmp<-cor(count_tab2[i], count_tab2[j])
+            cor_stat <-data.frame(tmp) 
+               #cor_out<-cor(count_tab[i], count_tab2[j])[1]
+            print(cor(count_tab2[i], count_tab2[j]))
+                #names(cor_stat)=NULL
+                  cor_df<-c(cor_df, cor_stat)
+      }
+    }
+  }
+}
+
+#unlist to a dataframe containing sample ID and the correlation
+cor_df <- data.frame(SampleID = rep(names(cor_df), sapply(cor_df, length)),
+                 correlation = unlist(cor_df))
+#summary info
+summary(cor_df)
+#look at lowest correlations
+cor_df %>%
+   arrange(correlation,SampleID)
 
 #sum technical replicates
 count_tab2<-t(rowsum(t(count_tab2), group = colnames(count_tab2), na.rm = T))
@@ -66,6 +90,11 @@ tax_tab<-tax_table(tax_tab2)
 library(phyloseq)
 HerbPt1_PS_Orig<-phyloseq(otu_tab, samp_dat, tax_tab)
 ```
+
+
+
+
+
 
 
 
