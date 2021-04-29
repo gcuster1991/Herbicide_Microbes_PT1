@@ -35,9 +35,7 @@ for(i in 1:length(samp_names)){
       if(cor(count_tab2[i], count_tab2[j]) < 0.999){
           tmp<-cor(count_tab2[i], count_tab2[j])
             cor_stat <-data.frame(tmp) 
-               #cor_out<-cor(count_tab[i], count_tab2[j])[1]
-            print(cor(count_tab2[i], count_tab2[j]))
-                #names(cor_stat)=NULL
+               #print(cor(count_tab2[i], count_tab2[j]))
                   cor_df<-c(cor_df, cor_stat)
       }
     }
@@ -46,12 +44,12 @@ for(i in 1:length(samp_names)){
 
 #unlist to a dataframe containing sample ID and the correlation
 cor_df <- data.frame(SampleID = rep(names(cor_df), sapply(cor_df, length)),
-                 correlation = unlist(cor_df))
+                 Correlation = unlist(cor_df))
 #summary info
 summary(cor_df)
 #look at lowest correlations
 cor_df %>%
-   arrange(correlation,SampleID)
+   arrange(Correlation,SampleID)
 
 #sum technical replicates
 count_tab2<-t(rowsum(t(count_tab2), group = colnames(count_tab2), na.rm = T))
