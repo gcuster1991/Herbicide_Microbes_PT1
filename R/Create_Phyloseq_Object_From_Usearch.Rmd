@@ -28,7 +28,6 @@ names(count_tab2)<-samp_names
 table(str_split(names(count_tab),pattern = "_", 5, simplify = T)[,4] == names(count_tab2))
 
 #check correlations of technical replicates.
-cor_mat<-data.frame()
 cor_df<-list()
 for(i in 1:length(samp_names)){
   for(j in 1:length(samp_names)){
