@@ -216,36 +216,13 @@ pre code {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5gYGAifQ== -->
-<pre class="r"><code>library(tidyverse)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2RzIG92ZXJ3cml0dGVuIGJ5ICdkYnBseXInOlxuICBtZXRob2QgICAgICAgICBmcm9tXG4gIHByaW50LnRibF9sYXp5ICAgICBcbiAgcHJpbnQudGJsX3NxbCAgICAgIFxuXHUwMDFiWzMwbeKUgOKUgCBcdTAwMWJbMW1BdHRhY2hpbmcgcGFja2FnZXNcdTAwMWJbMjJtIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCB0aWR5dmVyc2UgMS4zLjEg4pSA4pSAXHUwMDFiWzM5bVxuXHUwMDFiWzMwbVx1MDAxYlszMm3inJNcdTAwMWJbMzBtIFx1MDAxYlszNG1nZ3Bsb3QyXHUwMDFiWzMwbSAzLjMuMyAgICAgXHUwMDFiWzMybeKck1x1MDAxYlszMG0gXHUwMDFiWzM0bXB1cnJyICBcdTAwMWJbMzBtIDAuMy40XG5cdTAwMWJbMzJt4pyTXHUwMDFiWzMwbSBcdTAwMWJbMzRtdGliYmxlIFx1MDAxYlszMG0gMy4xLjEgICAgIFx1MDAxYlszMm3inJNcdTAwMWJbMzBtIFx1MDAxYlszNG1kcGx5ciAgXHUwMDFiWzMwbSAxLjAuNVxuXHUwMDFiWzMybeKck1x1MDAxYlszMG0gXHUwMDFiWzM0bXRpZHlyICBcdTAwMWJbMzBtIDEuMS4zICAgICBcdTAwMWJbMzJt4pyTXHUwMDFiWzMwbSBcdTAwMWJbMzRtc3RyaW5nclx1MDAxYlszMG0gMS40LjBcblx1MDAxYlszMm3inJNcdTAwMWJbMzBtIFx1MDAxYlszNG1yZWFkciAgXHUwMDFiWzMwbSAxLjQuMCAgICAgXHUwMDFiWzMybeKck1x1MDAxYlszMG0gXHUwMDFiWzM0bWZvcmNhdHNcdTAwMWJbMzBtIDAuNS4xXHUwMDFiWzM5bVxuXHUwMDFiWzMwbeKUgOKUgCBcdTAwMWJbMW1Db25mbGljdHNcdTAwMWJbMjJtIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCB0aWR5dmVyc2VfY29uZmxpY3RzKCkg4pSA4pSAXG5cdTAwMWJbMzFteFx1MDAxYlszMG0gXHUwMDFiWzM0bWRwbHlyXHUwMDFiWzMwbTo6XHUwMDFiWzMybWZpbHRlcigpXHUwMDFiWzMwbSBtYXNrcyBcdTAwMWJbMzRtc3RhdHNcdTAwMWJbMzBtOjpmaWx0ZXIoKVxuXHUwMDFiWzMxbXhcdTAwMWJbMzBtIFx1MDAxYlszNG1kcGx5clx1MDAxYlszMG06Olx1MDAxYlszMm1sYWcoKVx1MDAxYlszMG0gICAgbWFza3MgXHUwMDFiWzM0bXN0YXRzXHUwMDFiWzMwbTo6bGFnKClcdTAwMWJbMzltXG4ifQ== -->
-<pre><code>Registered S3 methods overwritten by 'dbplyr':
-  method         from
-  print.tbl_lazy     
-  print.tbl_sql      
-[30m── [1mAttaching packages[22m ──────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.1 ──[39m
-[30m[32m✓[30m [34mggplot2[30m 3.3.3     [32m✓[30m [34mpurrr  [30m 0.3.4
-[32m✓[30m [34mtibble [30m 3.1.1     [32m✓[30m [34mdplyr  [30m 1.0.5
-[32m✓[30m [34mtidyr  [30m 1.1.3     [32m✓[30m [34mstringr[30m 1.4.0
-[32m✓[30m [34mreadr  [30m 1.4.0     [32m✓[30m [34mforcats[30m 0.5.1[39m
-[30m── [1mConflicts[22m ─────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-[31mx[30m [34mdplyr[30m::[32mfilter()[30m masks [34mstats[30m::filter()
-[31mx[30m [34mdplyr[30m::[32mlag()[30m    masks [34mstats[30m::lag()[39m</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShwaHlsb3NlcSlcbmBgYCJ9 -->
-<pre class="r"><code>library(phyloseq)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2Qgb3ZlcndyaXR0ZW4gYnkgJ2RhdGEudGFibGUnOlxuICBtZXRob2QgICAgICAgICAgIGZyb21cbiAgcHJpbnQuZGF0YS50YWJsZSAgICAgXG4ifQ== -->
-<pre><code>Registered S3 method overwritten by 'data.table':
-  method           from
-  print.data.table     </code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI1lvdXIgY291bnQgZGF0YSB0YWJsZS4gVGhpcyBjYW4gYmUgZm91bmQgb24gVGV0b24gaW4gdGhlIGZvbGRlciBvZiBlYWNoIHByb2plY3QuIFRoaXMgY3VycmVudGx5IGhhcyBhIG5hbWUgbGlrZSBvdHV0YWJsZS5lc3YuIEkgbWFudWFsbHkgY2hhbmdlZCB0aGUgbmFtZSB0byBvdHV0YWJsZV9lc3QudHh0LlxuY291bnRfdGFiIDwtIHJlYWQudGFibGUoXCIvVXNlcnMvZ29yZG9uY3VzdGVyL0Rlc2t0b3AvTWFudXNjcmlwdCBTdWJtaXNzaW9ucy9IZXJiaWNpZGUgYW5kIE1pY3JvYmVzL1NlcXVlbmNlX2RhdGEvb3R1dGFibGVfZXN2LnR4dFwiLCBoZWFkZXI9VCwgcm93Lm5hbWVzPTEsIGNoZWNrLm5hbWVzPUYpXG4jWW91ciB0YXhvbm9teSB0YWJsZS4gVGhpcyBpcyB0aGUgb3VwdHVwdCBvZiB0aGUgYXNzaWduIHRheG9ub215IHN0ZXAuIFRoZSBvdXRwdXQgZmlsZSBpcyBjdXJyZW50bHkgbmFtZWQgc29tZXRoaW5nIGxpa2UgT1VULnNpbnRheC4gSSBtYW51YWxseSBjaGFuZ2VkIHRoZSBuYW1lIHRvIFhYWF9UYXhvbm9teS50eHQuIFxudGF4X3RhYiA8LSBhcy5tYXRyaXgocmVhZC50YWJsZShcIi9Vc2Vycy9nb3Jkb25jdXN0ZXIvRGVza3RvcC9NYW51c2NyaXB0IFN1Ym1pc3Npb25zL0hlcmJpY2lkZSBhbmQgTWljcm9iZXMvU2VxdWVuY2VfZGF0YS9IZXJiMV9UYXhvbm9teS50eHRcIiwgaGVhZGVyPUYsIHJvdy5uYW1lcz0xLCBjaGVjay5uYW1lcz1GLCBuYS5zdHJpbmdzPVwiXCIsIHNlcD1cIlxcdFwiKSlcbiNUaGlzIGlzIHlvdXIgbWV0YWRhdGEuIFxuc2FtcGxlX2luZm9fdGFiIDwtIHJlYWQuY3N2KFwiL1VzZXJzL2dvcmRvbmN1c3Rlci9EZXNrdG9wL01hbnVzY3JpcHQgU3VibWlzc2lvbnMvSGVyYmljaWRlIGFuZCBNaWNyb2Jlcy9TZXF1ZW5jZV9kYXRhL0hlcmJfUHRfMV9JQ19hbmlvbl9jYXRpb25faW1wb3J0X3RvX1IuY3N2XCIsIGhlYWRlcj1UKVxuI25hbWUgcm93cyBhcyB0aGUgYmFyY29kZXMvc2FtcGxlIElEcy4gXG5yb3duYW1lcyhzYW1wbGVfaW5mb190YWIpPC1zYW1wbGVfaW5mb190YWIkQmFyY29kZV9JRF9HXG5gYGAifQ== -->
-<pre class="r"><code>#Your count data table. This can be found on Teton in the folder of each project. This currently has a name like otutable.esv. I manually changed the name to otutable_est.txt.
-count_tab &lt;- read.table(&quot;/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/otutable_esv.txt&quot;, header=T, row.names=1, check.names=F)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHBoeWxvc2VxKVxuI1lvdXIgY291bnQgZGF0YSB0YWJsZS4gVGhpcyBjYW4gYmUgZm91bmQgb24gVGV0b24gaW4gdGhlIGZvbGRlciBvZiBlYWNoIHByb2plY3QuIFRoaXMgY3VycmVudGx5IGhhcyBhIG5hbWUgbGlrZSBvdHV0YWJsZS5lc3YuIEkgbWFudWFsbHkgY2hhbmdlZCB0aGUgbmFtZSB0byBvdHV0YWJsZV9lc3QudHh0LlxuY291bnRfdGFiIDwtIHJlYWQudGFibGUoXCIvVXNlcnMvZ29yZG9uY3VzdGVyL0Rlc2t0b3AvTWFudXNjcmlwdCBTdWJtaXNzaW9ucy9IZXJiaWNpZGUgYW5kIE1pY3JvYmVzL1NlcXVlbmNlX2RhdGEvMTZTL290dXRhYmxlX2Vzdi50eHRcIiwgaGVhZGVyPVQsIHJvdy5uYW1lcz0xLCBjaGVjay5uYW1lcz1GKVxuI1lvdXIgdGF4b25vbXkgdGFibGUuIFRoaXMgaXMgdGhlIG91cHR1cHQgb2YgdGhlIGFzc2lnbiB0YXhvbm9teSBzdGVwLiBUaGUgb3V0cHV0IGZpbGUgaXMgY3VycmVudGx5IG5hbWVkIHNvbWV0aGluZyBsaWtlIE9VVC5zaW50YXguIEkgbWFudWFsbHkgY2hhbmdlZCB0aGUgbmFtZSB0byBYWFhfVGF4b25vbXkudHh0LiBcbnRheF90YWIgPC0gYXMubWF0cml4KHJlYWQudGFibGUoXCIvVXNlcnMvZ29yZG9uY3VzdGVyL0Rlc2t0b3AvTWFudXNjcmlwdCBTdWJtaXNzaW9ucy9IZXJiaWNpZGUgYW5kIE1pY3JvYmVzL1NlcXVlbmNlX2RhdGEvMTZTL0hlcmIxX1RheG9ub215LnR4dFwiLCBoZWFkZXI9Riwgcm93Lm5hbWVzPTEsIGNoZWNrLm5hbWVzPUYsIG5hLnN0cmluZ3M9XCJcIiwgc2VwPVwiXFx0XCIpKVxuI1RoaXMgaXMgeW91ciBtZXRhZGF0YS4gXG5zYW1wbGVfaW5mb190YWIgPC0gcmVhZC5jc3YoXCIvVXNlcnMvZ29yZG9uY3VzdGVyL0Rlc2t0b3AvTWFudXNjcmlwdCBTdWJtaXNzaW9ucy9IZXJiaWNpZGUgYW5kIE1pY3JvYmVzL1NlcXVlbmNlX2RhdGEvSGVyYl9QdF8xX0lDX2FuaW9uX2NhdGlvbl9pbXBvcnRfdG9fUi5jc3ZcIiwgaGVhZGVyPVQpXG4jbmFtZSByb3dzIGFzIHRoZSBiYXJjb2Rlcy9zYW1wbGUgSURzLiBcbnJvd25hbWVzKHNhbXBsZV9pbmZvX3RhYik8LXNhbXBsZV9pbmZvX3RhYiRCYXJjb2RlX0lEX0dcbmBgYCJ9 -->
+<pre class="r"><code>library(tidyverse)
+library(phyloseq)
+#Your count data table. This can be found on Teton in the folder of each project. This currently has a name like otutable.esv. I manually changed the name to otutable_est.txt.
+count_tab &lt;- read.table(&quot;/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/otutable_esv.txt&quot;, header=T, row.names=1, check.names=F)
 #Your taxonomy table. This is the ouptupt of the assign taxonomy step. The output file is currently named something like OUT.sintax. I manually changed the name to XXX_Taxonomy.txt. 
-tax_tab &lt;- as.matrix(read.table(&quot;/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/Herb1_Taxonomy.txt&quot;, header=F, row.names=1, check.names=F, na.strings=&quot;&quot;, sep=&quot;\t&quot;))
+tax_tab &lt;- as.matrix(read.table(&quot;/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/Herb1_Taxonomy.txt&quot;, header=F, row.names=1, check.names=F, na.strings=&quot;&quot;, sep=&quot;\t&quot;))
 #This is your metadata. 
 sample_info_tab &lt;- read.csv(&quot;/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/Herb_Pt_1_IC_anion_cation_import_to_R.csv&quot;, header=T)
 #name rows as the barcodes/sample IDs. 
@@ -255,18 +232,113 @@ rownames(sample_info_tab)&lt;-sample_info_tab$Barcode_ID_G</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc29ydChjb2xTdW1zKGxvd19jb3JfZGYpKVxuXG5gYGAifQ== -->
-<pre class="r"><code>sort(colSums(low_cor_df))
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI0luIHRoaXMgbmV4dCBzZWN0aW9uLCBJJ20gcHVsbGluZyBvdXQgdGhlIGJhcmNvZGUgbmFtZXMgZnJvbSB0aGUgY3VycmVudCBzYW1wbGUgbmFtZXMgY29udGF0aW5pZyBsb2N1cyBJRCwgZm9yd2FyZCBNSUQsIHJldmVyc2UgTUlELCBhbmQgTGlicmFyeSBudW1iZXIuXG4jc3BsaXQgYnkgXCJfXCJcIiA1IHRpbWVzLCBzYXZlIGFzIGNoYXJhY3RlciBtYXRyaXggYW5kIGV4dHJhY3QgdGhlICA0dGggc2xvdC5cbnNhbXBfbmFtZXM8LXN0cl9zcGxpdChuYW1lcyhjb3VudF90YWIpLHBhdHRlcm4gPSBcIl9cIiwgNSwgc2ltcGxpZnkgPSBUKVssNF1cbiNqdXN0IHRvIGNoZWNrIHRoYXQgdGhlIG5ldyBzYW1wbGUgbmFtZXMgbWF0Y2ggdXAsIEkgY3JlYXRlZCBhIG5ldyBkYXRhZnJhbWUuIEkgY2hlY2sgdGhpcyB0aHJlZSBsaW5lcyBiZWxvdy4gXG5jb3VudF90YWIyPC1jb3VudF90YWJcbiNyZW5hbWUgY29sdW1ucyBpbiBjb3VudF90YWIyIHdpdGggdGhlIGV4dHJhY3RlZCBpbmZvIGluIHNhbXBfbmFtZXNcbm5hbWVzKGNvdW50X3RhYjIpPC1zYW1wX25hbWVzXG4jQ2hlY2sgdG8gbWFrZSBzdXJlIG5hbWVzIG1hdGNoIHVwLiBBbGwgdmFsdWVzIHNob3VsZCBlcXVhbCB0cnVlIGlmIHRoZSBuZXcgbmFtZXMgYXJlIGluIHRoZSBjb3JyZWN0IHNwb3QuIFxudGFibGUoc3RyX3NwbGl0KG5hbWVzKGNvdW50X3RhYikscGF0dGVybiA9IFwiX1wiLCA1LCBzaW1wbGlmeSA9IFQpWyw0XSA9PSBuYW1lcyhjb3VudF90YWIyKSlcbmBgYCJ9 -->
+<pre class="r"><code>#In this next section, I'm pulling out the barcode names from the current sample names contatinig locus ID, forward MID, reverse MID, and Library number.
+#split by &quot;_&quot;&quot; 5 times, save as character matrix and extract the  4th slot.
+samp_names&lt;-str_split(names(count_tab),pattern = &quot;_&quot;, 5, simplify = T)[,4]
+#just to check that the new sample names match up, I created a new dataframe. I check this three lines below. 
+count_tab2&lt;-count_tab
+#rename columns in count_tab2 with the extracted info in samp_names
+names(count_tab2)&lt;-samp_names
+#Check to make sure names match up. All values should equal true if the new names are in the correct spot. 
+table(str_split(names(count_tab),pattern = &quot;_&quot;, 5, simplify = T)[,4] == names(count_tab2))</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRzE1MlNHLjEgICBHMDExU0cgICBHMDkyU0cgIEJsYW5rLjEgICAgQmxhbmsgRzE3NFNHLjEgRzE2NVNHLjEgICBHMTUyU0cgRzEzOFNHLjEgICBHMTY1U0cgRzAyM1NHLjEgICBHMDQ5U0cgICBHMTM4U0cgRzA5MlNHLjEgXG4gICAgICAgNCAgICAgICAgNSAgICAgICAgNiAgICAgICAxNCAgICAgICAxNyAgICAgICAxOSAgICAgICA1MSAgICAgICA1NCAgICAgICA1NCAgICAgICA5NCAgICAgIDEwMSAgICAgIDExMCAgICAgIDExMSAgICAgIDExNSBcbkcwNDlTRy4xIEcwMTFTRy4xICAgRzAyM1NHIEcwODJTRy4xICAgRzEyN1NHICAgRzEwN1NHICAgRzA4MlNHIEcxMjdTRy4xICAgRzA5NVNHIEcxNjZTRy4xIEcwOTVTRy4xICAgRzE2NlNHICAgRzA2NVNHIEcxMDdTRy4xIFxuICAgICAxMzQgICAgICAxNzEgICAgICAxODcgICAgICAyMDYgICAgICA0OTAgICAgICA1ODEgICAgICA2NDYgICAgICA4MjEgICAgIDE1MDAgICAgIDE2NDggICAgIDM5MDUgICAgIDc3NTkgICAgMzEyMTEgICAgMzQzNTAgXG5HMDY1U0cuMSAgIEcxNzRTRyBcbiAgIDQ3NTQ1ICAgIDU2NTcxIFxuIn0= -->
-<pre><code>G152SG.1   G011SG   G092SG  Blank.1    Blank G174SG.1 G165SG.1   G152SG G138SG.1   G165SG G023SG.1   G049SG   G138SG G092SG.1 
-       4        5        6       14       17       19       51       54       54       94      101      110      111      115 
-G049SG.1 G011SG.1   G023SG G082SG.1   G127SG   G107SG   G082SG G127SG.1   G095SG G166SG.1 G095SG.1   G166SG   G065SG G107SG.1 
-     134      171      187      206      490      581      646      821     1500     1648     3905     7759    31211    34350 
-G065SG.1   G174SG 
-   47545    56571 </code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiXG5UUlVFIFxuIDM2MCBcbiJ9 -->
+<pre><code>
+TRUE 
+ 360 </code></pre>
 <!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI2NoZWNrIGNvcnJlbGF0aW9ucyBvZiB0ZWNobmljYWwgcmVwbGljYXRlcy5cbmNvcl9kZjwtbGlzdCgpXG5mb3IoaSBpbiAxOmxlbmd0aChzYW1wX25hbWVzKSl7XG4gIGZvcihqIGluIDE6bGVuZ3RoKHNhbXBfbmFtZXMpKXtcbiAgICBpZihzYW1wX25hbWVzW2ldID09IHNhbXBfbmFtZXNbal0pe1xuICAgICAgaWYoY29yKGNvdW50X3RhYjJbaV0sIGNvdW50X3RhYjJbal0pIDwgMC45OTkpe1xuICAgICAgICAgIHRtcDwtY29yKGNvdW50X3RhYjJbaV0sIGNvdW50X3RhYjJbal0pXG4gICAgICAgICAgICBjb3Jfc3RhdCA8LWRhdGEuZnJhbWUodG1wKSBcbiAgICAgICAgICAgICAgICNwcmludChjb3IoY291bnRfdGFiMltpXSwgY291bnRfdGFiMltqXSkpXG4gICAgICAgICAgICAgICAgICBjb3JfZGY8LWMoY29yX2RmLCBjb3Jfc3RhdClcbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cbiN1bmxpc3QgdG8gYSBkYXRhZnJhbWUgY29udGFpbmluZyBzYW1wbGUgSUQgYW5kIHRoZSBjb3JyZWxhdGlvblxuY29yX2RmIDwtIGRhdGEuZnJhbWUoU2FtcGxlSUQgPSByZXAobmFtZXMoY29yX2RmKSwgc2FwcGx5KGNvcl9kZiwgbGVuZ3RoKSksXG4gICAgICAgICAgICAgICAgIENvcnJlbGF0aW9uID0gdW5saXN0KGNvcl9kZikpXG4jc3VtbWFyeSBpbmZvXG5zdW1tYXJ5KGNvcl9kZilcbmBgYCJ9 -->
+<pre class="r"><code>#check correlations of technical replicates.
+cor_df&lt;-list()
+for(i in 1:length(samp_names)){
+  for(j in 1:length(samp_names)){
+    if(samp_names[i] == samp_names[j]){
+      if(cor(count_tab2[i], count_tab2[j]) &lt; 0.999){
+          tmp&lt;-cor(count_tab2[i], count_tab2[j])
+            cor_stat &lt;-data.frame(tmp) 
+               #print(cor(count_tab2[i], count_tab2[j]))
+                  cor_df&lt;-c(cor_df, cor_stat)
+      }
+    }
+  }
+}
+#unlist to a dataframe containing sample ID and the correlation
+cor_df &lt;- data.frame(SampleID = rep(names(cor_df), sapply(cor_df, length)),
+                 Correlation = unlist(cor_df))
+#summary info
+summary(cor_df)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgIFNhbXBsZUlEICAgIENvcnJlbGF0aW9uICAgICAgICBcbiBHMTE3U0cgOiAxMiAgIE1pbi4gICA6LTAuMDAwOTc5NCAgXG4gQmxhbmsgIDogIDIgICAxc3QgUXUuOiAwLjg4NTA4MjQgIFxuIEcwMDFTRyA6ICAyICAgTWVkaWFuIDogMC45NTA4Mjg2ICBcbiBHMDAyU0cgOiAgMiAgIE1lYW4gICA6IDAuODY4MTk2MiAgXG4gRzAwM1NHIDogIDIgICAzcmQgUXUuOiAwLjk2ODU2ODAgIFxuIEcwMDRTRyA6ICAyICAgTWF4LiAgIDogMC45OTM2OTEzICBcbiAoT3RoZXIpOjM0NiAgICAgICAgICAgICAgICAgICAgICAgXG4ifQ== -->
+<pre><code>    SampleID    Correlation        
+ G117SG : 12   Min.   :-0.0009794  
+ Blank  :  2   1st Qu.: 0.8850824  
+ G001SG :  2   Median : 0.9508286  
+ G002SG :  2   Mean   : 0.8681962  
+ G003SG :  2   3rd Qu.: 0.9685680  
+ G004SG :  2   Max.   : 0.9936913  
+ (Other):346                       </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI2xvb2sgYXQgbG93ZXN0IGNvcnJlbGF0aW9uc1xuY29yX3NhbXBfZGY8LSBjb3JfZGYgJT4lXG4gICBhcnJhbmdlKENvcnJlbGF0aW9uLFNhbXBsZUlEKVxuI0xvb2sgYXQgdGhvc2Ugc2FtcGxlcyB3aXRoIGEgbG93IGNvcnJlbGF0aW9uLiBJIGNob3NlIDAuNiBmb3Igbm93LCBidXQgdGhpcyBpcyBsaWtlbHkgdG8gY2hhbmdlLlxubG93X2Nvcl9zYW1wPC1jb3Jfc2FtcF9kZltjb3Jfc2FtcF9kZiRDb3JyZWxhdGlvbjwwLjYsXVxuI3JlbW92ZSBzYW1wbGVzIHRoYXQgZGlkIG5vdCBhbXBsaWZ5LiBJIGNob3NlIDEwMDAgYXMgYSBjdXRvZmYuIFxuY291bnRfdGFiMjwtY291bnRfdGFiMlssIWNvbFN1bXMoY291bnRfdGFiMik8PTUwMF1cbiNsb29rIGF0IHRoZSByZW1haW5nIHNhbXBsZXMuIEFmdGVyIHJlbW92aW5nIHRob3NlIHRoYXQgZGlkIG5vdCBhbXBsaWZ5LCBubyBkdXBsaWNhdGVzIHdlcmUga2VwdC4gVGhpcyBzdWdnZXN0cyB0aGF0IHRob3NlIHNhbXNwbGVzIHRoYXQgZGlkIGFtcGxpZnkgd2VyZSBoaWdobHkgY29ycmVsYXRlZC4gXG5sb3dfY29yIDwtIGNvbG5hbWVzKGNvdW50X3RhYjIpICVpbiUgbG93X2Nvcl9zYW1wJFNhbXBsZUlEXG5sb3dfY29yX2RmIDwtIGNvdW50X3RhYjJbLCBsb3dfY29yLCBkcm9wID0gRkFMU0VdXG5WaWV3KGxvd19jb3JfZGYpXG5zb3J0KGNvbFN1bXMobG93X2Nvcl9kZikpXG5gYGAifQ== -->
+<pre class="r"><code>#look at lowest correlations
+cor_samp_df&lt;- cor_df %&gt;%
+   arrange(Correlation,SampleID)
+#Look at those samples with a low correlation. I chose 0.6 for now, but this is likely to change.
+low_cor_samp&lt;-cor_samp_df[cor_samp_df$Correlation&lt;0.6,]
+#remove samples that did not amplify. I chose 1000 as a cutoff. 
+count_tab2&lt;-count_tab2[,!colSums(count_tab2)&lt;=500]
+#look at the remaing samples. After removing those that did not amplify, no duplicates were kept. This suggests that those samsples that did amplify were highly correlated. 
+low_cor &lt;- colnames(count_tab2) %in% low_cor_samp$SampleID
+low_cor_df &lt;- count_tab2[, low_cor, drop = FALSE]
+View(low_cor_df)
+sort(colSums(low_cor_df))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRzEwN1NHIEcwODJTRyBHMTI3U0cgRzA5NVNHIEcxNjZTRyBHMDY1U0cgRzE3NFNHIFxuICAgNTgxICAgIDY0NiAgICA4MjEgICAxNTAwICAgNzc1OSAgMzEyMTEgIDU2NTcxIFxuIn0= -->
+<pre><code>G107SG G082SG G127SG G095SG G166SG G065SG G174SG 
+   581    646    821   1500   7759  31211  56571 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3N1bSB0ZWNobmljYWwgcmVwbGljYXRlc1xuY291bnRfdGFiMjwtdChyb3dzdW0odChjb3VudF90YWIyKSwgZ3JvdXAgPSBjb2xuYW1lcyhjb3VudF90YWIyKSwgbmEucm0gPSBUKSlcbiNjb252ZXJ0IHRvIFwib3R1IHRhYmxlXCIgZm9ybWF0IGZvciBwaHlsb3NlcSBwYWNrYWdlXG5vdHVfdGFiPC1vdHVfdGFibGUoY291bnRfdGFiMiwgdGF4YV9hcmVfcm93cyA9IFQpXG4jY29udmVydCB0byBcInNhbXBsZSBkYXRhXCIgZm9ybWF0XG5zYW1wX2RhdDwtc2FtcGxlX2RhdGEoc2FtcGxlX2luZm9fdGFiKVxuI3dyYW5nbGUgbmFtZXMgb2YgdGF4IHRhYmxlIHRvIG9ubHkgaW5jbHVkZSBjZW50cm9pZCBJRFxuI3NwbGl0IHRoZSByb3duYW1lcyBieSBcIjtcIiBhbmQgcHVsbCBvdXQgb25seSB0aGUgXCJjZW50cm9pZFhYWFwiIGluZm8uIFxudGF4X25hbWVzPC1zdHJfc3BsaXQocm93bmFtZXModGF4X3RhYikscGF0dGVybiA9IFwiO1wiLCAzLCBzaW1wbGlmeSA9IFQpWywxXVxuI2FnYWluLCB0aGlzIGlzIGp1c3QgdG8gY2hlY2sgdGhhdCB0aGUgbmV3IHNhbXBsZSBuYW1lcyBtYXRjaCB1cC4gSSBjcmVhdGVkIGEgbmV3IGRhdGFmcmFtZSBhbmQgZG8gdGhlIGFjdHVhbCBjaGVjayBpbiB0aGUgbGluZXMgYmVsb3cuIEFsbCB2YWx1ZXMgc2hvdWxkIGVxdWFsIHRydWUgaWYgdGhlIG5ldyBuYW1lcyBhcmUgaW4gdGhlIGNvcnJlY3Qgc3BvdC4gXG50YXhfdGFiMjwtdGF4X3RhYlxuI3JlbmFtZSByb3dzIHdpdGggdGhlIGV4dHJhY3RlZCB0YXhfbmFtZXNcbnJvd25hbWVzKHRheF90YWIyKTwtdGF4X25hbWVzXG4jZG8gdGhlIGNoZWNrLiBBZ2FpbiwgYWxsIHNob3VsZCBlcXVhbCB0cnVlLiBcbnRhYmxlKHJvd25hbWVzKHRheF90YWIyKSA9PSBzdHJfc3BsaXQocm93bmFtZXModGF4X3RhYikscGF0dGVybiA9IFwiO1wiLCAzLCBzaW1wbGlmeSA9IFQpWywxXSlcbmBgYCJ9 -->
+<pre class="r"><code>#sum technical replicates
+count_tab2&lt;-t(rowsum(t(count_tab2), group = colnames(count_tab2), na.rm = T))
+#convert to &quot;otu table&quot; format for phyloseq package
+otu_tab&lt;-otu_table(count_tab2, taxa_are_rows = T)
+#convert to &quot;sample data&quot; format
+samp_dat&lt;-sample_data(sample_info_tab)
+#wrangle names of tax table to only include centroid ID
+#split the rownames by &quot;;&quot; and pull out only the &quot;centroidXXX&quot; info. 
+tax_names&lt;-str_split(rownames(tax_tab),pattern = &quot;;&quot;, 3, simplify = T)[,1]
+#again, this is just to check that the new sample names match up. I created a new dataframe and do the actual check in the lines below. All values should equal true if the new names are in the correct spot. 
+tax_tab2&lt;-tax_tab
+#rename rows with the extracted tax_names
+rownames(tax_tab2)&lt;-tax_names
+#do the check. Again, all should equal true. 
+table(rownames(tax_tab2) == str_split(rownames(tax_tab),pattern = &quot;;&quot;, 3, simplify = T)[,1])</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gVFJVRSBcbjIxMzgzIFxuIn0= -->
+<pre><code>
+ TRUE 
+21383 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI2V4dHJhY3Qgb25seSB0aGUgdGF4b25vbXkgY29sdW1uXG50YXhfdGFiMjwtZGF0YS5mcmFtZSh0YXhfdGFiMlssM10pXG4jY29udmVydCBsb25nIHN0cmluZyBvZiB0YXhvbm9teSB0byBpbmRpdmlkdWFsIGNvbHVtbnMuIHNpbXBsaWZ5ID0gVCBpcyBncmVhdCBiZWNhc3VlIGl0IHNhdmVzIGl0IGFzIGEgbWF0cml4IHdpdGggdmFsdWVzIGluIGluZHZpZHVhbCBjb2x1bW5zLiBcbnRheG9ub215X25hbWVzPC1kYXRhLmZyYW1lKHN0cl9zcGxpdCh0YXhfdGFiMiR0YXhfdGFiMi4uLjMuLHBhdHRlcm4gPSBcIixcIiwgNywgc2ltcGxpZnkgPSBUKSlcbiNCaW5kIGNlbnRyb2lkIG5hbWVzIGFuZCB0YXhvbm9teVxudGF4X3RhYjI8LWNiaW5kKHRheF90YWIyLCB0YXhvbm9teV9uYW1lcylcbiNyZW5hbWUgY29sdW1uc1xubmFtZXModGF4X3RhYjIpPC1jKFwiVGF4XCIsIFwiS2luZ2RvbVwiLCBcIlBoeWx1bVwiLCBcIkNsYXNzXCIsIFwiT3JkZXJcIiwgXCJGYW1pbHlcIiwgXCJHZW51c1wiLCBcIlNwZWNpZXNcIilcbiNyZW1vdmUgb3JpZ2luYWwgdGF4b25vbXkgc3RyaW5nXG50YXhfdGFiMiRUYXg9TlVMTFxuI3JlcGxhY2UgXCJcIiB3aXRoIE5BXG50YXhfdGFiMjwtbmFfaWYodGF4X3RhYjIsIFwiXCIpXG4jY29uZXJ0IHRvIG1hdHJpeFxudGF4X3RhYjI8LWFzLm1hdHJpeCh0YXhfdGFiMilcbnRheF90YWI8LXRheF90YWJsZSh0YXhfdGFiMilcbiNjcmVhdGUgcGh5bG9zZXEgb2JqZWN0XG5saWJyYXJ5KHBoeWxvc2VxKVxuSGVyYlB0MV9QU19PcmlnPC1waHlsb3NlcShvdHVfdGFiLCBzYW1wX2RhdCwgdGF4X3RhYilcbmBgYCJ9 -->
+<pre class="r"><code>#extract only the taxonomy column
+tax_tab2&lt;-data.frame(tax_tab2[,3])
+#convert long string of taxonomy to individual columns. simplify = T is great becasue it saves it as a matrix with values in indvidual columns. 
+taxonomy_names&lt;-data.frame(str_split(tax_tab2$tax_tab2...3.,pattern = &quot;,&quot;, 7, simplify = T))
+#Bind centroid names and taxonomy
+tax_tab2&lt;-cbind(tax_tab2, taxonomy_names)
+#rename columns
+names(tax_tab2)&lt;-c(&quot;Tax&quot;, &quot;Kingdom&quot;, &quot;Phylum&quot;, &quot;Class&quot;, &quot;Order&quot;, &quot;Family&quot;, &quot;Genus&quot;, &quot;Species&quot;)
+#remove original taxonomy string
+tax_tab2$Tax=NULL
+#replace &quot;&quot; with NA
+tax_tab2&lt;-na_if(tax_tab2, &quot;&quot;)
+#conert to matrix
+tax_tab2&lt;-as.matrix(tax_tab2)
+tax_tab&lt;-tax_table(tax_tab2)
+#create phyloseq object
+library(phyloseq)
+HerbPt1_PS_Orig&lt;-phyloseq(otu_tab, samp_dat, tax_tab)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->

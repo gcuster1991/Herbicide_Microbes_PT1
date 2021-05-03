@@ -56,7 +56,7 @@ cor_samp_df<- cor_df %>%
 low_cor_samp<-cor_samp_df[cor_samp_df$Correlation<0.6,]
 
 #remove samples that did not amplify. I chose 1000 as a cutoff. 
-count_tab2<-count_tab2[,!colSums(count_tab2)<=1000]
+count_tab2<-count_tab2[,!colSums(count_tab2)<=300]
 
 #look at the remaing samples. After removing those that did not amplify, no duplicates were kept. This suggests that those samsples that did amplify were highly correlated. 
 low_cor <- colnames(count_tab2) %in% low_cor_samp$SampleID
