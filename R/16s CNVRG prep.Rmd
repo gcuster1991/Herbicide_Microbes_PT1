@@ -1,0 +1,49 @@
+---
+title: "Preparing files for CNVRG 16S"
+output: html_notebook
+---
+
+Pre-analysis filtering of non-bacterial reads
+```{r}
+#21300 taxa in original
+HerbPt1_PS_Orig
+#remove all non-bacterial reads
+#21028 taxa in bacteria only ps object. 272 non-bacterial taxa 
+ps_bac<-subset_taxa(HerbPt1_PS_Orig, Kingdom == "k:Bacteria")
+#create seperate dataframe of archea
+#101 archeal taxa
+ps_archea<-subset_taxa(HerbPt1_PS_Orig, Kingdom=="k:Archaea")
+```
+
+
+Subset phyloseq object by time point
+```{r}
+Time1<-subset_samples(ps_bac, Time=="T1")
+Time2<-subset_samples(ps_bac, Time=="T2")
+Time3<-subset_samples(ps_bac, Time=="T3")
+```
+
+
+
+Pull out items and save for export to CNVRG
+```{r}
+Time1_Otu<-data.frame(t(data.frame(otu_table(Time1))))
+Time2_Otu<-data.frame(t(data.frame(otu_table(Time2))))
+Time3_Otu<-data.frame(t(data.frame(otu_table(Time3))))
+
+MD_Time1_16S<-data.frame(sample_data(Time1))
+MD_Time2_16S<-data.frame(sample_data(Time2))
+MD_Time3_16S<-data.frame(sample_data(Time3))
+
+Time1_Otu<-cbind(treatment=MD_Time1_16S$Herbicide, Time1_Otu) 
+Time2_Otu<-cbind(treatment=MD_Time2_16S$Herbicide, Time2_Otu) 
+Time3_Otu<-cbind(treatment=MD_Time3_16S$Herbicide, Time3_Otu) 
+
+write.csv(Time1_Otu, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/16S_time1_otu.csv")
+write.csv(Time2_Otu, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/16S_time2_otu.csv")
+write.csv(Time3_Otu, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/16S_time3_otu.csv")
+
+```
+
+
+

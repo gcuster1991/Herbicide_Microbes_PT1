@@ -7,9 +7,9 @@ output: html_notebook
 library(tidyverse)
 library(phyloseq)
 #Your count data table. This can be found on Teton in the folder of each project. This currently has a name like otutable.esv. I manually changed the name to otutable_est.txt.
-count_tab <- read.table("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/otutable_esv.txt", header=T, row.names=1, check.names=F)
+count_tab <- read.table("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/ITS/otutable_esv.txt", header=T, row.names=1, check.names=F)
 #Your taxonomy table. This is the ouptupt of the assign taxonomy step. The output file is currently named something like OUT.sintax. I manually changed the name to XXX_Taxonomy.txt. 
-tax_tab <- as.matrix(read.table("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/Herb1_Taxonomy.txt", header=F, row.names=1, check.names=F, na.strings="", sep="\t"))
+tax_tab <- as.matrix(read.table("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/ITS/OTU_sintax.txt", header=F, row.names=1, check.names=F, na.strings="", sep="\t"))
 #This is your metadata. 
 sample_info_tab <- read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/Herb_Pt_1_IC_anion_cation_import_to_R.csv", header=T)
 #name rows as the barcodes/sample IDs. 

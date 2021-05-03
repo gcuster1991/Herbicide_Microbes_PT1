@@ -102,20 +102,3 @@ HerbPt1_PS_Orig<-phyloseq(otu_tab, samp_dat, tax_tab)
 ```
 
 
-Pull out items and save for export to CNVRG
-```{r}
-Otu_table_16S<-data.frame(otu_table(HerbPt1_PS_Orig))
-Otu_table_16S<-data.frame(t(Otu_table_16S))
-write.csv(Otu_table_16S, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/16S_OTU_Table_HerbPt1.csv")
-
-MD_16S<-data.frame(sample_data(HerbPt1_PS_Orig))
-write.csv(MD_16S, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/16S_MD_HerbPt1.csv")
-
-Otu_table_16S$Hericide<-MD_16S$Herbicide
-Otu_table_16S$Time<-MD_16S$Time
-
-```
-
-
-
-
