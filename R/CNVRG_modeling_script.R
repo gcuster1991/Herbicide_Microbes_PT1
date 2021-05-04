@@ -47,6 +47,12 @@ modelOut <- cnvrg_VI(
   #  cores = 16,
   params_to_save = c("pi","p")
 )
+ests <- extract_point_estimate(modelOut = modelOut, countData = dat2,
+                               treatments = length(unique(treatments)))
+forExport <- data.frame(treatments, dat2[,1],ests$pointEstimates_p)
+names(forExport)[2] <- "sample"
+
+write.csv(forExport, file = paste(inargs[1], "_p_estimates.csv", sep = ""))
 save.image(file = paste(inargs[1], ".Rdata", sep = ""))
 
 
