@@ -12,6 +12,9 @@ inargs <- commandArgs(trailingOnly = TRUE)
 
 dat <- read.csv(inargs[1], 
                 fill = T, header = T, stringsAsFactors = F)
+#For troubleshooting
+dat <- read.csv("./forModeling_ITS_otuTables/ITS_time3_otu.csv",
+                fill = T, header = T, stringsAsFactors = F)
 
 #Order by treatment
 dat <- dat[order(dat$treatment),]
@@ -31,11 +34,14 @@ treatments <- dat2$treatment
 #remove treatment vector from dataframe
 dat2 <- dat2[,-2]
 
-dat2[,2:length(dat2)] <-  1 + dat2[,2:length(dat2)]
+dat3 <- dat2[, c(1, 1+ which(colSums(dat2[,2:length(dat2)]) > 3))]
+#table(colSums(dat3[, 2:length(dat3)]) > 3)
+
+dat3[,2:length(dat3)] <-  1 + dat3[,2:length(dat3)]
 
 #Commented out options are useful for cnvrg_HMC
 modelOut <- cnvrg_VI(
-  countData = dat2,
+  countData = dat3,
   starts = indexer(treatments)$starts,
   ends = indexer(treatments)$ends,
   #algorithm = "NUTS",
@@ -47,9 +53,22 @@ modelOut <- cnvrg_VI(
   #  cores = 16,
   params_to_save = c("pi","p")
 )
-ests <- extract_point_estimate(modelOut = modelOut, countData = dat2,
+# modelOut <- cnvrg_HMC(
+#   countData = dat2,
+#   starts = indexer(treatments)$starts,
+#   ends = indexer(treatments)$ends,
+#   algorithm = "NUTS",
+#   chains = 2,
+#   burn = 500,
+#   samples = 1500,
+#   thinning_rate = 2,
+#   #output_samples = 250,
+#     cores = 16,
+#   params_to_save = c("pi","p")
+# )
+ests <- extract_point_estimate(modelOut = modelOut, countData = dat3,
                                treatments = length(unique(treatments)))
-forExport <- data.frame(treatments, dat2[,1],ests$pointEstimates_p)
+forExport <- data.frame(treatments, dat3[,1],ests$pointEstimates_p)
 names(forExport)[2] <- "sample"
 
 write.csv(forExport, file = paste(inargs[1], "_p_estimates.csv", sep = ""))
