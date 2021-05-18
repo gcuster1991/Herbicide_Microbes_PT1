@@ -63,15 +63,8 @@ beta_mod<-betadisper(x_dist, sampledf$Herbicide)
           return(list(Anova = y1, Tuekys= y2, Adonis = y3, Pairwise = y4))
 }
 
-out_test<-betadispr_adonis(Time1)
-
-dist_bray_t1 <- phyloseq::distance(Time1, method = "bray")
-sampledf <- data.frame(sample_data(Time1))
-beta_mod<-betadisper(dist_bray_t1, sampledf$Herbicide)
-anova(beta_mod)
-TukeyHSD(beta_mod)
-vegan::adonis(dist_bray_t1 ~ Herbicide, data = sampledf)
-pairwiseAdonis::pairwise.adonis(dist_bray_t1, sampledf$Herbicide, p.adjust.m = "bon")
-
+T_1_beta_adonis<-betadispr_adonis(Time1)
+T_2_beta_adonis<-betadispr_adonis(Time2)
+T_3_beta_adonis<-betadispr_adonis(Time3)
 ```
 
