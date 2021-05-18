@@ -1,0 +1,112 @@
+---
+title: "Create phyloseq object from Vsearch"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(phyloseq)
+#Your count data table. This can be found on Teton in the folder of each project. This currently has a name like otutable.esv. I manually changed the name to otutable_est.txt.
+count_tab <- read.table("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/ITS/otutable_esv.txt", header=T, row.names=1, check.names=F)
+#Your taxonomy table. This is the ouptupt of the assign taxonomy step. The output file is currently named something like OUT.sintax. I manually changed the name to XXX_Taxonomy.txt. 
+tax_tab <- as.matrix(read.table("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/ITS/OTU_sintax.txt", header=F, row.names=1, check.names=F, na.strings="", sep="\t"))
+#This is your metadata. 
+sample_info_tab <- read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/Herb_Pt_1_IC_anion_cation_import_to_R.csv", header=T)
+#name rows as the barcodes/sample IDs. 
+rownames(sample_info_tab)<-sample_info_tab$Barcode_ID_G
+```
+
+```{r}
+#In this next section, I'm pulling out the barcode names from the current sample names contatinig locus ID, forward MID, reverse MID, and Library number.
+#split by "_"" 5 times, save as character matrix and extract the  4th slot.
+samp_names<-str_split(names(count_tab),pattern = "_", 5, simplify = T)[,4]
+#just to check that the new sample names match up, I created a new dataframe. I check this three lines below. 
+count_tab2<-count_tab
+#rename columns in count_tab2 with the extracted info in samp_names
+names(count_tab2)<-samp_names
+#Check to make sure names match up. All values should equal true if the new names are in the correct spot. 
+table(str_split(names(count_tab),pattern = "_", 5, simplify = T)[,4] == names(count_tab2))
+
+
+#check correlations of technical replicates.
+cor_df<-list()
+for(i in 1:length(samp_names)){
+  for(j in 1:length(samp_names)){
+    if(samp_names[i] == samp_names[j]){
+      if(cor(count_tab2[i], count_tab2[j]) < 0.999){
+          tmp<-cor(count_tab2[i], count_tab2[j])
+            cor_stat <-data.frame(tmp) 
+               #print(cor(count_tab2[i], count_tab2[j]))
+                  cor_df<-c(cor_df, cor_stat)
+      }
+    }
+  }
+}
+
+#unlist to a dataframe containing sample ID and the correlation
+cor_df <- data.frame(SampleID = rep(names(cor_df), sapply(cor_df, length)),
+                 Correlation = unlist(cor_df))
+#summary info
+summary(cor_df)
+#look at lowest correlations
+cor_samp_df<- cor_df %>%
+   arrange(Correlation,SampleID)
+
+#Look at those samples with a low correlation. I chose 0.6 for now, but this is likely to change.
+low_cor_samp<-cor_samp_df[cor_samp_df$Correlation<0.6,]
+
+#remove samples that did not amplify. I chose 1000 as a cutoff. 
+count_tab2<-count_tab2[,!colSums(count_tab2)<=300]
+
+#look at the remaing samples. After removing those that did not amplify, no duplicates were kept. This suggests that those samsples that did amplify were highly correlated. 
+low_cor <- colnames(count_tab2) %in% low_cor_samp$SampleID
+low_cor_df <- count_tab2[, low_cor, drop = FALSE]
+View(low_cor_df)
+sort(colSums(low_cor_df))
+
+#sum technical replicates
+count_tab2<-t(rowsum(t(count_tab2), group = colnames(count_tab2), na.rm = T))
+#convert to "otu table" format for phyloseq package
+otu_tab<-otu_table(count_tab2, taxa_are_rows = T)
+
+#convert to "sample data" format
+samp_dat<-sample_data(sample_info_tab)
+
+#wrangle names of tax table to only include centroid ID
+#split the rownames by ";" and pull out only the "centroidXXX" info. 
+tax_names<-str_split(rownames(tax_tab),pattern = ";", 3, simplify = T)[,1]
+#again, this is just to check that the new sample names match up. I created a new dataframe and do the actual check in the lines below. All values should equal true if the new names are in the correct spot. 
+tax_tab2<-tax_tab
+#rename rows with the extracted tax_names
+rownames(tax_tab2)<-tax_names
+#do the check. Again, all should equal true. 
+table(rownames(tax_tab2) == str_split(rownames(tax_tab),pattern = ";", 3, simplify = T)[,1])
+#extract only the taxonomy column
+tax_tab2<-data.frame(tax_tab2[,3])
+#convert long string of taxonomy to individual columns. simplify = T is great becasue it saves it as a matrix with values in indvidual columns. 
+taxonomy_names<-data.frame(str_split(tax_tab2$tax_tab2...3.,pattern = ",", 7, simplify = T))
+#Bind centroid names and taxonomy
+tax_tab2<-cbind(tax_tab2, taxonomy_names)
+#rename columns
+names(tax_tab2)<-c("Tax", "Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+#remove original taxonomy string
+tax_tab2$Tax=NULL
+#replace "" with NA
+tax_tab2<-na_if(tax_tab2, "")
+#conert to matrix
+tax_tab2<-as.matrix(tax_tab2)
+tax_tab<-tax_table(tax_tab2)
+#create phyloseq object
+library(phyloseq)
+HerbPt1_PS_Orig<-phyloseq(otu_tab, samp_dat, tax_tab)
+```
+
+
+
+
+
+
+
+
+
+
