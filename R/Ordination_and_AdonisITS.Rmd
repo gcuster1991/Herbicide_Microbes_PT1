@@ -1,0 +1,75 @@
+---
+title: "16S HMC proportion modeling"
+output: html_notebook
+---
+
+Read in original ps objects
+```{r}
+
+load("./data/Herb_PS_Objects.RData")
+```
+
+Read in HMC proportions to update Time phyloseq objects 
+```{r}
+HMC_T1<-read.csv("./data/16S_time1_otu.csv_p_estimatesHMC.csv")
+HMC_T2<-read.csv("./data/16S_time2_otu.csv_p_estimatesHMC.csv")
+HMC_T3<-read.csv("./data/16S_time3_otu.csv_p_estimatesHMC.csv")
+```
+update OTU tables of ps objects with HMC proprotions
+```{r}
+# input CNVRG proportion table and it will convert to the necessary format to update a phyloseq object
+format_HMC<-function(x){
+  rownames(x)<-x$sample
+     x1<-x[, -c(1:4)]
+        x1_t<-data.frame(t(x1))
+            rownames(x1_t)<-gsub("\\.", "=", rownames(x1_t))
+                x1_t<-otu_table(x1_t, taxa_are_rows = T)
+  return(x1_t)
+}
+
+HMC_T1_T<-format_HMC(HMC_T1)
+HMC_T2_T<-format_HMC(HMC_T2)
+HMC_T3_T<-format_HMC(HMC_T3)
+
+otu_table(Time1) <- HMC_T1_T
+otu_table(Time2) <- HMC_T2_T
+otu_table(Time3) <- HMC_T3_T
+```
+
+Ordinate and plot via phyloseq
+```{r}
+#input phyloseq object
+ordinate_and_plot<-function(x){
+  x_ord<-phyloseq::ordinate(x, method = "NMDS", distance = "bray")
+      x_ord_plot<-plot_ordination(x, x_ord, type="samples", color="Herbicide")  + geom_point(size=5) + ggtitle("NMDS by Herbicie") + stat_ellipse(type = "norm", linetype = 2) +   stat_ellipse(type = "t") + theme_bw() + theme(plot.title = element_text(hjust=0.5))
+
+      return(x_ord_plot)
+}
+
+#Plot to visualize seperation of soil assemblages following applicaiton
+ordinate_and_plot(Time1)
+ordinate_and_plot(Time2)
+ordinate_and_plot(Time3)
+```
+
+Adonis testing by herbicide treatments at each time point. See https://stats.stackexchange.com/questions/314184/betadisper-is-significant-can-i-still-do-adonis-and-anosim for discussion of significant dispersion and use of adonis. 
+```{r}
+betadispr_adonis<-function(x){
+  x_dist <- phyloseq::distance(x, method = "bray")
+    sampledf <- data.frame(sample_data(x))
+      beta_mod<-betadisper(x_dist, sampledf$Herbicide)
+      
+    y1<-anova(beta_mod)
+      y2<-TukeyHSD(beta_mod)
+        y3<-vegan::adonis(x_dist ~ Herbicide, data = sampledf)
+          y4<-pairwiseAdonis::pairwise.adonis(x_dist, sampledf$Herbicide, p.adjust.m = "bon")
+
+          return(list(Anova = y1, Tuekys= y2, Adonis = y3, Pairwise = y4))
+}
+
+#run this with each ps object with updated HMC count data
+T_1_beta_adonis<-betadispr_adonis(Time1)
+T_2_beta_adonis<-betadispr_adonis(Time2)
+T_3_beta_adonis<-betadispr_adonis(Time3)
+```
+
