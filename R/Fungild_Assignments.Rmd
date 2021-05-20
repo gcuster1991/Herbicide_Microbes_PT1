@@ -15,26 +15,67 @@ remotes::install_github("brendanf/FUNGuildR")
 ```{r}
 library(FUNGuildR)
 library(phyloseq)
+library(tidyverse)
 ```
 
 load ITS time point phyloseq object of interest
 ```{r}
+Time1<-readRDS("../data/Time1_ITS.HMC.rda")
 Time2<-readRDS("../data/Time2_ITS.HMC.rda")
+Time3<-readRDS("../data/Time3_ITS.HMC.rda")
 ```
+
 Extract and format taxonomy table
 ```{r}
+#this function is written assuming there is 2 characters before the meaninfgul infomraiton in the taxonomy string (e.g. "K:Fungi")
+#input is your taxonomy table with individual columns for each level of taxonomy
 extractandMerge<-function(x){
   x<-data.frame(phyloseq::tax_table(x))
   x$Taxonomy<-paste(substring(x$Kingdom, 3, 1000), substring(x$Phylum, 3, 1000), substring(x$Class, 3, 1000), substring(x$Order, 3, 1000), substring(x$Family, 3, 1000), substring(x$Genus, 3, 1000), substring(x$Species, 3, 1000), sep = ";")
   
-  return(taxonomy=x)
+  return(x)
 }
-
-T2_tax_FG<-extractandMerge(Time2)
 ```
 
-Assign funguilds
+Combine taxonomy and count data. Then assign FunGuild data
 ```{r}
-T2_FG_Assignments<-funguild_assign(T2_tax_FG, db = get_funguild_db(), tax_col = "Taxonomy")
+#inputs phyloseq object
+fgAssign<-function(z){
+    y<-extractandMerge(z)  
+        count_tab<-data.frame(phyloseq::otu_table(z))
+  if(table(rownames(count_tab)== rownames(y))){
+        count_tab$Centroid<-rownames(count_tab)
+           y$Centroid<-rownames(y)
+             Tax_count_FG<-dplyr::left_join(count_tab, y, "Centroid")
+                p<-FUNGuildR::funguild_assign(Tax_count_FG, db = get_funguild_db(), tax_col = "Taxonomy")
+  }
+  
+    return(p)
+}
+
+```
+
+Assign FUNGuild assignemnts
+```{r}
+T1_FG_Assignments<-fgAssign(Time1)
+T2_FG_Assignments<-fgAssign(Time2)
+T3_FG_Assignments<-fgAssign(Time3)
+```
+
+Query based upon trait, guild, trohpic mode of interest. This example queries any symbiotrophs and mycorrhizae. This top line queried against the output of the fgAssign and the bottomthe entire database not your output. 
+```{r}
+symbiotrophs <- funguild_query("*Symbiotroph*", "trophicMode", db = T1_FG_Assignments)
+mycorrhizae <- funguild_query("*Mycorrhizal*", "guild")
+```
+Convert query output to correct format... Still working on this. 
+```{r}
+trophic_modes<- symbiotrophs %>% filter(confidenceRanking == "Highly Probable" | confidenceRanking == "Probable") %>% select(starts_with(c("G0", "G1", "trophicMode"))) 
+
+
+
+#%>% group_by(as.factor(trophicMode)) %>% summarise(average=mean(trophicMode)) %>%  t() %>% data.frame() 
+
+
+
 ```
 
