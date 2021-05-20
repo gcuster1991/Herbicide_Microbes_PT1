@@ -5,15 +5,14 @@ output: html_notebook
 
 Read in original ps objects
 ```{r}
-
-load("./data/Herb_PS_Objects.RData")
+load("../data/Herb_PS_Objects_ITS.RData")
 ```
 
 Read in HMC proportions to update Time phyloseq objects 
 ```{r}
-HMC_T1<-read.csv("./data/16S_time1_otu.csv_p_estimatesHMC.csv")
-HMC_T2<-read.csv("./data/16S_time2_otu.csv_p_estimatesHMC.csv")
-HMC_T3<-read.csv("./data/16S_time3_otu.csv_p_estimatesHMC.csv")
+HMC_T1<-read.csv("../data/ITS_time1_otu.csv_p_estimatesHMC.csv")
+HMC_T2<-read.csv("../data/ITS_time2_otu.csv_p_estimatesHMC.csv")
+HMC_T3<-read.csv("../data/ITS_time3_otu.csv_p_estimatesHMC.csv")
 ```
 update OTU tables of ps objects with HMC proprotions
 ```{r}
@@ -57,7 +56,7 @@ Adonis testing by herbicide treatments at each time point. See https://stats.sta
 betadispr_adonis<-function(x){
   x_dist <- phyloseq::distance(x, method = "bray")
     sampledf <- data.frame(sample_data(x))
-      beta_mod<-betadisper(x_dist, sampledf$Herbicide)
+      beta_mod<-vegan::betadisper(x_dist, sampledf$Herbicide)
       
     y1<-anova(beta_mod)
       y2<-TukeyHSD(beta_mod)
