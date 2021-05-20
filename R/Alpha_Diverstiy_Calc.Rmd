@@ -1,0 +1,22 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(CNVRG)
+```
+
+```{r}
+load("/Users/gordoncuster/Desktop/16S_time1_otu.csv_HMC.Rdata")
+```
+
+```{r}
+entropies<-diversity_calc(model_output = modelOut, "./forModeling_16s_otuTables/16S_time1_otu.csv", params = "pi", entropy_measure = "shannon", equivalents = T)
+plot(density(entropies[[1]][[1]]),
+     xlab = "Entropy",
+     ylab = "Density",
+     main = "")
+
+```
+
