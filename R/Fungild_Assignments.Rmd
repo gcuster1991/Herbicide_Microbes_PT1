@@ -1,0 +1,35 @@
+---
+title: "Fungild Assignments"
+output: html_notebook
+---
+
+Using the funguildR package:
+https://rdrr.io/github/brendanf/FUNGuildR/
+
+Install for inital use
+```{#r}
+install.packages("remotes")
+remotes::install_github("brendanf/FUNGuildR")
+```
+
+load ITS time point phyloseq object of interest
+```{r}
+Time2<-readRDS("./data/Time2_ITS.HMC.rda")
+```
+Extract and format taxonomy table
+```{r}
+extractandMerge<-function(x){
+  x<-data.frame(tax_table(x))
+  x$Taxonomy<-paste(substring(x$Kingdom, 3, 1000), substring(x$Phylum, 3, 1000), substring(x$Class, 3, 1000), substring(x$Order, 3, 1000), substring(x$Family, 3, 1000), substring(x$Genus, 3, 1000), substring(x$Species, 3, 1000), sep = ";")
+  
+  return(taxonomy=x)
+}
+
+T2_tax_FG<-extractandMerge(Time2)
+```
+
+Assign funguilds
+```{r}
+funguild_assign(T2_tax_FG, db = get_funguild_db(), tax_col = "Taxonomy")
+```
+
