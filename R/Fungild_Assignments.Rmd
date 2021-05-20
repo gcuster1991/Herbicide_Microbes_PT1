@@ -25,7 +25,7 @@ Time2<-readRDS("../data/Time2_ITS.HMC.rda")
 Time3<-readRDS("../data/Time3_ITS.HMC.rda")
 ```
 
-Extract and format taxonomy table
+Extract and format taxonomy table and sample data
 ```{r}
 #this function is written assuming there is 2 characters before the meaninfgul infomraiton in the taxonomy string (e.g. "K:Fungi")
 #input is your taxonomy table with individual columns for each level of taxonomy
@@ -35,6 +35,12 @@ extractandMerge<-function(x){
   
   return(x)
 }
+
+md_extract<-function(x){
+  meta_data<-data.frame(sample_data(x))
+  return(meta_data)
+}
+
 ```
 
 Combine taxonomy and count data. Then assign FunGuild data
@@ -67,15 +73,23 @@ Query based upon trait, guild, trohpic mode of interest. This example queries an
 symbiotrophs <- funguild_query("*Symbiotroph*", "trophicMode", db = T1_FG_Assignments)
 mycorrhizae <- funguild_query("*Mycorrhizal*", "guild")
 ```
-Convert query output to correct format... Still working on this. 
+Convert query output to correct format. This can be done for any of the inputs from the above query step. 
 ```{r}
-trophic_modes<- symbiotrophs %>% filter(confidenceRanking == "Highly Probable" | confidenceRanking == "Probable") %>% select(starts_with(c("G0", "G1", "trophicMode"))) 
-
-
-
-#%>% group_by(as.factor(trophicMode)) %>% summarise(average=mean(trophicMode)) %>%  t() %>% data.frame() 
-
-
-
+trophic_modes<- symbiotrophs %>% filter(confidenceRanking == "Highly Probable" | confidenceRanking == "Probable") %>% select(starts_with(c("G0", "G1", "trophicMode"))) %>% group_by(trophicMode) %>% summarise(across(where(is.numeric), mean)) %>% column_to_rownames("trophicMode") %>%  t() %>% data.frame() %>% rownames_to_column("Barcode")
+```
+extract metadata
+```{r}
+T1_md<-md_extract(Time1)
+T2_md<-md_extract(Time2)
+T3_md<-md_extract(Time3)
 ```
 
+
+Combine metadata and count/FG table
+```{r}
+md_sd_fg_t1<-left_join(T1_md, trophic_modes, by = c("Barcode_ID_G" = "Barcode"))
+md_sd_fg_t2<-left_join(T2_md, trophic_modes, by = c("Barcode_ID_G" = "Barcode"))
+md_sd_fg_t3<-left_join(T3_md, trophic_modes, by = c("Barcode_ID_G" = "Barcode"))
+```
+
+ summary(aov(Symbiotroph ~ Herbicide, data = md_sd_fg))
