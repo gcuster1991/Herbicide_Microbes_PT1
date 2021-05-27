@@ -4,19 +4,39 @@ output: html_notebook
 ---
 
 ```{r}
+#Get the latest version of CNVRG, which has some handy features and improved help pages
+devtools::install_github("https://github.com/JHarrisonEcoEvo/CNVRG")
 library(CNVRG)
+set.seed(666)
+install.packages("viridis") #a handy color choosing package
+library(viridis)
 ```
+Load data. These are the posterior samples for parameters of interest as output from CNVRG.
+```{r}
+load("../data//16S_time1_otu.csv_HMC.Rdata")
+```
+Calculate the Shannon entropy for pi values (Dirichlet parameters) for each treatment group. Recall that pi parameters are the proportion estimates for each microbial taxon in each sampling group. Thus, by calculating shannon entropies for each vector of pi samples we obtain a posterior probability distribution of diversity entropies. The mean of the distribution can be thought of as a point estimate for diversity. Note we are converting entropies to species equivalencies. These are the number of species of equal relative abundance it would take to generate the same Shannon value as our data. Equivalencies make it easier to compare diversity among samples and projects, see Lou Jost's work (i.e., "entropy and diversity" in Oikos).
 
 ```{r}
-load("/Users/gordoncuster/Desktop/16S_time1_otu.csv_HMC.Rdata")
+isd_transform(model_out = modelOut, isd_index = )
+entropies<-diversity_calc(model_out = modelOut, "./forModeling_16s_otuTables/16S_time1_otu.csv", params = "pi", entropy_measure = "shannon", equivalents = T)
 ```
-
+Plot our posterior of diversity
 ```{r}
-entropies<-diversity_calc(model_output = modelOut, "./forModeling_16s_otuTables/16S_time1_otu.csv", params = "pi", entropy_measure = "shannon", equivalents = T)
-plot(density(entropies[[1]][[1]]),
-     xlab = "Entropy",
-     ylab = "Density",
-     main = "")
+# plot(density(entropies[[1]][[1]]),
+#      xlab = "Entropy",
+#      ylab = "Density",
+#      main = "")
+
+diversity_plotter(div = entropies, 
+                  color_vec = viridis::viridis(n = 5), xlim = c(4000,5000), xlab = "Shannon's diversity equivalents")
+legend(x = 4700,
+       y = 0.04,
+       xpd = NA,
+       bty = "n",
+  legend = unique(forExport$treatment), #See the CNVRG_modeling_script.R to check this order
+       pch = 15,
+       col = viridis::viridis(n = 5))
 
 ```
 
