@@ -20,7 +20,6 @@ load("../data//16S_time1_otu.csv_HMC.Rdata")
 Calculate the Shannon entropy for pi values (Dirichlet parameters) for each treatment group. Recall that pi parameters are the proportion estimates for each microbial taxon in each sampling group. Thus, by calculating shannon entropies for each vector of pi samples we obtain a posterior probability distribution of diversity entropies. The mean of the distribution can be thought of as a point estimate for diversity. Note we are converting entropies to species equivalencies. These are the number of species of equal relative abundance it would take to generate the same Shannon value as our data. Equivalencies make it easier to compare diversity among samples and projects, see Lou Jost's work (i.e., "entropy and diversity" in Oikos).
 
 ```{r}
-isd_transform(model_out = modelOut, isd_index = )
 entropies<-diversity_calc(model_out = modelOut, "./forModeling_16s_otuTables/16S_time1_otu.csv", params = "pi", entropy_measure = "shannon", equivalents = T)
 ```
 Plot our posterior of diversity
@@ -31,16 +30,17 @@ Plot our posterior of diversity
 #      main = "")
 
 diversity_plotter(div = entropies, 
-                  color_vec = viridis::inferno(n = 5), xlim = c(4000,5000), xlab = "Shannon's diversity equivalents")
+                  color_vec = viridis::turbo(n = 5), xlim = c(4000,5000), xlab = "Shannon's diversity equivalents")
 legend(x = 4700,
        y = 0.04,
        xpd = NA,
        bty = "n",
   legend = unique(forExport$treatment), #See the CNVRG_modeling_script.R to check this order
        pch = 15,
-       col = viridis::inferno(n = 5))
+       col = viridis::turbo(n = 5))
 
 ```
+
 Quick check to see how/if these numbers differ much from those obtained from the unmodeled data. 
 ```{r}
 dat <- read.csv("../forModeling_ITS_otuTables/ITS_time3_otu.csv",
@@ -75,6 +75,7 @@ div <- exp(div)
 boxplot(div~treatments, outline = F) 
 
 ```
+
 This provides similar patterns but much smaller values than the CNVRG function. This is likely
 because there are zeros in the data (converted to ones), which convey no information. In contrast, there are no zeros in the proportion estimates, just many very small numbers. This of course takes more information to convey and thus should lead to much higher diversity values. We can test this through calculating diversity from the CNVRG output. This lets us double-check there is nothing wrong with the diversity_calc function, which is in beta.
 
@@ -85,7 +86,7 @@ dat <- read.csv("../data/16S_time1_otu.csv_p_estimatesHMC.csv",
 div <- vegan::diversity(x = dat[,5:length(dat)], index = "shannon" )
 #exponentiate to convert to equivalencies
 div <- exp(div)
-boxplot(div~dat$treatments, outline = F, col = viridis::inferno(n = 5)) 
+boxplot(div~dat$treatments, outline = F, col = viridis::turbo(n = 5)) 
 ```
 
 My hypothesis was correct. Since we are comparing diversities among samples and the absolute values do not allow for comparison among studies anyway (due to vast differences in sequencing depth and the myriad biases associated with laboratory prep. and sampling), it doesn't matter that we see this large increase in Shannon's entropy when using proportion estimates. 
