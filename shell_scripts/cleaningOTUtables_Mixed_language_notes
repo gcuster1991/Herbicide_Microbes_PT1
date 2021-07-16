@@ -1,0 +1,80 @@
+/project/microbiome/data/seq/psomagen_29jan21novaseq1c/tfmergedreads/16S/HerbPT1
+/project/microbiome/data/seq/psomagen_29jan21novaseq1c/tfmergedreads/16S/sm18-herb
+/project/microbiome/data/seq/cu_24feb21novaseq4/tfmergedreads/16S/sm18-herb
+
+
+#Cleaned up the OTU tables using this (for each locus): 
+Rscript /project/microbiome/scripts/cleanOTUtable.R OUT_sintax.txt otutable.esv
+
+Output tables were named:
+otutable16S.esv.mtdna_cpdna_nontarget.csv
+otutableITS.esv.mtdna_cpdna_nontarget.csv
+
+#Then I copied the coligo and ISD tables to the 16s and ITS working folders
+
+cp /project/microbiome/data/seq/psomagen_29jan21novaseq1c/coligoISD/16S/HerbPT1/coligoISDtable.txt .
+mv coligoISDtable.txt coligoISDtable16s_herbpt1_29jan21data.txt
+
+cp /project/microbiome/data/seq/psomagen_29jan21novaseq1c/coligoISD/16S/sm18-herb/coligoISDtable.txt .
+mv coligoISDtable.txt coligoISDtable16s_sm18-herb_29jan21data.txt
+
+cp /project/microbiome/data/seq/cu_24feb21novaseq4/tfmergedreads/16S/sm18-herb/coligoISDtable.txt .
+mv coligoISDtable.txt coligoISDtable16s_sm18-herb_cu24feb21data.txt
+
+#In R
+#combined isd interactively see below in the ITS section for example code
+
+isd <- read.csv("isd_all_sequencing_runs.csv")
+isd
+dat <- read.csv("otutable16S.esv.mtdna_cpdna_nontarget.csv")
+dat[21047,] <- 0
+names(dat) <- gsub("_[0-9A-Z]*$", "", names(dat))
+
+for(i in 2:length(dat)){
+  if(names(dat)[i] %in% names(isd)){
+    dat[21047, i] <- isd[1 , which(names(isd) == names(dat)[i])]
+  }
+}
+
+dat$OTUID[length(dat$OTUID)] <- "ISD"
+table(is.na(dat))
+
+#NOW we do over for ITS
+cp /project/microbiome/data/seq/psomagen_29jan21novaseq1c/coligoISD/ITS/HerbPT1/coligoISDtable.txt .
+mv coligoISDtable.txt coligoISDtableITS_herbpt1_29jan21data.txt
+
+cp /project/microbiome/data/seq/psomagen_29jan21novaseq1c/coligoISD/ITS/sm18-herb/coligoISDtable.txt .
+mv coligoISDtable.txt coligoISDtableITS_sm18-herb_29jan21data.txt
+
+#apparently no its stuff in the cu run
+
+#IN R 
+isd <- read.table("coligoISDtableITS_herbpt1_29jan21data.txt", header = T)
+isd2 <- read.table("coligoISDtableITS_sm18-herb_29jan21data.txt", header = T)
+isd <- isd[isd[,1] == "ISD", ]
+isd2 <- isd2[isd2[,1] == "ISD", ]
+
+write.csv(data.frame(isd, isd2[,2:length(isd2)]), row.names = F, file = "isd_all_sequencing_runs")
+
+
+isd <- read.csv("isd_all_sequencing_runs")
+isd
+dat <- read.csv("otutableITS.esv.mtdna_cpdna_nontarget.csv")
+dat[4307,] <- 0
+names(dat) <- gsub("_[0-9A-Z]*$", "", names(dat))
+
+for(i in 2:length(dat)){
+  if(names(dat)[i] %in% names(isd)){
+  print(i)
+    dat[4307, i] <- isd[1 , which(names(isd) == names(dat)[i])]
+  }
+}
+
+dat$OTUID[length(dat$OTUID)] <- "ISD"
+#table(is.na(dat))
+
+write.csv(dat, row.names = F, file = "otutable.esv.ITS.ISD_mt_cpDNA_etc.csv")
+
+
+
+
