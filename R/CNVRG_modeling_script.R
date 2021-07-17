@@ -18,10 +18,12 @@ dat <- read.csv("./forModeling_ITS_otuTables/ITS_time3_otu.csv",
 
 #Order by treatment
 dat <- dat[order(dat$treatment),]
+dat <- data.frame(dat$X, dat$treatment, dat[,2:(length(dat)-1)])
 
 #check for zero counts and rows with no data, then add one to all data
 table(rowSums(dat[,3:length(dat)]) > 0)
 table(colSums(dat[,3:length(dat)]) > 0)
+
 #Some OTUs are not present in these data. Remove them. 
 dat2 <- dat[, c(TRUE, TRUE, colSums(dat[,3:length(dat)]) > 0)]
 
@@ -30,7 +32,8 @@ table(colSums(dat2[,3:length(dat2)]) > 0 )
 dat2[1:3,1:5]
 
 #For ease, extracting treatment vector
-treatments <- dat2$treatment
+treatments <- dat2$dat.treatment
+
 #remove treatment vector from dataframe
 dat2 <- dat2[,-2]
 
@@ -53,6 +56,7 @@ modelOut <- cnvrg_VI(
   #  cores = 16,
   params_to_save = c("pi","p")
 )
+
 # modelOut <- cnvrg_HMC(
 #   countData = dat2,
 #   starts = indexer(treatments)$starts,
