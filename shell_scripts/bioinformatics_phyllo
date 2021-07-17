@@ -60,9 +60,15 @@ cat
 vsearch -sintax zotus_nonchimericits.fa -db /project/microbiome/ref_db/unite4_02_20.fa -tabbedout zotus_nonchimericits.sintax -strand both -sintax_cutoff 0.8 --threads 32
 vsearch -sintax zotus_nonchimeric16.fa -db /project/microbiome/ref_db/gg_16s_13.5.fa  -tabbedout zotus_nonchimeric16.sintax -strand both -sintax_cutoff 0.8 --threads 32
 
+#Look for coligos and ISD
+usearch -usearch_global  zotus_nonchimericits.fa -db /project/microbiome/ref_db/synthgene.fasta -strand both -blast6out isdits -id 0.85
+usearch -usearch_global  zotus_nonchimeric16.fa -db /project/microbiome/ref_db/synthgene.fasta -strand both -blast6out isd16s -id 0.85
+
+#none in 16s, one in its. Note that these would only be hte ITS from the few samples from my run, not Gordons' runs that Alex preprocessed. ISD from those latter runs will get added bwlow
+
 Rscript /project/microbiome/scripts/cleanOTUtable.R zotus_nonchimeric16.sintax otutab16s
 
-Rscript /project/microbiome/scripts/cleanOTUtable.R zotus_nonchimericits.sintax otutabITS
+Rscript /project/microbiome/scripts/cleanOTUtable.R zotus_nonchimericits.sintax otutabITS isdits
 
 #Before adding ISD and modeling lets just see how much there is
 R
@@ -86,3 +92,9 @@ rm(list=ls())
  sort(rowSums(dat)
  sort(colSums(dat) #5 over 1k
 sum(colSums(dat)) #54203
+
+#Lets see if we can get the ISD info on there. I will do this
+#and split up by time point in R in a different script called
+wrangle_phyllo_tables_for_CNVRG
+
+
