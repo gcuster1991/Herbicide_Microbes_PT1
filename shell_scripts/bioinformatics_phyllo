@@ -1,0 +1,53 @@
+#og processing code
+cat $tfmdirectory/*tfmergedreads.fa $tfmdirectory/joined/*tfmergedreads.fa | vsearch --derep_fulllength - --threads 32 --output uniqueSequences.fa --sizeout;\n";
+vsearch --cluster_unoise uniqueSequences.fa --relabel 'otu' --sizein --sizeout --consout zotus.fa --minsize 8 ;\n";
+vsearch --uchime3_denovo zotus.fa --nonchimeras zotus_nonchimeric.fa --threads 32;\n";
+cat $tfmdirectory/*tfmergedreads.fa $tfmdirectory/joined/*tfmergedreads.fa | vsearch --usearch_global - --db zotus_nonchimeric.fa --otutabout - --id 0.99 --threads 32 | sed 's/^#OTU ID/OTUID/' > 'otutable';\n";
+cat $tfmdirectory/*tfmergedreads.fa $tfmdirectory/joined/*tfmergedreads.fa | vsearch --search_exact - --db zotus_nonchimeric.fa --otutabout - --threads 32 | sed 's/^#OTU ID/OTUID/' > 'otutable.esv';\n";
+cat $tfmdirectory/*tfmergedreads.fa $tfmdirectory/joined/*tfmergedreads.fa | vsearch --search_exact - --db zotus_nonchimeric.fa --biomout otu.esv.biom.json --threads 32\n";
+
+I am working in /project/microbiome/users/jharri62/herbicide/phyllo
+
+#Places with phyllo data
+
+/project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/16S/corn
+/project/microbiome/data/seq/psomagen_9oct20_novaseq3/tfmergedreads/16S/sm18-herb/
+/project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/16S/Harrison/
+
+#First, lets get all the unique sequences from each of thes locations for each locus
+#eg.., via: 
+cp /project/microbiome/data/seq/psomagen_9oct20_novaseq3/otu/16S/sm18-herb/uniqueSequences.fa ./uniqueSequences16s_psomagen9oct.fa
+
+#Cat all together
+cat *16* > all16s
+
+#redreplicate and call ESVs
+vsearch --derep_fulllength all16s --threads 32 --output all16derep.fa --sizeout --sizein
+#denoising
+vsearch --cluster_unoise all16derep.fa --relabel 'otu' --sizein --sizeout --consout zotus16.fa --minsize 8 
+vsearch --sortbysize zotus16.fa --output zotus16_sorted.fa
+
+#Asv calling
+vsearch --uchime3_denovo zotus16_sorted --nonchimeras zotus_nonchimeric16.fa --threads 32
+
+#DO over for ITS
+vsearch --derep_fulllength allits --threads 32 --output allitsderep.fa --sizeout --sizein
+vsearch --cluster_unoise allitsderep.fa --relabel 'otu' --sizein --sizeout --consout zotusits.fa --minsize 8 
+vsearch --sortbysize zotusits.fa --output zotusits_sorted.fa
+vsearch --uchime3_denovo zotusits_sorted --nonchimeras zotus_nonchimericits.fa --threads 32
+
+#Need to make OTU tables (no p1 in Harrison)
+
+cat /project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/16S/corn/*fa 
+/project/microbiome/data/seq/psomagen_9oct20_novaseq3/tfmergedreads/16S/sm18-herb/*fa
+/project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/16S/Harrison/*p2*fa
+/project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/16S/Harrison/*p3*fa
+
+| vsearch --usearch_global - --db zotus_nonchimeric16.fa --otutabout - --id 0.99 --threads 32 | sed 's/^#OTU ID/OTUID/' > 'otutab16s'
+
+#its
+
+
+cat /project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/ITS/corn/*fa /project/microbiome/data/seq/psomagen_9oct20_novaseq3/tfmergedreads/ITS/sm18-herb/*fa | vsearch --usearch_global - --db zotus_nonchimericits.fa --otutabout - --id 0.99 --threads 32 | sed 's/^#OTU ID/OTUID/' > 'otutabITS'
+
+
