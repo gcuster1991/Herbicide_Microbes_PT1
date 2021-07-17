@@ -47,7 +47,42 @@ cat /project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/16S/cor
 
 #its
 
+#Need to add joined
 
-cat /project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/ITS/corn/*fa /project/microbiome/data/seq/psomagen_9oct20_novaseq3/tfmergedreads/ITS/sm18-herb/*fa | vsearch --usearch_global - --db zotus_nonchimericits.fa --otutabout - --id 0.99 --threads 32 | sed 's/^#OTU ID/OTUID/' > 'otutabITS'
+cat 
+/project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/ITS/corn/joined/corn.*fa 
+/project/microbiome/data/seq/psomagen_17sep20_novaseq2/tfmergedreads/ITS/corn/*fa 
+/project/microbiome/data/seq/psomagen_9oct20_novaseq3/tfmergedreads/ITS/sm18-herb/*fa
+| vsearch --usearch_global - --db zotus_nonchimericits.fa --otutabout - --id 0.99 --threads 32 | sed 's/^#OTU ID/OTUID/' > 'otutabITS'
 
+#Need to call taxonomy, clean up OTU tables (combine cpDNA, etc.), and add in ISD, then model
 
+vsearch -sintax zotus_nonchimericits.fa -db /project/microbiome/ref_db/unite4_02_20.fa -tabbedout zotus_nonchimericits.sintax -strand both -sintax_cutoff 0.8 --threads 32
+vsearch -sintax zotus_nonchimeric16.fa -db /project/microbiome/ref_db/gg_16s_13.5.fa  -tabbedout zotus_nonchimeric16.sintax -strand both -sintax_cutoff 0.8 --threads 32
+
+Rscript /project/microbiome/scripts/cleanOTUtable.R zotus_nonchimeric16.sintax otutab16s
+
+Rscript /project/microbiome/scripts/cleanOTUtable.R zotus_nonchimericits.sintax otutabITS
+
+#Before adding ISD and modeling lets just see how much there is
+R
+dat <- dat[,-1]
+rowSums(dat)[1:(length(dat[,1])-1)]
+sum(rowSums(dat)[1:(length(dat[,1])-1)])
+[1] 27982
+#not bad I guess. Lets see how many samples had a reasonable count number
+dat <- dat[-(length(dat[,1])),]
+sort(colSums(dat))
+5 samples had over 1000 counts. That is not good
+
+sort(rowSums(dat))
+Shows that there are five taxa with more than a thousand reads
+#Need to figure out what the "ITS" sample is. some error with sample naming maybe?
+
+#Lets look at the 16s
+rm(list=ls())
+ dat <- read.csv("otutab16s_cleaned")
+ dat <- dat[1:936,-1] #clip off the extraneous shit
+ sort(rowSums(dat)
+ sort(colSums(dat) #5 over 1k
+sum(colSums(dat)) #54203
