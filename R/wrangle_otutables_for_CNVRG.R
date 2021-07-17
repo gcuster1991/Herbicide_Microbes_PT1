@@ -1,3 +1,4 @@
+rm(list=ls())
 dat <- read.csv("./data/otutable16s.esv_withISD_and_mtDNA_cpDNA_etc.csv")
 head(dat)
 
@@ -17,7 +18,7 @@ intersect(t3, t2)
 names(dat) <- gsub(".*_([A-Za-z0-9]*$)","\\1",names(dat))
 duplicated(names(dat))
 
-#Ok., I think dat has samples that were sequenced multiple times and need to be combined
+#Ok., dat has samples that were sequenced multiple times and need to be combined
 dat2 <- data.frame(matrix(nrow = length(dat[,1]), ncol = 1))
 k <- 1
 for(i in unique(names(dat)[2:length(names(dat))])){
@@ -55,13 +56,13 @@ t3dat$treatment <- time3$treatment
 
 write.csv(t1dat,
           file = "./forModeling_16s_otuTables/16S_time1_otu.csv", 
-          row.names = F)
+          row.names = T)
 write.csv(t2dat,
           file = "./forModeling_16s_otuTables/16S_time2_otu.csv", 
-          row.names = F)
+          row.names = T)
 write.csv(t3dat,
           file = "./forModeling_16s_otuTables/16S_time3_otu.csv", 
-          row.names = F)
+          row.names = T)
 
 #Do for ITS
 rm(list=ls())
@@ -122,11 +123,11 @@ t3dat$treatment <- time3$treatment
 
 write.csv(t1dat,
           file = "./forModeling_ITS_otuTables/ITS_time1_otu.csv", 
-          row.names = F)
+          row.names = T)
 write.csv(t2dat,
           file = "./forModeling_ITS_otuTables/ITS_time2_otu.csv", 
-          row.names = F)
+          row.names = T)
 write.csv(t3dat,
           file = "./forModeling_ITS_otuTables/ITS_time3_otu.csv", 
-          row.names = F)
+          row.names = T)
 
