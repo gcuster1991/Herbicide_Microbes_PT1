@@ -1,11 +1,3 @@
-#og processing code
-cat $tfmdirectory/*tfmergedreads.fa $tfmdirectory/joined/*tfmergedreads.fa | vsearch --derep_fulllength - --threads 32 --output uniqueSequences.fa --sizeout;\n";
-vsearch --cluster_unoise uniqueSequences.fa --relabel 'otu' --sizein --sizeout --consout zotus.fa --minsize 8 ;\n";
-vsearch --uchime3_denovo zotus.fa --nonchimeras zotus_nonchimeric.fa --threads 32;\n";
-cat $tfmdirectory/*tfmergedreads.fa $tfmdirectory/joined/*tfmergedreads.fa | vsearch --usearch_global - --db zotus_nonchimeric.fa --otutabout - --id 0.99 --threads 32 | sed 's/^#OTU ID/OTUID/' > 'otutable';\n";
-cat $tfmdirectory/*tfmergedreads.fa $tfmdirectory/joined/*tfmergedreads.fa | vsearch --search_exact - --db zotus_nonchimeric.fa --otutabout - --threads 32 | sed 's/^#OTU ID/OTUID/' > 'otutable.esv';\n";
-cat $tfmdirectory/*tfmergedreads.fa $tfmdirectory/joined/*tfmergedreads.fa | vsearch --search_exact - --db zotus_nonchimeric.fa --biomout otu.esv.biom.json --threads 32\n";
-
 I am working in /project/microbiome/users/jharri62/herbicide/phyllo
 
 #Places with phyllo data
