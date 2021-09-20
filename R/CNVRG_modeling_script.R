@@ -12,9 +12,7 @@ inargs <- commandArgs(trailingOnly = TRUE)
 
 dat <- read.csv(inargs[1], 
                 fill = T, header = T, stringsAsFactors = F)
-#For troubleshooting
-dat <- read.csv("./forModeling_ITS_otuTables/ITS_time3_otu.csv",
-                fill = T, header = T, stringsAsFactors = F)
+
 
 #Order by treatment
 dat <- dat[order(dat$treatment),]
@@ -43,39 +41,37 @@ dat3 <- dat2[, c(1, 1+ which(colSums(dat2[,2:length(dat2)]) > 3))]
 dat3[,2:length(dat3)] <-  1 + dat3[,2:length(dat3)]
 
 #Commented out options are useful for cnvrg_HMC
-modelOut <- cnvrg_VI(
-  countData = dat3,
-  starts = indexer(treatments)$starts,
-  ends = indexer(treatments)$ends,
+#modelOut <- cnvrg_VI(
+#  countData = dat3,
+#  starts = indexer(treatments)$starts,
+#  ends = indexer(treatments)$ends,
   #algorithm = "NUTS",
   #chains = 2,
   #burn = 500,
   #samples = 1500,
   #thinning_rate = 2,
-  output_samples = 250,
+#  output_samples = 250,
   #  cores = 16,
-  params_to_save = c("pi","p")
-)
-
-# modelOut <- cnvrg_HMC(
-#   countData = dat2,
-#   starts = indexer(treatments)$starts,
-#   ends = indexer(treatments)$ends,
-#   algorithm = "NUTS",
-#   chains = 2,
-#   burn = 500,
-#   samples = 1500,
-#   thinning_rate = 2,
+#  params_to_save = c("pi","p")
+#)
+ modelOut <- cnvrg_HMC(
+   countData = dat3,
+   starts = indexer(treatments)$starts,
+   ends = indexer(treatments)$ends,
+   algorithm = "NUTS",
+   chains = 2,
+   burn = 500,
+   samples = 1500,
+   thinning_rate = 2,
 #   #output_samples = 250,
-#     cores = 16,
-#   params_to_save = c("pi","p")
-# )
-ests <- extract_point_estimate(modelOut = modelOut, countData = dat3,
-                               treatments = length(unique(treatments)))
+     cores = 16,
+   params_to_save = c("pi","p")
+ )
+ests <- extract_point_estimate(model_out = modelOut, countData = dat3,
+                               params = c("p", "pi"))
 forExport <- data.frame(treatments, dat3[,1],ests$pointEstimates_p)
 names(forExport)[2] <- "sample"
 
-write.csv(forExport, file = paste(inargs[1], "_p_estimates.csv", sep = ""))
-save.image(file = paste(inargs[1], ".Rdata", sep = ""))
-
+write.csv(forExport, file = paste(inargs[1], "_p_estimatesHMC.csv", sep = ""))
+save.image(file = paste(inargs[1], "_HMC.Rdata", sep = ""))
 
