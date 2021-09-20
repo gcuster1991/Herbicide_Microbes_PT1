@@ -1,0 +1,36 @@
+---
+title: "16S Diversity analyses GC 9_21_21"
+output: html_notebook
+---
+
+load data for the time point we want to work with
+```{r}
+load("/Users/gordoncuster/Desktop/CNVRGHERB1/16S/16S_time1_otu.csv_VI.Rdata")
+```
+
+Calculate the Shannon entropy for pi values (Dirichlet parameters) for each treatment group. Recall that pi parameters are the proportion estimates for each microbial taxon in each sampling group. Thus, by calculating shannon entropies for each vector of pi samples we obtain a posterior probability distribution of diversity entropies. The mean of the distribution can be thought of as a point estimate for diversity. Note we are converting entropies to species equivalencies. These are the number of species of equal relative abundance it would take to generate the same Shannon value as our data. Equivalencies make it easier to compare diversity among samples and projects, see Lou Jost's work (i.e., "entropy and diversity" in Oikos).
+
+```{r}
+#isd_transform(model_out = modelOut, isd_index = )
+entropies<-diversity_calc(model_out = modelOut, "/Users/gordoncuster/Desktop/CNVRGHERB1/HerbPT1_CNVRG_OTU_tables/16S_time1_otu.csv", params = "pi", entropy_measure = "shannon", equivalents = T)
+
+test<-do.call(rbind.data.frame, entropies)
+
+names(test) <- c("Aatrex", "Clarity", "Hand", "Non-Treated", "Roundup Powermax")
+
+test_t<-data.frame(t(test))
+
+test_t$herbicide<-rownames(test_t)
+
+test_long<-gather(test_t, Sim_num, Shannon, entropy_pi.1:entropy_pi.250, factor_key=TRUE)
+
+
+
+mod_test<-aov(Shannon ~ herbicide, data = test_long)
+hist(mod_test$residuals)
+summary(mod_test)
+t_1_tukey<-TukeyHSD(mod_test)
+
+plot(t_1_tukey, las = 2)
+
+```
