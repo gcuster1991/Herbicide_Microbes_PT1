@@ -17,10 +17,22 @@ ps_archea<-subset_taxa(HerbPt1_PS_Orig, Kingdom=="k:Archaea")
 sample_names(ps_bac)
 ```
 
+Get number of reads per sample
 ```{r}
-
-
 sort(sample_sums(ps_bac))
 sort(sample_sums(ps_archea))
+
+rare_bac<-rarefy_even_depth(ps_bac, sample.size = 1000)
+sample_sums(rare_bac)
+
+#estimate richenss metrics across samples
+richness_estimates_bac<-estimate_richness(rare_bac)
+
+#make plot of original sequencing depth by rarefied observed
+plot(sample_sums(ps_bac) ~ richness_estimates_bac$Observed)
+plot(sample_sums(ps_bac) ~ richness_estimates_bac$Shannon)
+plot(sample_sums(ps_bac) ~ richness_estimates_bac$Chao1)
+
+
 ```
 
