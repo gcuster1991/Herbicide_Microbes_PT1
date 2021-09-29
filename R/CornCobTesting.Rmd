@@ -1,0 +1,127 @@
+---
+title: "Corncob vignette"
+output: html_notebook
+---
+
+```{r}
+devtools::install_github("bryandmartin/corncob")
+```
+
+```{r}
+library(corncob)
+library(phyloseq)
+library(magrittr)
+data(soil_phylo) 
+```
+
+```{r}
+soil <- soil_phylo %>%
+phyloseq::subset_samples(DayAmdmt %in% c(11,21)) %>%
+ tax_glom("Phylum")
+
+
+data(soil_phylum_small)
+soil <- soil_phylum_small
+```
+
+```{r}
+corncob <- bbdml(formula = OTU.1 ~ 1,
+phi.formula = ~ 1,
+data = soil)
+
+#b is nmumnber of bootstraps
+plot(corncob, B=50)
+plot(corncob, total = T, B = 50)
+plot(corncob, color = "DayAmdmt", B = 50)
+plot(corncob, total = T, color = "DayAmdmt", B = 50)
+```
+
+```{r}
+corncob_da <- bbdml(formula = OTU.1 ~ DayAmdmt,
+phi.formula = ~ DayAmdmt,
+data = soil)
+
+plot(corncob_da, total = T, color = "DayAmdmt", B = 50)
+plot(corncob_da, color = "DayAmdmt", B = 50)
+```
+
+Model selection. P less than 0.05 so we want to use the model with covariates for this taxon. 
+```{r}
+lrtest(mod_null = corncob, mod = corncob_da)
+summary(corncob_da)
+```
+
+```{r}
+set.seed(1)
+da_analysis <- differentialTest(formula = ~ DayAmdmt,
+phi.formula = ~ DayAmdmt,
+formula_null = ~ 1,
+phi.formula_null = ~ DayAmdmt,
+test = "Wald", boot = FALSE,
+data = soil,
+fdr_cutoff = 0.05)
+```
+
+```{r}
+da_analysis$significant_taxa
+```
+
+```{r}
+dv_analysis <- differentialTest(formula = ~ DayAmdmt,
+phi.formula = ~ DayAmdmt,
+formula_null = ~ DayAmdmt,
+phi.formula_null = ~ 1,
+data = soil,
+test = "LRT", boot = FALSE,
+fdr_cutoff = 0.05)
+dv_analysis$significant_taxa
+```
+
+Testing with herbicide data
+```{r}
+
+sample_data(ps_bac)$Herbicide <- factor(sample_data(ps_bac)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Roundup Powermax", "Clarity"))
+soil <- ps_bac %>%
+#phyloseq::subset_samples(Time == "T2") %>%
+ tax_glom("Family")
+
+
+set.seed(1)
+da_analysis <- differentialTest(formula = ~ Herbicide + Time + Herbicide:Time,
+phi.formula = ~ Herbicide,
+formula_null = ~ 1,
+phi.formula_null = ~ Herbicide,
+test = "Wald", boot = FALSE,
+data = soil,
+fdr_cutoff = 0.05)
+
+da_analysis$significant_models
+plot(da_analysis, levels =c("Family"))
+
+```
+
+```{r}
+
+sample_data(ps_bac)$Herbicide <- factor(sample_data(ps_bac)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Roundup Powermax", "Clarity"))
+soil <- ps_bac %>%
+phyloseq::subset_samples(Time == "T2") %>%
+ tax_glom("Family")
+
+
+set.seed(1)
+da_analysis <- differentialTest(formula = ~ Herbicide,
+phi.formula = ~ Herbicide,
+formula_null  ~ 1,
+phi.formula_null = ~ Herbicide,
+test = "Wald", boot = FALSE,
+data = soil,
+fdr_cutoff = 0.05)
+
+(da_analysis)
+
+da_analysis$significant_models
+plot(da_analysis, level =c("Family"))
+
+plot(da_analysis)
+```
+
