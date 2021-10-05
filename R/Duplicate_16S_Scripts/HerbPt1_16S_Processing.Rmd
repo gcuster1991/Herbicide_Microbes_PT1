@@ -3,11 +3,6 @@ title: "HerbPt1 16S processing"
 output: html_notebook
 ---
 
-```{r}
-load("/Users/gordoncuster/Desktop/CusterData/sm18_Herb1/Herb_PS_Objects_16S.RData")
-```
-
-
 Pre-analysis filtering of non-bacterial reads
 ```{r}
 #21300 taxa in original
