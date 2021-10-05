@@ -3,6 +3,11 @@ title: "HerbPt1 16S processing"
 output: html_notebook
 ---
 
+```{r}
+load("/Users/gordoncuster/Desktop/CusterData/sm18_Herb1/Herb_PS_Objects_16S.RData")
+```
+
+
 Pre-analysis filtering of non-bacterial reads
 ```{r}
 #21300 taxa in original
@@ -16,7 +21,7 @@ ps_archea<-subset_taxa(HerbPt1_PS_Orig, Kingdom=="k:Archaea")
 ```
 
 Get number of reads per sample
-```{r}
+```{#r}
 sort(sample_sums(ps_bac))
 sort(sample_sums(ps_archea))
 
@@ -36,7 +41,7 @@ plot(sample_sums(ps_bac) ~ richness_estimates_bac$Chao1)
 
 ```
 Replace count table with dm estimates
-```{r}
+```{#r}
 HerbPt1_PS_Orig_mn_est<-HerbPt1_PS_Orig
 
 t1<-read.csv("/Users/gordoncuster/Desktop/Git_Projects/Herb_Pt1/forModeling_16s_otuTables/16S_time1_otu.csv")

@@ -1,0 +1,22 @@
+---
+title: "Herb Pt1 Phyloseq object processing for CNVRG inputs"
+output: html_notebook
+---
+
+this loads everything. The steps below work with the 
+```{r}
+load("/Users/gordoncuster/Desktop/CusterData/sm18_Herb1/Herb_PS_Objects_16S.RData")
+```
+
+
+Pre-analysis filtering of non-bacterial reads
+```{r}
+#21300 taxa in original
+HerbPt1_PS_Orig
+#remove all non-bacterial reads
+#21028 taxa in bacteria only ps object. 272 non-bacterial taxa 
+ps_bac<-subset_taxa(HerbPt1_PS_Orig, Kingdom == "k:Bacteria")
+#create seperate dataframe of archea
+#101 archeal taxa
+ps_archea<-subset_taxa(HerbPt1_PS_Orig, Kingdom=="k:Archaea")
+```
