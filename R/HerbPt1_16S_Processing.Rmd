@@ -13,8 +13,6 @@ ps_bac<-subset_taxa(HerbPt1_PS_Orig, Kingdom == "k:Bacteria")
 #create seperate dataframe of archea
 #101 archeal taxa
 ps_archea<-subset_taxa(HerbPt1_PS_Orig, Kingdom=="k:Archaea")
-
-sample_names(ps_bac)
 ```
 
 Get number of reads per sample
@@ -22,11 +20,13 @@ Get number of reads per sample
 sort(sample_sums(ps_bac))
 sort(sample_sums(ps_archea))
 
-rare_bac<-rarefy_even_depth(ps_bac, sample.size = 1000)
+rare_bac<-rarefy_even_depth(ps_bac, sample.size = 1400)
 sample_sums(rare_bac)
 
 #estimate richenss metrics across samples
 richness_estimates_bac<-estimate_richness(rare_bac)
+
+plot_richness(rare_bac, color = "Herbicide")
 
 #make plot of original sequencing depth by rarefied observed
 plot(sample_sums(ps_bac) ~ richness_estimates_bac$Observed)
@@ -34,5 +34,31 @@ plot(sample_sums(ps_bac) ~ richness_estimates_bac$Shannon)
 plot(sample_sums(ps_bac) ~ richness_estimates_bac$Chao1)
 
 
+```
+Replace count table with dm estimates
+```{r}
+HerbPt1_PS_Orig_mn_est<-HerbPt1_PS_Orig
+
+t1<-read.csv("/Users/gordoncuster/Desktop/Git_Projects/Herb_Pt1/forModeling_16s_otuTables/16S_time1_otu.csv")
+t2<-read.csv("/Users/gordoncuster/Desktop/Git_Projects/Herb_Pt1/forModeling_16s_otuTables/16S_time2_otu.csv")
+t3<-read.csv("/Users/gordoncuster/Desktop/Git_Projects/Herb_Pt1/forModeling_16s_otuTables/16S_time3_otu.csv")
+
+combined_otu_table<-rbind(t1, t2, t3)
+dim(combined_otu_table)
+rownames(combined_otu_table)<-combined_otu_table$X
+combined_otu_table<-combined_otu_table[,2:ncol(combined_otu_table)]
+
+dat <- sapply(combined_otu_table, as.numeric )
+
+otu_tab_mn_est<-otu_table(dat, taxa_are_rows = F)
+
+
+
+HerbPt1_PS_Orig<-phyloseq(otu_tab, samp_dat, tax_tab)
+
+otu_table(HerbPt1_PS_Orig)<-otu_tab_mn_est
+
+taxa_names(otu_tab_mn_est)
+taxa_names(HerbPt1_PS_Orig)
 ```
 

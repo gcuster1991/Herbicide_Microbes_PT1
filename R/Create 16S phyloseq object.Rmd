@@ -53,13 +53,14 @@ cor_samp_df<- cor_df %>%
    arrange(Correlation,SampleID)
 
 #Look at those samples with a low correlation. I chose 0.6 for now, but this is likely to change.
-low_cor_samp<-cor_samp_df[cor_samp_df$Correlation<0.6,]
+low_cor_samp<-cor_samp_df[cor_samp_df$Correlation < 0.6,]
 
 #remove samples that did not amplify. I chose 1000 as a cutoff. 
 count_tab2<-count_tab2[,!colSums(count_tab2)<=500]
 
-#look at the remaing samples. After removing those that did not amplify, no duplicates were kept. This suggests that those samsples that did amplify were highly correlated. 
+#look at the remaining samples. After removing those that did not amplify, no duplicates were kept. This suggests that those samples that did amplify were highly correlated. 
 low_cor <- colnames(count_tab2) %in% low_cor_samp$SampleID
+#create data frae with only those samples with low correaliotns
 low_cor_df <- count_tab2[, low_cor, drop = FALSE]
 View(low_cor_df)
 sort(colSums(low_cor_df))
