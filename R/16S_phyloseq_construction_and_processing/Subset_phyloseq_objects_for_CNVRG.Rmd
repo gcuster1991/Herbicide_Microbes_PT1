@@ -23,11 +23,16 @@ ps_archea<-subset_taxa(HerbPt1_PS_Orig, Kingdom=="k:Archaea")
 
 Subset phyloseq object by time point
 ```{r}
-Time1<-subset_samples(ps_fungi, Time=="T1")
-Time2<-subset_samples(ps_fungi, Time=="T2")
-Time3<-subset_samples(ps_fungi, Time=="T3")
+Time1<-subset_samples(ps_bac, Time=="T1")
+Time2<-subset_samples(ps_bac, Time=="T2")
+Time3<-subset_samples(ps_bac, Time=="T3")
 ```
 
+```{r}
+sort(sample_sums(Time1))
+sort(sample_sums(Time2))
+sort(sample_sums(Time3))
+```
 
 
 Pull out items and save for export to CNVRG
@@ -44,7 +49,414 @@ Time1_Otu<-cbind(treatment=MD_Time1_16S$Herbicide, Time1_Otu)
 Time2_Otu<-cbind(treatment=MD_Time2_16S$Herbicide, Time2_Otu) 
 Time3_Otu<-cbind(treatment=MD_Time3_16S$Herbicide, Time3_Otu) 
 
-write.csv(Time1_Otu, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/ITS/ITS_time1_otu.csv")
-write.csv(Time2_Otu, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/ITS/ITS_time2_otu.csv")
-write.csv(Time3_Otu, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/ITS/ITS_time3_otu.csv")
+dim(Time1_Otu)
+dim(Time2_Otu)
+dim(Time3_Otu)
+
+#write.csv(Time1_Otu, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/16S_time1_otu.csv")
+#write.csv(Time2_Otu, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/16S_time2_otu.csv")
+#write.csv(Time3_Otu, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/16S_time3_otu.csv")
 ```
+
+Pull out samples with low abund for testing with differntial abundance in MN estimates. 
+```{r}
+
+ps_bac_low_depth <- prune_samples(sample_sums(ps_bac)<=5000, ps_bac)
+sort(sample_sums(ps_bac_low_depth))
+ps_bac_low_table<-data.frame(otu_table(ps_bac_low_depth))
+
+ps_bac_mid_depth <- prune_samples(sample_sums(ps_bac)>=35000, ps_bac)
+ps_bac_mid_depth <- prune_samples(sample_sums(ps_bac_mid_depth)<=40000, ps_bac_mid_depth)
+sort(sample_sums(ps_bac_mid_depth))
+ps_bac_mid_table<-data.frame(otu_table(ps_bac_mid_depth))
+
+ps_bac_high_depth <- prune_samples(sample_sums(ps_bac)>=75000, ps_bac)
+sort(sample_sums(ps_bac_high_depth))
+ps_bac_high_table<-data.frame(otu_table(ps_bac_high_depth))
+
+
+combined_ps<-merge_phyloseq(ps_bac_low_depth, ps_bac_mid_depth, ps_bac_high_depth)
+
+combined_ps@sam_data$sampling_depth<-sample_sums(combined_ps)
+
+plot(estimate_richness(combined_ps)$Observed ~ combined_ps@sam_data$sampling_depth)
+```
+
+
+```{#r}
+low_depths <- data.frame(t(ps_bac_low_table[,2:length(ps_bac_low_table)]))
+names(low_depths)<-rownames(ps_bac_low_table)
+sort(rowSums(low_depths))
+low_depths_sub<-low_depths[c(2,3,5,6),]
+#low_depths_sub<-low_depths[,]
+
+
+mid_depths <- data.frame(t(ps_bac_mid_table[,2:length(ps_bac_mid_table)]))
+names(mid_depths)<-rownames(ps_bac_mid_table)
+sort(rowSums(mid_depths))
+mid_depths_sub<-mid_depths[1:2,]
+
+high_depths <- data.frame(t(ps_bac_high_table[,2:length(ps_bac_high_table)]))
+names(high_depths)<-rownames(ps_bac_high_table)
+sort(rowSums(high_depths))
+high_depths_sub<-high_depths[1,]
+
+
+combined_data<-rbind(low_depths_sub, mid_depths_sub, high_depths_sub)
+
+#combined_data<-rbind(low_depths_sub, high_depths_sub)
+
+sort(rowSums(combined_data))
+
+
+```
+
+
+```{r}
+low_and_even_depths<-data.frame(t(cbind(ps_bac_low_table, ps_bac_mid_table)))
+#low_and_even_depths<-low_and_even_depths + 1
+#low_and_even_depths<-cbind(treatment = rep(x = "a", nrow(low_and_even_depths)), low_and_even_depths)
+#rowSums(low_depths)
+
+low_and_high_depths<-data.frame(t(cbind(ps_bac_low_table, ps_bac_high_table)))
+#low_and_high_depths<-low_and_high_depths + 1
+#low_and_high_depths<-cbind(treatment = rep(x = "a", nrow(low_and_high_depths)), low_and_high_depths)
+
+all_depths<- data.frame(t(cbind(ps_bac_low_table, ps_bac_mid_table, ps_bac_high_table)))
+#all_depths<-all_depths + 1
+#rowSums(all_depths)
+#all_depths<-cbind(treatment = rep(x = "a", nrow(all_depths)), all_depths)
+
+
+#create table of 
+
+```
+
+CNVRG all combinedps
+```{r}
+all_depths<- data.frame(t(cbind(ps_bac_low_table, ps_bac_mid_table, ps_bac_high_table)))
+lnH_depths <- data.frame((all_depths[,1:length(all_depths)]))
+
+lnH_depths <- lnH_depths + 1
+lnH_depths_trta <- rep(x = "a", nrow(lnH_depths))
+lnH_depths_trtb <- rep(x = "b", nrow(lnH_depths))
+
+
+lnh_depths_trt<-c(lnH_depths_trta , lnH_depths_trtb)
+#Note that the CNVRG help states that the first column of the input data should have sample names
+#This was not the case, so I have changed that. 
+lnH_depths <- data.frame(row.names(lnH_depths), lnH_depths)
+names(lnH_depths)[1] <- "sampleNames"
+lnH_depths[1:3,1:3]
+
+indexer(lnh_depths_trt)
+
+lnh_depths2<-rbind(lnH_depths,lnH_depths)
+
+all_depths_CNVRG_VI <-
+  CNVRG::cnvrg_VI(
+    countData = lnh_depths2, #JH, changed, so that the treatment column was retained
+    starts = c(1, 24),
+    ends = c(23, 46),
+    output_samples = 250,
+    params_to_save = c("pi", "p")
+  )
+```
+
+
+
+low depths only model
+```{r}
+library(CNVRG)
+
+#ps_bac_low_table <- read.csv("~/Desktop/ps_bac_low_table.csv")
+
+
+#transpose matrix
+#JH. Cleaned this code slightly. cbind wasn't doing anything...and we needed to get the 
+#characters out of the first row. 
+low_depths <- data.frame(t(ps_bac_low_table[,2:length(ps_bac_low_table)]))
+names(low_depths)<-rownames(ps_bac_low_table)
+
+#low_depths <- data.frame(t(combined_data[,1:length(combined_data)]))
+#names(low_depths)<-rownames(combined_data)
+
+#low_depths<-data.frame(t(low_depths))
+
+#names(low_depths) <- ps_bac_low_table$X
+#This looks like this now:
+# low_depths[1:3,1:3]
+#             centroid=otu1 centroid=otu10 centroid=otu100
+# G010SG            25             17               2
+# G082SG             8              2               3
+# G087SG            65             29               0
+
+# #before it looked like this
+# low_depths <- data.frame(t(cbind(ps_bac_low_table))
+#                          > low_depths[1:3,1:3]
+#                          X1             X2              X3
+#                          X      centroid=otu1 centroid=otu10 centroid=otu100
+#                          G010SG            25             17               2
+#                          G082SG             8              2               3
+
+#add 1 to all zeros (JH: not just zeros, but everything)
+low_depths <- low_depths + 1
+#low_depths <- low_depths + 1
+
+#duplicate low depths to see if this will allow function to work
+#low_depths2<-rbind(low_depths, low_depths)
+
+#JH: make column of treatment type for samples. All samples are same treatment.
+#I removed the part where this was added then removed from the dataframe.
+low_depths_trta <- rep(x = "a", nrow(low_depths))
+low_depths_trtb <- rep(x = "b", nrow(low_depths))
+
+low_depths_trt<-c(low_depths_trta, low_depths_trtb)
+#Note that the CNVRG help states that the first column of the input data should have sample names
+#This was not the case, so I have changed that. 
+low_depths <- data.frame(row.names(low_depths), low_depths)
+names(low_depths)[1] <- "sampleNames"
+low_depths[1:3,1:3]
+
+#check structure
+# str(low_depths)
+
+#JH: note that we have only one group here. 
+indexer(low_depths_trt)
+
+low_depths2<-rbind(low_depths,low_depths)
+
+low_depths_CNVRG_VI <-
+  CNVRG::cnvrg_VI(
+    countData = low_depths2, #JH, changed, so that the treatment column was retained
+    starts = c(1,8),
+    ends = c(7,14),
+    output_samples = 250,
+    params_to_save = c("pi", "p")
+  )
+#This gives the following error:
+# Error in new_CppObject_xp(fields$.module, fields$.pointer, ...) : 
+#   Exception: mismatch in number dimensions declared and found in context; processing stage=data initialization; variable name=start; dims declared=(1); dims found=()  (in 'model_dm' at line 6)
+# 
+# failed to create the optimizer; optimization not done
+
+#Lets try making two treatment groups and see if that fixes it. 
+#low_depths_CNVRG_VI <-
+#  CNVRG::cnvrg_VI(
+#    countData = low_depths2, #JH, changed, so that the treatment column was retained
+#    starts = c(1,8),
+#    ends = c(7,14),
+#    output_samples = 250,
+#    params_to_save = c("pi", "p")
+#  )
+
+#It fixes it. I suspect the function fails because it tries to index a vector, but it gets a single value. 
+#ANytime you get a "dimensions" error it is usually because something has the wrong shape (dimensions) 
+#or, relatedly is a class of object that can't be subsetted in an expected way and thus has the wrong dimensions.
+
+point_est <- extract_point_estimate(model_out = low_depths_CNVRG_VI, countData = low_depths2)
+
+#point_est_low<-point_est
+
+```
+
+low depths + high depth model
+```{r}
+library(CNVRG)
+
+#ps_bac_low_table <- read.csv("~/Desktop/ps_bac_low_table.csv")
+
+
+#transpose matrix
+#JH. Cleaned this code slightly. cbind wasn't doing anything...and we needed to get the 
+#characters out of the first row. 
+lnH_depths <- data.frame((low_and_high_depths[,1:length(low_and_high_depths)]))
+#names(lnH_depths)<-rownames(low_and_high_depths)
+
+#low_depths <- data.frame(t(combined_data[,1:length(combined_data)]))
+#names(low_depths)<-rownames(combined_data)
+
+#low_depths<-data.frame(t(low_depths))
+
+#names(low_depths) <- ps_bac_low_table$X
+#This looks like this now:
+# low_depths[1:3,1:3]
+#             centroid=otu1 centroid=otu10 centroid=otu100
+# G010SG            25             17               2
+# G082SG             8              2               3
+# G087SG            65             29               0
+
+# #before it looked like this
+# low_depths <- data.frame(t(cbind(ps_bac_low_table))
+#                          > low_depths[1:3,1:3]
+#                          X1             X2              X3
+#                          X      centroid=otu1 centroid=otu10 centroid=otu100
+#                          G010SG            25             17               2
+#                          G082SG             8              2               3
+
+#add 1 to all zeros (JH: not just zeros, but everything)
+lnH_depths <- lnH_depths + 1
+#low_depths <- low_depths + 1
+
+#duplicate low depths to see if this will allow function to work
+#low_depths2<-rbind(low_depths, low_depths)
+
+#JH: make column of treatment type for samples. All samples are same treatment.
+#I removed the part where this was added then removed from the dataframe.
+lnH_depths_trta <- rep(x = "a", nrow(lnH_depths))
+lnH_depths_trtb <- rep(x = "b", nrow(lnH_depths))
+
+lnh_depths_trt<-c(lnH_depths_trta , lnH_depths_trtb)
+#Note that the CNVRG help states that the first column of the input data should have sample names
+#This was not the case, so I have changed that. 
+lnH_depths <- data.frame(row.names(lnH_depths), lnH_depths)
+names(lnH_depths)[1] <- "sampleNames"
+lnH_depths[1:3,1:3]
+
+#check structure
+# str(low_depths)
+
+#JH: note that we have only one group here. 
+indexer(lnh_depths_trt)
+
+lnh_depths2<-rbind(lnH_depths,lnH_depths)
+
+lnh_depths_CNVRG_VI <-
+  CNVRG::cnvrg_VI(
+    countData = lnh_depths2, #JH, changed, so that the treatment column was retained
+    starts = c(1,12),
+    ends = c(11,22),
+    output_samples = 250,
+    params_to_save = c("pi", "p")
+  )
+#This gives the following error:
+# Error in new_CppObject_xp(fields$.module, fields$.pointer, ...) : 
+#   Exception: mismatch in number dimensions declared and found in context; processing stage=data initialization; variable name=start; dims declared=(1); dims found=()  (in 'model_dm' at line 6)
+# 
+# failed to create the optimizer; optimization not done
+
+#Lets try making two treatment groups and see if that fixes it. 
+#low_depths_CNVRG_VI <-
+#  CNVRG::cnvrg_VI(
+#    countData = low_depths2, #JH, changed, so that the treatment column was retained
+#    starts = c(1,8),
+#    ends = c(7,14),
+#    output_samples = 250,
+#    params_to_save = c("pi", "p")
+#  )
+
+#It fixes it. I suspect the function fails because it tries to index a vector, but it gets a single value. 
+#ANytime you get a "dimensions" error it is usually because something has the wrong shape (dimensions) 
+#or, relatedly is a class of object that can't be subsetted in an expected way and thus has the wrong dimensions.
+
+point_est_lnh <- extract_point_estimate(model_out = low_depths_CNVRG_VI, countData = low_depths2)
+
+#point_est_low<-point_est
+
+```
+
+
+
+```{#r}
+#transpose matrix
+#JH. Cleaned this code slightly. cbind wasn't doing anything...and we needed to get the 
+#characters out of the first row. 
+low_depths <- data.frame(t(ps_bac_low_table[,2:length(ps_bac_low_table)]))
+names(low_depths)<-rownames(ps_bac_low_table)
+#names(low_depths) <- ps_bac_low_table$X
+#This looks like this now:
+# low_depths[1:3,1:3]
+#             centroid=otu1 centroid=otu10 centroid=otu100
+# G010SG            25             17               2
+# G082SG             8              2               3
+# G087SG            65             29               0
+
+# #before it looked like this
+# low_depths <- data.frame(t(cbind(ps_bac_low_table))
+#                          > low_depths[1:3,1:3]
+#                          X1             X2              X3
+#                          X      centroid=otu1 centroid=otu10 centroid=otu100
+#                          G010SG            25             17               2
+#                          G082SG             8              2               3
+
+#add 1 to all zeros (JH: not just zeros, but everything)
+
+low_depths <- low_depths + 1
+
+#JH: make column of treatment type for samples. All samples are same treatment.
+#I removed the part where this was added then removed from the dataframe.
+low_depths_trta <- rep(x = "a", nrow(low_depths))
+low_depths_trtb <- rep(x = "b", nrow(low_depths))
+
+low_depths_trt<-c(low_depths_trta, low_depths_trtb)
+#Note that the CNVRG help states that the first column of the input data should have sample names
+#This was not the case, so I have changed that. 
+low_depths <- data.frame(row.names(low_depths), low_depths)
+names(low_depths)[1] <- "sampleNames"
+low_depths[1:3,1:3]
+
+low_depths2<-rbind(low_depths,low_depths)
+
+
+#check structure
+# str(low_depths)
+
+#JH: note that we have only one group here. 
+indexer(low_depths_trt)
+
+low_depths_CNVRG_VI <-
+  CNVRG::cnvrg_VI(
+    countData = low_depths2, #JH, changed, so that the treatment column was retained
+    starts = c(1,8),
+    ends = c(7,14),
+    output_samples = 250,
+    params_to_save = c("pi", "p")
+  )
+#This gives the following error:
+# Error in new_CppObject_xp(fields$.module, fields$.pointer, ...) : 
+#   Exception: mismatch in number dimensions declared and found in context; processing stage=data initialization; variable name=start; dims declared=(1); dims found=()  (in 'model_dm' at line 6)
+# 
+# failed to create the optimizer; optimization not done
+
+
+
+```
+
+Depth by richness
+```{r}
+ps_bac@sam_data$sampling_depth<-sample_sums(ps_bac)
+rich<-estimate_richness(ps_bac)
+plot(rich$Observed ~ ps_bac@sam_data$sampling_depth)
+summary(lm(rich$Observed ~ ps_bac@sam_data$sampling_depth))
+
+ps_rare<-rarefy_even_depth(ps_bac,sample.size = 1000)
+rich_rare<-estimate_richness(ps_rare)
+plot(rich_rare$Observed ~ ps_rare@sam_data$sampling_depth)
+summary(lm(rich_rare$Observed ~ ps_rare@sam_data$sampling_depth))
+
+
+
+ps_rare_ord<-ordinate(ps_rare, distance = "bray")
+
+plot_ordination(ps_rare, ordination = ps_rare_ord, type = "Samples", color = "sampling_depth", shape = "Time")
+
+ps_trans <- transform_sample_counts(ps_bac, function(x) x / sum(x) )
+
+
+ps_rare_table<-data.frame(t(otu_table(ps_rare)))
+ps_rare_md<-data.frame(sample_data(ps_rare))
+ps_rare_dist<-parDist(as.matrix(ps_rare_table), method = "bray")
+ps_rare_dist<-parDist(as.matrix(ps_rare_table), method = "fJaccard")
+
+ps_trans_table<-data.frame(t(otu_table(ps_trans)))
+ps_trans_md<-data.frame(sample_data(ps_trans))
+ps_trans_dist<-parDist(as.matrix(ps_trans_table), method = "bray")
+ps_trans_dist<-parDist(as.matrix(ps_trans_table), method = "fJaccard")
+
+
+library(vegan)
+
+adonis(ps_rare_dist~sampling_depth, data=ps_rare_md)
+adonis(ps_trans_dist~sampling_depth, data=ps_trans_md)
+```
+

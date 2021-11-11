@@ -28,20 +28,31 @@ names(count_tab2)<-samp_names
 table(str_split(names(count_tab),pattern = "_", 5, simplify = T)[,4] == names(count_tab2))
 
 
+#drop out low counts
+
 #check correlations of technical replicates.
 cor_df<-list()
 for(i in 1:length(samp_names)){
   for(j in 1:length(samp_names)){
     if(samp_names[i] == samp_names[j]){
-      if(cor(count_tab2[i], count_tab2[j]) < 0.999){
-          tmp<-cor(count_tab2[i], count_tab2[j])
+      #if(rowSums(cbind(count_tab2[i], count_tab2[j])) < 1){
+        tmp2<-cbind(count_tab2[i], count_tab2[j])
+        tmp2<-tmp2[rowSums(tmp2)>2, ]
+       if(cor(count_tab2[i], count_tab2[j]) < 0.999){
+          tmp<-cor(tmp2[1], tmp2[2])
             cor_stat <-data.frame(tmp) 
                #print(cor(count_tab2[i], count_tab2[j]))
                   cor_df<-c(cor_df, cor_stat)
-      }
+        }
+      }    
     }
   }
-}
+
+
+#cor_df_with_zeros<-cor_df
+cor_df_with_zeros <- data.frame(SampleID = rep(names(cor_df_with_zeros), sapply(cor_df_with_zeros, length)),
+                 Correlation = unlist(cor_df_with_zeros))
+density(cor_df_with_zeros$Correlation)
 
 #unlist to a dataframe containing sample ID and the correlation
 cor_df <- data.frame(SampleID = rep(names(cor_df), sapply(cor_df, length)),
