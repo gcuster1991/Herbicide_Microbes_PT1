@@ -1,0 +1,35 @@
+---
+title: "Phyloseq Objects 16S"
+output: html_notebook
+---
+
+```{r}
+require(phyloseq)
+```
+
+16S
+```{r}
+load("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/Nov_21/CNVRG_Herbpt1_16S_VI_model_w_param_est.RData")
+```
+
+rarefy - chose 3000. This dropped 5 samples 
+```{r}
+sort(sample_sums(ps_bac))
+Herbpt1_rare<-rarefy_even_depth(physeq = ps_bac, sample.size = 3000)
+```
+
+hellinger transform
+```{r}
+Herbpt1_hel_trans<- transform_sample_counts(ps_bac, function(x) sqrt(x / sum(x)))
+```
+
+MN param estimates
+```{r}
+load("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/16S/Nov_21/CNVRG_Herbpt1_16S_VI_model_w_param_est.RData")
+```
+
+
+```{r}
+otu_table(ps_bac)<-ests
+```
+
