@@ -23,4 +23,21 @@ hellinger transform
 Herbpt1_hel_trans<- transform_sample_counts(ps_fungal, function(x) sqrt(x / sum(x)))
 ```
 
+CNVRG DMN estimates
+```{r}
+rownames(forExport)<-rownames(dat3)
+dmn_est<-forExport[,4:ncol(forExport)]
+names(dmn_est)<-stringr::str_replace(names(dmn_est), pattern = "[.]", replacement = "=")
+otu_table(ps_fungal) <- otu_table(dmn_est, taxa_are_rows = F)
+```
+
+
+save phyloseq objects
+```{r}
+saveRDS(Herbpt1_hel_trans, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_hel_trans_ITS.rds")
+
+saveRDS(Herbpt1_rare, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_rare_ITS.rds")
+
+saveRDS(ps_fungal, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/DMN_ests.rds")
+```
 
