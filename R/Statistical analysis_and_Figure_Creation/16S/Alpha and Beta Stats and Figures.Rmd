@@ -158,6 +158,9 @@ plotDistances = function(p, m, s, d) {
   colnames(sd) = c("Var2", "Type2")
   wu.sd = left_join(wu.sd, sd, by = "Var2")
   
+  #remove this line to plot all comparisons. 
+  wu.sd = wu.sd %>% filter(Type1 == "Hand" | Type1 == "Non-Treated")
+  
   # plot
   ggplot(wu.sd, aes(x = Type2, y = value)) +
     theme_bw() +
