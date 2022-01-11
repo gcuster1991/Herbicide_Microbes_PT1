@@ -10,9 +10,12 @@ require(tidyverse)
 
 Load data
 ```{r}
-ps_dmn <- readRDS("data/PhyloseqObjects/16S/DMN_ests_16S.Rdata")
-ps_rare <- readRDS("data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
-ps_trans <- readRDS("data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.Rdata")
+ps_dmn <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/DMN_ests_16S.Rdata")
+sample_data(ps_dmn)$Herbicide <- factor(sample_data(ps_dmn)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
+ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
+sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
+ps_trans <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.Rdata")
+sample_data(ps_trans)$Herbicide <- factor(sample_data(ps_trans)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
 ```
 
 create alphadiversity tables
@@ -43,15 +46,14 @@ plot(aov_t3$residuals)
 summary(aov_t3)
 ```
 
-ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed)
+ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transfomred to sucessfully ordinate. At this point, the transformed data will not ordinate. 
 ```{r}
 ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 100)
 
-
 ps_rare_sub<-prune_taxa(taxa_sums(ps_rare) > 2, ps_rare)
-ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 100)
+ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 100, previous.best = ord_rare)
 
-#can't get the hellinger transformed data to ordinate sucessfully
+#can't get the hellinger transformed data to ordinate successfully
 ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.5, ps_trans)
 ord_transformed<-ordinate(physeq = ps_trans_sub, method = "NMDS", distance = "bray", k=3, trymax= 100)
 ```
@@ -64,6 +66,7 @@ ps_adonis<-function(physeq){
     if(taxa_are_rows(physeq)== T){
        physeq_dist<-parallelDist::parDist(as.matrix(t(otu_tab)), method = "bray")}
             else{physeq_dist<-parallelDist::parDist(as.matrix(otu_tab), method = "bray")}
+  print(anova(vegan::betadisper(physeq_dist, md_tab$Herbicide)))
   vegan::adonis(physeq_dist ~ Herbicide * Time, data = md_tab)
 }
 ```
@@ -72,5 +75,32 @@ ps_adonis<-function(physeq){
 ps_adonis(ps_rare_sub)
 ps_adonis(ps_trans_sub)
 ps_adonis(ps_dmn)
+```
+
+Ordination plots DMN
+```{r}
+ord_t1_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T1"), method = "NMDS", distance = "bray", k=3, trymax= 100)
+plot_ordination(physeq = subset_samples(ps_dmn, Time=="T1"), ordination = ord_t1_dmn, type = "Samples", axes = c(1,2), color = "Herbicide") +  theme_classic() +  stat_ellipse(type = "norm", linetype = 2, level = 0.95) 
+
+T1_dmn<-ggordiplots::gg_ordiplot(ord = ord_t1_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T1_dmn$plot + theme_classic()
+
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_dmn_T1.pdf")
+
+ord_t2_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T2"), method = "NMDS", distance = "bray", k=3, trymax= 100)
+plot_ordination(physeq = subset_samples(ps_dmn, Time=="T2"), ordination = ord_t2_dmn, type = "Samples", axes = c(1,2), color = "Herbicide") +  theme_classic() + stat_ellipse(type = "norm", linetype = 2)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_dmn_T2.pdf")
+
+
+ord_t3_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
+plot_ordination(physeq = subset_samples(ps_dmn, Time=="T3"), ordination = ord_t3_dmn, type = "Samples", axes = c(1,2), color = "Herbicide") +  theme_classic() + stat_ellipse(type = "norm", linetype = 2)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_dmn_T3.pdf")
+
+
+ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 100)
+
+#can't get the hellinger transformed data to ordinate successfully
+ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.5, ps_trans)
+ord_transformed<-ordinate(physeq = ps_trans_sub, method = "NMDS", distance = "bray", k=3, trymax= 100)
 ```
 
