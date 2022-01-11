@@ -1,0 +1,22 @@
+---
+title: "HerbPt1 16S Figures"
+output: html_notebook
+---
+
+Load data
+```{r}
+ps_dmn<-readRDS("data/PhyloseqObjects/16S/DMN_ests_16S.Rdata")
+ps_rare<-readRDS("data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
+ps_trans<-readRDS("data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.Rdata")
+```
+
+create alphadiversity tables
+```{r}
+alpha_div<-estimate_richness(physeq = ps_rare, measures = c("Observed", "Shannon", "Chao1"))
+#pull out metadata and concatonate with alpha diversity metrics
+
+```
+```{r}
+
+```
+
