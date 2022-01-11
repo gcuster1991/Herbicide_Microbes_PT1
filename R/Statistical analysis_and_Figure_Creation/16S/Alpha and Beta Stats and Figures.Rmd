@@ -6,6 +6,10 @@ output: html_notebook
 ```{r}
 require(phyloseq)
 require(tidyverse)
+require(phyloseq)
+require(reshape2)
+require(dplyr)
+require(ggplot2)
 ```
 
 Load data
@@ -80,27 +84,99 @@ ps_adonis(ps_dmn)
 Ordination plots DMN
 ```{r}
 ord_t1_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T1"), method = "NMDS", distance = "bray", k=3, trymax= 100)
-plot_ordination(physeq = subset_samples(ps_dmn, Time=="T1"), ordination = ord_t1_dmn, type = "Samples", axes = c(1,2), color = "Herbicide") +  theme_classic() +  stat_ellipse(type = "norm", linetype = 2, level = 0.95) 
-
 T1_dmn<-ggordiplots::gg_ordiplot(ord = ord_t1_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T1_dmn$plot + theme_classic()
 
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_dmn_T1.pdf")
 
 ord_t2_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T2"), method = "NMDS", distance = "bray", k=3, trymax= 100)
-plot_ordination(physeq = subset_samples(ps_dmn, Time=="T2"), ordination = ord_t2_dmn, type = "Samples", axes = c(1,2), color = "Herbicide") +  theme_classic() + stat_ellipse(type = "norm", linetype = 2)
+T2_dmn<-ggordiplots::gg_ordiplot(ord = ord_t2_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T2")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T2_dmn$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_dmn_T2.pdf")
 
 
 ord_t3_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
-plot_ordination(physeq = subset_samples(ps_dmn, Time=="T3"), ordination = ord_t3_dmn, type = "Samples", axes = c(1,2), color = "Herbicide") +  theme_classic() + stat_ellipse(type = "norm", linetype = 2)
+T3_dmn<-ggordiplots::gg_ordiplot(ord = ord_t3_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T3_dmn$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_dmn_T3.pdf")
+```
+
+Ordination plots rarefied
+```{r}
+ord_t1_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T1"), method = "NMDS", distance = "bray", k=3, trymax= 100)
+T1_rare<-ggordiplots::gg_ordiplot(ord = ord_t1_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T1_rare$plot + theme_classic()
+
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T1.pdf")
+
+ord_t2_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T2"), method = "NMDS", distance = "bray", k=3, trymax= 100)
+T2_rare<-ggordiplots::gg_ordiplot(ord = ord_t2_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T2")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T2_rare$plot + theme_classic()
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T2.pdf")
 
 
-ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 100)
+ord_t3_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
+T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T3_rare$plot + theme_classic()
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T3.pdf")
+```
+box and whisker plots of distance 
+within group distances
+```{r}
+library(micrUBIfuns)
+beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Herbicide")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_withingroup_beta.pdf")
+beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "bray", group = "Herbicide")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_withingroup_beta.pdf")
+beta_boxplot(physeq = subset_samples(ps_rare, Time=="T3"), method = "bray", group = "Herbicide")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_withingroup_beta.pdf")
+```
 
-#can't get the hellinger transformed data to ordinate successfully
-ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.5, ps_trans)
-ord_transformed<-ordinate(physeq = ps_trans_sub, method = "NMDS", distance = "bray", k=3, trymax= 100)
+treatment to control 
+```{r}
+plotDistances = function(p, m, s, d) {
+
+  # calc distances
+  wu = phyloseq::distance(p, m)
+  wu.m = melt(as.matrix(wu))
+  
+  # remove self-comparisons
+  wu.m = wu.m %>%
+    filter(as.character(Var1) != as.character(Var2)) %>%
+    mutate_if(is.factor,as.character)
+  
+  # get sample data (S4 error OK and expected)
+  sd = data.frame(sample_data(p)) %>%
+    select(s, d) %>%
+    mutate_if(is.factor,as.character)
+  sd$Herbicide <- factor(sd$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
+  
+  # combined distances with sample data
+  colnames(sd) = c("Var1", "Type1")
+  wu.sd = left_join(wu.m, sd, by = "Var1")
+  
+  colnames(sd) = c("Var2", "Type2")
+  wu.sd = left_join(wu.sd, sd, by = "Var2")
+  
+  # plot
+  ggplot(wu.sd, aes(x = Type2, y = value)) +
+    theme_bw() +
+    geom_point() +
+    geom_boxplot(aes(color = ifelse(Type1 == Type2, "red", "black"))) +
+    scale_color_identity() +
+    facet_wrap(~ Type1, scales = "free_x") +
+    theme(axis.text.x=element_text(angle = 45, hjust = 1, size = 5)) + 
+    ggtitle(paste0("Distance Metric = ", m))
+}
+```
+
+
+```{r}
+plotDistances(p = subset_samples(physeq= ps_rare, Time=="T1"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_allgroup_beta.pdf")
+plotDistances(p = subset_samples(physeq= ps_rare, Time=="T2"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_allgroup_beta.pdf")
+plotDistances(p = subset_samples(physeq= ps_rare, Time=="T3"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_allgroup_beta.pdf")
 ```
 
