@@ -170,17 +170,25 @@ plotDistances = function(p, m, s, d) {
     facet_wrap(~ Type1, scales = "free_x") +
     theme(axis.text.x=element_text(angle = 45, hjust = 1, size = 5)) + 
     ggtitle(paste0("Distance Metric = ", m))
+  
 }
 ```
 
 
 ```{r}
-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T1"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
+a<-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T1"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
+a <- a + ggtitle("Time 1 Bray-Curtis Dissimlarities")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_allgroup_beta.pdf")
-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T2"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
+b<-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T2"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
+b <-b + ggtitle("Time 2 Bray-Curtis Dissimlarities")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_allgroup_beta.pdf")
-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T3"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
+c<-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T3"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
+c<- c + ggtitle("Time 3 Bray-Curtis Dissimlarities")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_allgroup_beta.pdf")
+
+library(ggpubr)
+ggarrange(a, b, c, ncol = 1)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/test.pdf", width = 7, height = 10)
 ```
 
 1
