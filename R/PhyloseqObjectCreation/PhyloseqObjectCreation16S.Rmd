@@ -33,10 +33,10 @@ otu_table(ps_bac) <- otu_table(dmn_est, taxa_are_rows = F)
 
 save phyloseq objects
 ```{r}
-saveRDS(Herbpt1_hel_trans, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.rds")
+saveRDS(Herbpt1_hel_trans, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.Rdata")
 
-saveRDS(Herbpt1_rare, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.rds")
+saveRDS(Herbpt1_rare, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
 
-saveRDS(ps_bac, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/DMN_ests_16S.rds")
+saveRDS(ps_bac, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/DMN_ests_16S.Rdata")
 ```
 
