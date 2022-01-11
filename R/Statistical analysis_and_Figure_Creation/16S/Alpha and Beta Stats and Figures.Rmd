@@ -3,20 +3,74 @@ title: "HerbPt1 16S Figures"
 output: html_notebook
 ---
 
+```{r}
+require(phyloseq)
+require(tidyverse)
+```
+
 Load data
 ```{r}
-ps_dmn<-readRDS("data/PhyloseqObjects/16S/DMN_ests_16S.Rdata")
-ps_rare<-readRDS("data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
-ps_trans<-readRDS("data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.Rdata")
+ps_dmn <- readRDS("data/PhyloseqObjects/16S/DMN_ests_16S.Rdata")
+ps_rare <- readRDS("data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
+ps_trans <- readRDS("data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.Rdata")
 ```
 
 create alphadiversity tables
 ```{r}
-alpha_div<-estimate_richness(physeq = ps_rare, measures = c("Observed", "Shannon", "Chao1"))
+alpha_div <- estimate_richness(physeq = ps_rare, measures = c("Observed", "Shannon", "Chao1"))
 #pull out metadata and concatonate with alpha diversity metrics
-
+md<-data.frame(sample_data(ps_rare))
+alpha_div_md <- rownames_to_column(alpha_div, "Barcode_ID_G") %>% full_join(md) 
+alpha_div_md$Herbicide <- factor(alpha_div_md$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
 ```
-```{r}
 
+Shannon Div plots - no significant differences among herbicide treatments at any of the three time points
+```{r}
+ggplot(data = alpha_div_md, aes(Herbicide, Shannon, color= Herbicide)) + facet_grid(. ~ Time) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust = 1) )
+
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_Shannon.pdf")
+
+aov_t1<-aov(Shannon ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T1",])
+plot(aov_t1$residuals)
+summary(aov_t1)
+
+aov_t2<-aov(Shannon ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T2",])
+plot(aov_t2$residuals)
+summary(aov_t2)
+
+aov_t3<-aov(Shannon ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T3",])
+plot(aov_t3$residuals)
+summary(aov_t3)
+```
+
+ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed)
+```{r}
+ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 100)
+
+
+ps_rare_sub<-prune_taxa(taxa_sums(ps_rare) > 2, ps_rare)
+ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 100)
+
+#can't get the hellinger transformed data to ordinate sucessfully
+ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.5, ps_trans)
+ord_transformed<-ordinate(physeq = ps_trans_sub, method = "NMDS", distance = "bray", k=3, trymax= 100)
+```
+
+Adonis testing of herbicide treatments by time point
+```{r}
+ps_adonis<-function(physeq){
+  otu_tab<-data.frame(phyloseq::otu_table(physeq))
+  md_tab<-data.frame(phyloseq::sample_data(physeq))
+    if(taxa_are_rows(physeq)== T){
+       physeq_dist<-parallelDist::parDist(as.matrix(t(otu_tab)), method = "bray")}
+            else{physeq_dist<-parallelDist::parDist(as.matrix(otu_tab), method = "bray")}
+  vegan::adonis(physeq_dist ~ Herbicide * Time, data = md_tab)
+}
+```
+
+```{r}
+ps_adonis(ps_rare_sub)
+ps_adonis(ps_trans_sub)
+ps_adonis(ps_dmn)
 ```
 
