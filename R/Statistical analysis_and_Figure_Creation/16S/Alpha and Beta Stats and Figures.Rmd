@@ -188,7 +188,7 @@ ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/
 
 library(ggpubr)
 ggarrange(a, b, c, ncol = 1)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/test.pdf", width = 7, height = 10)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_allgroup_beta.pdf", width = 7, height = 10)
 ```
 
 1
