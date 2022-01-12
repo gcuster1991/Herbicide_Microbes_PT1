@@ -14,11 +14,11 @@ require(ggplot2)
 
 Load data
 ```{r}
-ps_dmn <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/DMN_ests_16S.Rdata")
+ps_dmn <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/DMN_ests_ITS.Rdata")
 sample_data(ps_dmn)$Herbicide <- factor(sample_data(ps_dmn)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
-ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
+ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_rare_ITS.Rdata")
 sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
-ps_trans <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.Rdata")
+ps_trans <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_hel_trans_ITS.Rdata")
 sample_data(ps_trans)$Herbicide <- factor(sample_data(ps_trans)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
 ```
 
@@ -35,7 +35,7 @@ Shannon Div plots - no significant differences among herbicide treatments at any
 ```{r}
 ggplot(data = alpha_div_md, aes(Herbicide, Shannon, color= Herbicide)) + facet_grid(. ~ Time) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust = 1) )
 
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_Shannon.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_Shannon.pdf")
 
 aov_t1<-aov(Shannon ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T1",])
 plot(aov_t1$residuals)
@@ -50,16 +50,15 @@ plot(aov_t3$residuals)
 summary(aov_t3)
 ```
 
-ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transfomred to sucessfully ordinate. At this point, the transformed data will not ordinate. 
+ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transformed to successfully ordinate. At this point, the transformed data will not ordinate. 
 ```{r}
-ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 100)
+ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit = 1000)
 
 ps_rare_sub<-prune_taxa(taxa_sums(ps_rare) > 2, ps_rare)
-ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 100, previous.best = ord_rare)
+ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit = 1000)
 
-#can't get the hellinger transformed data to ordinate successfully
-ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.5, ps_trans)
-ord_transformed<-ordinate(physeq = ps_trans_sub, method = "NMDS", distance = "bray", k=3, trymax= 100)
+ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.01, ps_trans)
+ord_transformed<-ordinate(physeq = ps_trans_sub, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit = 1000)
 ```
 
 Adonis testing of herbicide treatments by time point
@@ -87,18 +86,18 @@ ord_t1_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T1"), method = "NMDS
 T1_dmn<-ggordiplots::gg_ordiplot(ord = ord_t1_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T1_dmn$plot + theme_classic()
 
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_dmn_T1.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_dmn_T1.pdf")
 
 ord_t2_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T2"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T2_dmn<-ggordiplots::gg_ordiplot(ord = ord_t2_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T2")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T2_dmn$plot + theme_classic()
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_dmn_T2.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_dmn_T2.pdf")
 
 
 ord_t3_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T3_dmn<-ggordiplots::gg_ordiplot(ord = ord_t3_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T3_dmn$plot + theme_classic()
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_dmn_T3.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_dmn_T3.pdf")
 ```
 
 Ordination plots rarefied
@@ -107,29 +106,29 @@ ord_t1_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T1"), method = "NM
 T1_rare<-ggordiplots::gg_ordiplot(ord = ord_t1_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T1_rare$plot + theme_classic()
 
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T1.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T1.pdf")
 
 ord_t2_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T2"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T2_rare<-ggordiplots::gg_ordiplot(ord = ord_t2_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T2")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T2_rare$plot + theme_classic()
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T2.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T2.pdf")
 
 
 ord_t3_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T3_rare$plot + theme_classic()
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T3.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T3.pdf")
 ```
 box and whisker plots of distance 
 within group distances
 ```{r}
 library(micrUBIfuns)
 beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Herbicide")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_withingroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T1_rare_withingroup_beta.pdf")
 beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "bray", group = "Herbicide")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_withingroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T2_rare_withingroup_beta.pdf")
 beta_boxplot(physeq = subset_samples(ps_rare, Time=="T3"), method = "bray", group = "Herbicide")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_withingroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T3_rare_withingroup_beta.pdf")
 ```
 
 treatment to control 
@@ -178,17 +177,17 @@ plotDistances = function(p, m, s, d) {
 ```{r}
 a<-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T1"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
 a <- a + ggtitle("Time 1 Bray-Curtis Dissimlarities")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_allgroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T1_rare_allgroup_beta.pdf")
 b<-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T2"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
 b <-b + ggtitle("Time 2 Bray-Curtis Dissimlarities")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_allgroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T2_rare_allgroup_beta.pdf")
 c<-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T3"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
 c<- c + ggtitle("Time 3 Bray-Curtis Dissimlarities")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_allgroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T3_rare_allgroup_beta.pdf")
 
 library(ggpubr)
 ggarrange(a, b, c, ncol = 1)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_allgroup_beta.pdf", width = 7, height = 10)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_allgroup_beta.pdf", width = 7, height = 12)
 ```
 Taxon abundance bar plot
 
@@ -246,7 +245,7 @@ sample_data(phylumGlommed_herb_t1)$Herbicide <- factor(sample_data(phylumGlommed
 plot_bar(phylumGlommed_herb_t1, x = "Herbicide", fill = "Phylum")  + theme_classic() + ggtitle("Proportional Taxon Abundances Time 1") +
 theme(legend.position="bottom") + guides(fill=guide_legend(nrow=6)) + geom_bar(stat="identity") + theme(axis.text.x=element_text(angle = 45, hjust = 1, size = 5)) + 
 scale_fill_manual(values = col_vector)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Taxon_barplot_t1.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_Taxon_barplot_t1.pdf")
 
 #t2
 phylumGlommed_herb_t2 <- merge_samples(subset_samples(physeq= phylumGlommed, Time=="T2"), group = "Herbicide")
@@ -257,7 +256,7 @@ sample_data(phylumGlommed_herb_t2)$Herbicide <- factor(sample_data(phylumGlommed
 plot_bar(phylumGlommed_herb_t2, x = "Herbicide", fill = "Phylum")  + theme_classic() + ggtitle("Proportional Taxon Abundances Time 1") +
 theme(legend.position="bottom") + guides(fill=guide_legend(nrow=6)) + geom_bar(stat="identity") + theme(axis.text.x=element_text(angle = 45, hjust = 1, size = 5)) + 
 scale_fill_manual(values = col_vector)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_Pt1/Figures/Taxon_barplot_t2.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_Pt1/Figures/ITS_Taxon_barplot_t2.pdf")
 
 #t3
 phylumGlommed_herb_t3 <- merge_samples(subset_samples(physeq= phylumGlommed, Time=="T3"), group = "Herbicide")
@@ -268,5 +267,5 @@ sample_data(phylumGlommed_herb_t3)$Herbicide <- factor(sample_data(phylumGlommed
 plot_bar(phylumGlommed_herb_t3, x = "Herbicide", fill = "Phylum")  + theme_classic() + ggtitle("Proportional Taxon Abundances Time 1") +
 theme(legend.position="bottom") + guides(fill=guide_legend(nrow=6)) + geom_bar(stat="identity") + theme(axis.text.x=element_text(angle = 45, hjust = 1, size = 5)) + 
 scale_fill_manual(values = col_vector)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_Pt1/Figures/Taxon_barplot_t3.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_Pt1/Figures/ITS_Taxon_barplot_t3.pdf")
 ```

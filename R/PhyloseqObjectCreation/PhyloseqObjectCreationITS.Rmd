@@ -38,6 +38,6 @@ saveRDS(Herbpt1_hel_trans, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_M
 
 saveRDS(Herbpt1_rare, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_rare_ITS.Rdata")
 
-saveRDS(ps_fungal, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/DMN_ests.Rdata")
+saveRDS(ps_fungal, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/DMN_ests_ITS.Rdata")
 ```
 
