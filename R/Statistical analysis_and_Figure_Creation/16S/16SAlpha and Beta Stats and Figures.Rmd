@@ -269,3 +269,10 @@ theme(legend.position="bottom") + guides(fill=guide_legend(nrow=6)) + geom_bar(s
 scale_fill_manual(values = col_vector)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_Pt1/Figures/16S_Taxon_barplot_t3.pdf")
 ```
+Combined herbicide and time bar plot
+```{r}
+sample_data(ps_rare)$herb_time<-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = "_")
+ps_rare_for_barplot <- prune_taxa(taxa_sums(ps_rare) > 50, ps_rare)
+plot_bar(ps_rare_for_barplot, x= "herb_time", fill = "Family") + scale_fill_manual(values = col_vector) + geom_bar(stat="identity")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_BarPlot_Herbicide_Time.pdf", width = 20, height = 11)
+```
