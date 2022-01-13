@@ -10,6 +10,7 @@ require(phyloseq)
 require(reshape2)
 require(dplyr)
 require(ggplot2)
+require(microbiome)
 ```
 
 Load data
@@ -50,7 +51,7 @@ plot(aov_t3$residuals)
 summary(aov_t3)
 ```
 
-ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transformed to successfully ordinate. At this point, the transformed data will not ordinate. 
+ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transformed to successfully ordinate. At this point, the transformed data will not ordinate. This section is full dataset ordinations. 
 ```{r}
 ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit = 1000)
 
@@ -80,7 +81,7 @@ ps_adonis(ps_trans_sub)
 ps_adonis(ps_dmn)
 ```
 
-Ordination plots DMN
+Ordination plots DMN by time point
 ```{r}
 ord_t1_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T1"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T1_dmn<-ggordiplots::gg_ordiplot(ord = ord_t1_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
@@ -94,13 +95,14 @@ T2_dmn$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_dmn_T2.pdf")
 
 
+#this time point needs to be checked out. The ordination is not working properly. 
 ord_t3_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T3_dmn<-ggordiplots::gg_ordiplot(ord = ord_t3_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T3_dmn$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_dmn_T3.pdf")
 ```
 
-Ordination plots rarefied
+Ordination plots on rarefied data by time point. 
 ```{r}
 ord_t1_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T1"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T1_rare<-ggordiplots::gg_ordiplot(ord = ord_t1_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
@@ -268,4 +270,12 @@ plot_bar(phylumGlommed_herb_t3, x = "Herbicide", fill = "Phylum")  + theme_class
 theme(legend.position="bottom") + guides(fill=guide_legend(nrow=6)) + geom_bar(stat="identity") + theme(axis.text.x=element_text(angle = 45, hjust = 1, size = 5)) + 
 scale_fill_manual(values = col_vector)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_Pt1/Figures/ITS_Taxon_barplot_t3.pdf")
+```
+
+Combined herbicide and time bar plot
+```{r}
+sample_data(ps_rare_sub)$herb_time<-paste(sample_data(ps_rare_sub)$Herbicide, sample_data(ps_rare_sub)$Time, sep = "_")
+ps_rare_for_barplot <- prune_taxa(taxa_sums(ps_rare_sub) > 50, ps_rare_sub)
+plot_bar(ps_rare_for_barplot, x= "herb_time", fill = "Family") + scale_fill_manual(values = col_vector) + geom_bar(stat="identity")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_BarPlot_Herbicide_Time.pdf", width = 20, height = 11)
 ```
