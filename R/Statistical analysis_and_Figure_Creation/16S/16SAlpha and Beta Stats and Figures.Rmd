@@ -314,26 +314,23 @@ abund_aov_wrangle <- function (physeq, y = "Tax_Level"){
 test<-abund_aov_wrangle(ps_rare_family_top25, y = "Family")
 
 
-mod_abund<-function(counts, DV = "Independent Variable", Grouping = "Grouping Variable") {
-  data <- counts[counts[,Grouping[i]] == as.character(unique(counts[,Grouping]))[j], ]
+mod_abund<-function(count_tab, DV = "Independent Variable") {
+  for (i in 3:ncol(count_tab)-2) {
+    for(j in 1:length(unique(count_tab[,"Herbicide"]))){
+      data <- count_tab %>% filter(Herbicide == unique(count_tab$Herbicide[j]))
       mod <- aov(unlist(data[1]) ~ matrix(data[,DV])) 
-  if( summary(mod)[[1]][["Pr(>F)"]][1] <= 0.05) {
-  data<-counts[counts[,Grouping[i]] == as.character(unique(counts[,Grouping]))[j], ]
+              if(summary(mod)[[1]][["Pr(>F)"]][1] <= 0.05) {
+                  data <- count_tab %>% filter(Herbicide == unique(count_tab$Herbicide[j]))
    #return(boxplot(unlist(data[1]) ~ matrix(data[,DV]), main =  paste(names(data[1])), xlab= "Time", ylab="Abundance")
     #      )
-   return(boxplot(unlist(data[1]) ~ matrix(data[,DV]), main =    paste(names(data[1]), as.character(unique(counts[,Grouping]))[j]), xlab= "Time", ylab="Abundance") )
-  
-   
-          }
-} 
-mod_abund(counts = test, DV = "Time", Grouping = "Herbicide" )  
-
-nreturns<- 25
-
-#now I need to make this into a for loop for the funciton mod_abund. 
-for (i in 1:nreturns){
-plot  <- mod_abund(counts = test[,i], DV = test[,"Time"], Grouping = test[,"Herbicide"] )
+print(boxplot(unlist(data[1]) ~ matrix(data[,DV]), main =paste(names(data[i]), as.character(unique(count_tab[,"Herbicide"]))[j]), xlab= "Time", ylab="Abundance") )
+      
+      } 
+    }
+  }
 }
 
-```
 
+mod_abund(count_tab = test, DV = "Time")  
+
+```
