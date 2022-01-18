@@ -118,7 +118,8 @@ T2_rare<-ggordiplots::gg_ordiplot(ord = ord_t2_rare, groups = data.frame(sample_
 T2_rare$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T2.pdf")
 
-
+#G166SG identified as outlier based on plots with it included. Removed to create plot. 
+ps_rare = subset_samples(ps_rare, sample_names(ps_rare) != "G166SG")
 ord_t3_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T3_rare$plot + theme_classic()
