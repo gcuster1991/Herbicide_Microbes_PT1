@@ -42,15 +42,15 @@ ggplot(data = alpha_div_md, aes(Herbicide, Shannon, color= Herbicide)) + facet_g
 
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_Shannon.pdf")
 
-aov_t1<-aov(Shannon ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T1",])
+aov_t1<-aov(Chao1 ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T1",])
 plot(aov_t1$residuals)
 summary(aov_t1)
 
-aov_t2<-aov(Shannon ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T2",])
+aov_t2<-aov(Chao1 ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T2",])
 plot(aov_t2$residuals)
 summary(aov_t2)
 
-aov_t3<-aov(Shannon ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T3",])
+aov_t3<-aov(Chao1 ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T3",])
 plot(aov_t3$residuals)
 summary(aov_t3)
 ```
@@ -75,13 +75,13 @@ ps_adonis<-function(physeq){
        physeq_dist<-parallelDist::parDist(as.matrix(t(otu_tab)), method = "bray")}
             else{physeq_dist<-parallelDist::parDist(as.matrix(otu_tab), method = "bray")}
   print(anova(vegan::betadisper(physeq_dist, md_tab$Herbicide)))
-  vegan::adonis(physeq_dist ~ Herbicide * Time, data = md_tab, permutations = 100)
+  vegan::adonis(physeq_dist ~ Herbicide * Time, data = md_tab, permutations = 1000)
 }
 ```
 
 ```{r}
 ps_adonis(ps_rare_sub)
-ps_adonis(ps_trans_sub)
+#ps_adonis(ps_trans_sub)
 ps_adonis(ps_dmn)
 ```
 
@@ -124,6 +124,39 @@ T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_
 T3_rare$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T3.pdf")
 ```
+
+
+Pairwise adonis testing
+```{r}
+
+
+ps_pairwiseadonis<-function(physeq){
+  otu_tab<-data.frame(phyloseq::otu_table(physeq))
+  md_tab<-data.frame(phyloseq::sample_data(physeq))
+    if(taxa_are_rows(physeq)== T){
+       physeq_dist<-parallelDist::parDist(as.matrix(t(otu_tab)), method = "bray")}
+            else{physeq_dist<-parallelDist::parDist(as.matrix(otu_tab), method = "bray")}
+pairwiseAdonis::pairwise.adonis(x = physeq_dist, factors = md_tab$Herbicide, p.adjust.m = "none", perm = 1000)
+}
+
+ps_t1<-subset_samples(ps_rare_sub, Time == "T1")
+ps_t1<-prune_taxa(taxa_sums(ps_t1) > 2, ps_t1)
+
+ps_t2<-subset_samples(ps_rare_sub, Time == "T2")
+ps_t2<-prune_taxa(taxa_sums(ps_t2) > 2, ps_t2)
+
+ps_t3<-subset_samples(ps_rare_sub, Time == "T3")
+ps_t3<-prune_taxa(taxa_sums(ps_t3) > 2, ps_t3)
+
+
+ps_pairwiseadonis(ps_t1)
+ps_pairwiseadonis(ps_t2)
+ps_pairwiseadonis(ps_t3)
+
+
+```
+
+
 box and whisker plots of distance 
 within group distances
 ```{r}
