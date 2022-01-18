@@ -17,9 +17,11 @@ Load data
 ps_dmn <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/DMN_ests_16S.Rdata")
 sample_data(ps_dmn)$Herbicide <- factor(sample_data(ps_dmn)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
 sample_data(ps_dmn)$herb_time<-paste(sample_data(ps_dmn)$Herbicide, sample_data(ps_dmn)$Time, sep = "_")
+
 ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
 sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
 sample_data(ps_rare)$herb_time<-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = "_")
+
 ps_trans <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.Rdata")
 sample_data(ps_trans)$Herbicide <- factor(sample_data(ps_trans)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
 sample_data(ps_trans)$herb_time<-paste(sample_data(ps_trans)$Herbicide, sample_data(ps_trans)$Time, sep = "_")
@@ -313,24 +315,21 @@ abund_aov_wrangle <- function (physeq, y = "Tax_Level"){
 
 test<-abund_aov_wrangle(ps_rare_family_top25, y = "Family")
 
-
-mod_abund<-function(count_tab, DV = "Independent Variable") {
-  for (i in 3:ncol(count_tab)-2) {
-    for(j in 1:length(unique(count_tab[,"Herbicide"]))){
-      data <- count_tab %>% filter(Herbicide == unique(count_tab$Herbicide[j]))
-      mod <- aov(unlist(data[1]) ~ matrix(data[,DV])) 
-              if(summary(mod)[[1]][["Pr(>F)"]][1] <= 0.05) {
-                  data <- count_tab %>% filter(Herbicide == unique(count_tab$Herbicide[j]))
-   #return(boxplot(unlist(data[1]) ~ matrix(data[,DV]), main =  paste(names(data[1])), xlab= "Time", ylab="Abundance")
-    #      )
-print(boxplot(unlist(data[1]) ~ matrix(data[,DV]), main =paste(names(data[i]), as.character(unique(count_tab[,"Herbicide"]))[j]), xlab= "Time", ylab="Abundance") )
-      
-      } 
-    }
-  }
+mod_abund<-function(count_tab, IV = "Groups to be tested") {
+   for(j in 1:length(unique(count_tab[,"Herbicide"]))){
+         data <- count_tab %>% filter(Herbicide == unique(count_tab$Herbicide)[j])
+                   for (i in 1:25) { 
+            mod <- aov(unlist(data[i]) ~ matrix(data[,IV])) 
+            #sanity check
+            print(c(j, i))
+      if(summary(mod)[[1]][["Pr(>F)"]][1] <= 0.05) {
+            print(summary(mod))
+         print(boxplot(unlist(data[i]) ~ unlist(data[IV]), main =paste(names(data[i]), as.character(unique(count_tab[,"Herbicide"]))[j]), xlab= "Time", ylab="Abundance") )
+      }
+   }
+}
 }
 
 
-mod_abund(count_tab = test, DV = "Time")  
-
+mod_abund(test, IV = "Time")
 ```

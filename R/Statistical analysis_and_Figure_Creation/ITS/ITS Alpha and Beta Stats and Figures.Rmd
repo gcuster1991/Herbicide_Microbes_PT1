@@ -17,10 +17,17 @@ Load data
 ```{r}
 ps_dmn <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/DMN_ests_ITS.Rdata")
 sample_data(ps_dmn)$Herbicide <- factor(sample_data(ps_dmn)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
+sample_data(ps_dmn)$herb_time<-paste(sample_data(ps_dmn)$Herbicide, sample_data(ps_dmn)$Time, sep = "_")
+
+
 ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_rare_ITS.Rdata")
 sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
+sample_data(ps_rare)$herb_time<-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = "_")
+
+
 ps_trans <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_hel_trans_ITS.Rdata")
 sample_data(ps_trans)$Herbicide <- factor(sample_data(ps_trans)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
+sample_data(ps_trans)$herb_time<-paste(sample_data(ps_trans)$Herbicide, sample_data(ps_trans)$Time, sep = "_")
 ```
 
 create alphadiversity tables
@@ -278,4 +285,59 @@ sample_data(ps_rare_sub)$herb_time<-paste(sample_data(ps_rare_sub)$Herbicide, sa
 ps_rare_for_barplot <- prune_taxa(taxa_sums(ps_rare_sub) > 50, ps_rare_sub)
 plot_bar(ps_rare_for_barplot, x= "herb_time", fill = "Family") + scale_fill_manual(values = col_vector) + geom_bar(stat="identity")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_BarPlot_Herbicide_Time.pdf", width = 20, height = 11)
+```
+
+Linear modeling of abundant taxa
+```{r}
+
+Tax_glom_Subset <- function (physeq, y = "taxLevel", nreturns = "Number of returns"){
+   ps_1<- tax_glom(ps_rare_sub, taxrank = y )
+    myTaxa <- names(sort(taxa_sums(ps_1), decreasing = TRUE)[1:nreturns])
+       ps_1_sub <- prune_taxa(myTaxa, ps_1)
+  return(ps_1_sub)
+}
+
+ps_rare_family_top25<-Tax_glom_Subset(physeq = ps_rare, nreturns = 25, y = "Family")
+ps_rare_order_top10<-Tax_glom_Subset(physeq = ps_rare, nreturns = 10, y = "Order")
+
+#explore top 25 taxa with plot bar
+plot_bar(ps_rare_family_top25, x= "herb_time", fill = "Family") + scale_fill_manual(values = col_vector) + geom_bar(stat="identity")
+plot_bar(ps_rare_order_top10, x= "herb_time", fill = "Order") + scale_fill_manual(values = col_vector) + geom_bar(stat="identity")
+
+
+#write function to wrangle data prior to anova
+
+abund_aov_wrangle <- function (physeq, y = "Tax_Level"){
+  tax<-tax_table(physeq)[,y]
+   meta<-data.frame(sample_data(physeq))
+  counts<-data.frame(otu_table(physeq))
+  rownames(counts) <- tax[,1]
+  counts<-data.frame(t(counts))
+   counts$Time <- meta$Time 
+   counts$Herbicide <- meta$Herbicide 
+  counts$Herb_time <- meta$herb_time 
+  return(counts)
+}            
+
+test<-abund_aov_wrangle(ps_rare_order_top10, y = "Order")
+
+mod_abund<-function(count_tab, IV = "Groups to be tested") {
+   for(j in 1:length(unique(count_tab[,"Herbicide"]))){
+         data <- count_tab %>% filter(Herbicide == unique(count_tab$Herbicide)[j])
+                   for (i in 1:10) { 
+            mod <- aov(unlist(data[i]) ~ matrix(data[,IV])) 
+            #sanity check
+            print(c(j, i))
+      if(summary(mod)[[1]][["Pr(>F)"]][1] <= 0.05) {
+            print(summary(mod))
+         print(boxplot(unlist(data[i]) ~ unlist(data[IV]), main =paste(names(data[i]), as.character(unique(count_tab[,"Herbicide"]))[j]), xlab= "Time", ylab="Abundance") )
+      }
+   }
+}
+}
+
+
+mod_abund(test, IV = "Time")
+
+
 ```
