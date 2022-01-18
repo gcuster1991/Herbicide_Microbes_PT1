@@ -318,17 +318,17 @@ test<-abund_aov_wrangle(ps_rare_family_top25, y = "Family")
 mod_abund<-function(count_tab, IV = "Groups to be tested") {
    for(j in 1:length(unique(count_tab[,"Herbicide"]))){
          data <- count_tab %>% filter(Herbicide == unique(count_tab$Herbicide)[j])
-                   for (i in 1:25) { 
+   for (i in 1:25) { 
             mod <- aov(unlist(data[i]) ~ matrix(data[,IV])) 
             #sanity check
             print(c(j, i))
-      if(summary(mod)[[1]][["Pr(>F)"]][1] <= 0.05) {
+   if(summary(mod)[[1]][["Pr(>F)"]][1] <= 0.05) {
             print(summary(mod))
          print(boxplot(unlist(data[i]) ~ unlist(data[IV]), main =paste(names(data[i]), as.character(unique(count_tab[,"Herbicide"]))[j]), xlab= "Time", ylab="Abundance") )
+           }
+         }
       }
-   }
-}
-}
+    }
 
 
 mod_abund(test, IV = "Time")
