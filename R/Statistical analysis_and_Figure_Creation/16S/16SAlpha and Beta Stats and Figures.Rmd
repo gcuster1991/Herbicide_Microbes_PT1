@@ -57,8 +57,10 @@ summary(aov_t3)
 
 ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transfomred to sucessfully ordinate. At this point, the transformed data will not ordinate. 
 ```{r}
+ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_rare) != "G166SG")
 ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit=1000)
 
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G166SG")
 ps_rare_sub<-prune_taxa(taxa_sums(ps_rare) > 2, ps_rare)
 ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit=1000)
 
@@ -119,7 +121,7 @@ T2_rare$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T2.pdf")
 
 #G166SG identified as outlier based on plots with it included. Removed to create plot. 
-ps_rare = subset_samples(ps_rare, sample_names(ps_rare) != "G166SG")
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G166SG")
 ord_t3_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T3_rare$plot + theme_classic()
