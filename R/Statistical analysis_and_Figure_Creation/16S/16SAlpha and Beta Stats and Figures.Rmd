@@ -318,6 +318,7 @@ test<-abund_aov_wrangle(ps_rare_family_top25, y = "Family")
 mod_abund<-function(count_tab, IV = "Groups to be tested") {
    for(j in 1:length(unique(count_tab[,"Herbicide"]))){
          data <- count_tab %>% filter(Herbicide == unique(count_tab$Herbicide)[j])
+           #change this to the number of returns from the tax_glom_subset function
    for (i in 1:25) { 
             mod <- aov(unlist(data[i]) ~ matrix(data[,IV])) 
             #sanity check
