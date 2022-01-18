@@ -128,8 +128,6 @@ ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/
 
 Pairwise adonis testing
 ```{r}
-
-
 ps_pairwiseadonis<-function(physeq){
   otu_tab<-data.frame(phyloseq::otu_table(physeq))
   md_tab<-data.frame(phyloseq::sample_data(physeq))
@@ -152,10 +150,7 @@ ps_t3<-prune_taxa(taxa_sums(ps_t3) > 2, ps_t3)
 ps_pairwiseadonis(ps_t1)
 ps_pairwiseadonis(ps_t2)
 ps_pairwiseadonis(ps_t3)
-
-
 ```
-
 
 box and whisker plots of distance 
 within group distances
@@ -355,10 +350,11 @@ mod_abund<-function(count_tab, IV = "Groups to be tested") {
    for (i in 1:25) { 
             mod <- aov(unlist(data[i]) ~ matrix(data[,IV])) 
             #sanity check
-            print(c(j, i))
+            #print(c(j, i))
    if(summary(mod)[[1]][["Pr(>F)"]][1] <= 0.05) {
-            print(summary(mod))
-         print(boxplot(unlist(data[i]) ~ unlist(data[IV]), main =paste(names(data[i]), as.character(unique(count_tab[,"Herbicide"]))[j]), xlab= "Time", ylab="Abundance") )
+            #print(summary(mod))
+     print(c(as.character(unique(count_tab[,"Herbicide"]))[j], names(data)[i]))
+              boxplot(unlist(data[i]) ~ unlist(data[IV]), main =paste(names(data[i]), as.character(unique(count_tab[,"Herbicide"]))[j]), xlab= "Time", ylab="Abundance") 
            }
          }
       }
