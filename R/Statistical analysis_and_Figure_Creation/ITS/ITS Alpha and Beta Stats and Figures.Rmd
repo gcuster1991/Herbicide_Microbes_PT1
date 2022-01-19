@@ -60,8 +60,18 @@ summary(aov_t3)
 
 ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transformed to successfully ordinate. At this point, the transformed data will not ordinate. This section is full dataset ordinations. 
 ```{r}
+ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_dmn) != "G009SG")
+ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_dmn) != "G095SG")
+ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_dmn) != "G123SG")
+ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_dmn) != "G129SG")
+
 ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit = 1000)
 
+
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G009SG")
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G095SG")
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G123SG")
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G129SG")
 ps_rare_sub<-prune_taxa(taxa_sums(ps_rare) > 2, ps_rare)
 ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit = 1000)
 
@@ -111,34 +121,147 @@ ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/
 
 Ordination plots on rarefied data by time point. 
 ```{r}
-ord_t1_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T1"), method = "NMDS", distance = "bray", k=3, trymax= 100)
+ord_t1_rare<-ordinate(physeq = subset_samples(ps_rare_sub, Time=="T1"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T1_rare<-ggordiplots::gg_ordiplot(ord = ord_t1_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T1_rare$plot + theme_classic()
+ord_t1_rare$points
 
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T1.pdf")
 
-ord_t2_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T2"), method = "NMDS", distance = "bray", k=3, trymax= 100)
+ord_t2_rare<-ordinate(physeq = subset_samples(ps_rare_sub, Time=="T2"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T2_rare<-ggordiplots::gg_ordiplot(ord = ord_t2_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T2")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T2_rare$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T2.pdf")
 
 
-ord_t3_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
+ord_t3_rare<-ordinate(physeq = subset_samples(ps_rare_sub, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T3_rare$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T3.pdf")
+```
+
+Pairwise adonis testing
+```{r}
+ps_pairwiseadonis<-function(physeq){
+  otu_tab<-data.frame(phyloseq::otu_table(physeq))
+  md_tab<-data.frame(phyloseq::sample_data(physeq))
+    if(taxa_are_rows(physeq)== T){
+       physeq_dist<-parallelDist::parDist(as.matrix(t(otu_tab)), method = "bray")}
+            else{physeq_dist<-parallelDist::parDist(as.matrix(otu_tab), method = "bray")}
+pairwiseAdonis::pairwise.adonis(x = physeq_dist, factors = md_tab$Herbicide, p.adjust.m = "none", perm = 1000)
+}
+
+ps_t1<-subset_samples(ps_rare_sub, Time == "T1")
+ps_t1<-prune_taxa(taxa_sums(ps_t1) > 2, ps_t1)
+
+ps_t2<-subset_samples(ps_rare_sub, Time == "T2")
+ps_t2<-prune_taxa(taxa_sums(ps_t2) > 2, ps_t2)
+
+ps_t3<-subset_samples(ps_rare_sub, Time == "T3")
+ps_t3<-prune_taxa(taxa_sums(ps_t3) > 2, ps_t3)
+
+
+ps_pairwiseadonis(ps_t1)
+ps_pairwiseadonis(ps_t2)
+ps_pairwiseadonis(ps_t3)
 ```
 box and whisker plots of distance 
 within group distances
 ```{r}
 library(micrUBIfuns)
-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Herbicide")
+T1_beta<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Herbicide")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T1_rare_withingroup_beta.pdf")
-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "bray", group = "Herbicide")
+T1_beta_df<- T1_beta$data
+T1_betamod<-aov(formula = beta_div_value ~ group ,data = T1_beta_df)
+summary(T1_betamod)
+TukeyHSD(x = T1_betamod, which = "group")
+
+T2_beta<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "bray", group = "Herbicide")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T2_rare_withingroup_beta.pdf")
-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T3"), method = "bray", group = "Herbicide")
+T2_beta_df<- T2_beta$data
+T2_betamod<-aov(formula = beta_div_value ~ group ,data = T2_beta_df)
+summary(T2_betamod)
+TukeyHSD(x = T2_betamod, which = "group")
+
+T3_beta<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T3"), method = "bray", group = "Herbicide")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T3_rare_withingroup_beta.pdf")
+T3_beta_df<- T3_beta$data
+T3_betamod<-aov(formula = beta_div_value ~ group ,data = T3_beta_df)
+summary(T3_betamod)
+TukeyHSD(x = T3_betamod, which = "group")
+
+library(ggpubr)
+ggarrange(T1_beta$plot, T2_beta$plot, T3_beta$plot, ncol = 1)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta.pdf", width = 7, height = 10)
 ```
+
+Examination of dissimliarity across time points by treatment and then again by all chemical treatments combined.
+```{r}
+T1_beta_df$Time<-"T1"
+T2_beta_df$Time<-"T2"
+T3_beta_df$Time<-"T3"
+
+
+beta_div_T1_T2_T3 <- rbind(T1_beta_df, T2_beta_df, T3_beta_df)
+
+beta_anova<-function(data, Herbicide = "Herbicide"){
+  df_sub<- data %>% filter(group == Herbicide)
+  mod<-aov(beta_div_value ~ Time, data = df_sub)
+  print(summary(mod))
+  print(TukeyHSD(mod, "Time"))
+  boxplot(df_sub$beta_div_value ~ df_sub$Time)
+}
+
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Non-Treated")
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Hand")
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Clarity")
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Aatrex")
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Roundup Powermax")
+
+#regroup all chemical treatments together and rerun betadiv calcs within group. 
+sample_data(ps_rare)$Mode<-sample_data(ps_rare)$Herbicide
+levels(sample_data(ps_rare)$Mode) <- c(Clarity  = "Chemical", Aatrex = "Chemical", `Roundup Powermax` = "Chemical", `Non-Treated` = "Non-Treated", Hand = "Hand")
+
+
+T1_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Mode")
+T2_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "bray", group = "Mode")
+T3_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T3"), method = "bray", group = "Mode")
+
+ggarrange(T1_beta_chemical_combined$plot, T2_beta_chemical_combined$plot, T3_beta_chemical_combined$plot, ncol = 1)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta_chemical_combined.pdf", width = 7, height = 10)
+
+T1_beta_df_chemical_combined <- T1_beta_chemical_combined$data
+T2_beta_df_chemical_combined<- T2_beta_chemical_combined$data
+T3_beta_df_chemical_combined<- T3_beta_chemical_combined$data
+
+T1_beta_df_chemical_combined$Time<-"T1"
+T2_beta_df_chemical_combined$Time<-"T2"
+T3_beta_df_chemical_combined$Time<-"T3"
+
+m1<-aov(beta_div_value ~ group, data = T1_beta_df_chemical_combined)
+summary(m1)
+TukeyHSD(m1, "group")
+boxplot(beta_div_value ~ group, data = T1_beta_df_chemical_combined)
+
+
+m2<-aov(beta_div_value ~ group, data = T2_beta_df_chemical_combined)
+summary(m2)
+TukeyHSD(m2, "group")
+boxplot(beta_div_value ~ group, data = T2_beta_df_chemical_combined)
+
+m3<-aov(beta_div_value ~ group, data = T3_beta_df_chemical_combined)
+summary(m3)
+TukeyHSD(m3, "group")
+boxplot(beta_div_value ~ group, data = T3_beta_df_chemical_combined)
+
+
+beta_div__chemical_combined_T1_T2_T3 <- rbind(T1_beta_df_chemical_combined, T2_beta_df_chemical_combined, T3_beta_df_chemical_combined)
+
+beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Chemical")
+beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Hand")
+beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Non-Treated")
+```
+
 
 treatment to control 
 ```{r}
