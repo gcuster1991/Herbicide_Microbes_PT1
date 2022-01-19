@@ -183,7 +183,10 @@ TukeyHSD(x = T3_betamod, which = "group")
 library(ggpubr)
 ggarrange(T1_beta$plot, T2_beta$plot, T3_beta$plot, ncol = 1)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_within_group_beta.pdf", width = 7, height = 10)
+```
 
+Examination of dissimliarity across time points by treatment and then again by all chemical treatments combined.
+```{r}
 T1_beta_df$Time<-"T1"
 T2_beta_df$Time<-"T2"
 T3_beta_df$Time<-"T3"
@@ -205,9 +208,48 @@ beta_anova(beta_div_T1_T2_T3, Herbicide = "Clarity")
 beta_anova(beta_div_T1_T2_T3, Herbicide = "Aatrex")
 beta_anova(beta_div_T1_T2_T3, Herbicide = "Roundup Powermax")
 
+#regroup all chemical treatments together and rerun betadiv calcs within group. 
+sample_data(ps_rare)$Mode<-sample_data(ps_rare)$Herbicide
+levels(sample_data(ps_rare)$Mode) <- c(Clarity  = "Chemical", Aatrex = "Chemical", `Roundup Powermax` = "Chemical", `Non-Treated` = "Non-Treated", Hand = "Hand")
 
 
+T1_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Mode")
+T2_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "bray", group = "Mode")
+T3_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T3"), method = "bray", group = "Mode")
 
+ggarrange(T1_beta_chemical_combined$plot, T2_beta_chemical_combined$plot, T3_beta_chemical_combined$plot, ncol = 1)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_within_group_beta_chemical_combined.pdf", width = 7, height = 10)
+
+T1_beta_df_chemical_combined <- T1_beta_chemical_combined$data
+T2_beta_df_chemical_combined<- T2_beta_chemical_combined$data
+T3_beta_df_chemical_combined<- T3_beta_chemical_combined$data
+
+T1_beta_df_chemical_combined$Time<-"T1"
+T2_beta_df_chemical_combined$Time<-"T2"
+T3_beta_df_chemical_combined$Time<-"T3"
+
+m1<-aov(beta_div_value ~ group, data = T1_beta_df_chemical_combined)
+summary(m1)
+TukeyHSD(m1, "group")
+boxplot(beta_div_value ~ group, data = T1_beta_df_chemical_combined)
+
+
+m2<-aov(beta_div_value ~ group, data = T2_beta_df_chemical_combined)
+summary(m2)
+TukeyHSD(m2, "group")
+boxplot(beta_div_value ~ group, data = T2_beta_df_chemical_combined)
+
+m3<-aov(beta_div_value ~ group, data = T3_beta_df_chemical_combined)
+summary(m3)
+TukeyHSD(m3, "group")
+boxplot(beta_div_value ~ group, data = T3_beta_df_chemical_combined)
+
+
+beta_div__chemical_combined_T1_T2_T3 <- rbind(T1_beta_df_chemical_combined, T2_beta_df_chemical_combined, T3_beta_df_chemical_combined)
+
+beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Chemical")
+beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Hand")
+beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Non-Treated")
 ```
 
 treatment to control 
