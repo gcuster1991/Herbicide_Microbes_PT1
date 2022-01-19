@@ -262,7 +262,6 @@ beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Hand")
 beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Non-Treated")
 ```
 
-
 treatment to control 
 ```{r}
 plotDistances = function(p, m, s, d) {
