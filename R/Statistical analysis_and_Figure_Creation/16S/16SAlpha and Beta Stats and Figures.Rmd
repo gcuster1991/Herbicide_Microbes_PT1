@@ -159,12 +159,55 @@ box and whisker plots of distance
 within group distances
 ```{r}
 library(micrUBIfuns)
-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Herbicide")
+T1_beta<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Herbicide")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_withingroup_beta.pdf")
-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "bray", group = "Herbicide")
+T1_beta_df<- T1_beta$data
+T1_betamod<-aov(formula = beta_div_value ~ group ,data = T1_beta_df)
+summary(T1_betamod)
+TukeyHSD(x = T1_betamod, which = "group")
+
+T2_beta<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "bray", group = "Herbicide")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_withingroup_beta.pdf")
-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T3"), method = "bray", group = "Herbicide")
+T2_beta_df<- T2_beta$data
+T2_betamod<-aov(formula = beta_div_value ~ group ,data = T2_beta_df)
+summary(T2_betamod)
+TukeyHSD(x = T2_betamod, which = "group")
+
+T3_beta<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T3"), method = "bray", group = "Herbicide")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_withingroup_beta.pdf")
+T3_beta_df<- T3_beta$data
+T3_betamod<-aov(formula = beta_div_value ~ group ,data = T3_beta_df)
+summary(T3_betamod)
+TukeyHSD(x = T3_betamod, which = "group")
+
+library(ggpubr)
+ggarrange(T1_beta$plot, T2_beta$plot, T3_beta$plot, ncol = 1)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_within_group_beta.pdf", width = 7, height = 10)
+
+T1_beta_df$Time<-"T1"
+T2_beta_df$Time<-"T2"
+T3_beta_df$Time<-"T3"
+
+
+beta_div_T1_T2_T3 <- rbind(T1_beta_df, T2_beta_df, T3_beta_df)
+
+beta_anova<-function(data, Herbicide = "Herbicide"){
+  df_sub<- data %>% filter(group == Herbicide)
+  mod<-aov(beta_div_value ~ Time, data = df_sub)
+  print(summary(mod))
+  print(TukeyHSD(mod, "Time"))
+  boxplot(df_sub$beta_div_value ~ df_sub$Time)
+}
+
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Non-Treated")
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Hand")
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Clarity")
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Aatrex")
+beta_anova(beta_div_T1_T2_T3, Herbicide = "Roundup Powermax")
+
+
+
+
 ```
 
 treatment to control 
@@ -194,7 +237,7 @@ plotDistances = function(p, m, s, d) {
   wu.sd = left_join(wu.sd, sd, by = "Var2")
   
   #remove this line to plot all comparisons. 
-  wu.sd = wu.sd %>% filter(Type1 == "Hand" | Type1 == "Non-Treated")
+  #wu.sd = wu.sd %>% filter(Type1 == "Hand" | Type1 == "Non-Treated")
   
   # plot
   ggplot(wu.sd, aes(x = Type2, y = value)) +
@@ -213,17 +256,20 @@ plotDistances = function(p, m, s, d) {
 ```{r}
 a<-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T1"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
 a <- a + ggtitle("Time 1 Bray-Curtis Dissimlarities")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_allgroup_beta.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_allgroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_allgroup_beta_multicomparison.pdf")
 b<-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T2"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
 b <-b + ggtitle("Time 2 Bray-Curtis Dissimlarities")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_allgroup_beta.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_allgroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_allgroup_beta_multicomparison.pdf")
 c<-plotDistances(p = subset_samples(physeq= ps_rare, Time=="T3"), m = "bray", s = "Barcode_ID_G", d = "Herbicide")
 c<- c + ggtitle("Time 3 Bray-Curtis Dissimlarities")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_allgroup_beta.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_allgroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_allgroup_beta_multicomparison.pdf")
 
 library(ggpubr)
 ggarrange(a, b, c, ncol = 1)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_allgroup_beta.pdf", width = 7, height = 10)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_allgroup_beta_multi_comparison.pdf", width = 7, height = 10)
 ```
 Taxon abundance bar plot
 
