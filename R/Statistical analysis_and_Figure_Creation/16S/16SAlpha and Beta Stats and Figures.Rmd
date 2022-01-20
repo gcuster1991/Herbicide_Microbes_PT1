@@ -63,6 +63,9 @@ ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trym
 ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G166SG")
 ps_rare_sub<-prune_taxa(taxa_sums(ps_rare) > 2, ps_rare)
 ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit=1000)
+full_ord_rare<-ggordiplots::gg_ordiplot(ord = ord_rare, groups = data.frame(sample_data(ps_rare))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+full_ord_rare$plot + theme_classic()
+
 
 ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.05, ps_trans)
 ord_transformed<-ordinate(physeq = ps_trans_sub, method = "NMDS", distance = "bray", trymax= 300, maxit=1000)
@@ -210,7 +213,11 @@ beta_anova(beta_div_T1_T2_T3, Herbicide = "Roundup Powermax")
 
 #regroup all chemical treatments together and rerun betadiv calcs within group. 
 sample_data(ps_rare)$Mode<-sample_data(ps_rare)$Herbicide
-levels(sample_data(ps_rare)$Mode) <- c(Clarity  = "Chemical", Aatrex = "Chemical", `Roundup Powermax` = "Chemical", `Non-Treated` = "Non-Treated", Hand = "Hand")
+
+index <- c("Clarity", "Roundup Powermax", "Aatrex", "Hand", "Non-Treated")
+values <- c("Chemical", "Chemical", "Chemical", "Hand", "Non-Treated")
+
+sample_data(ps_rare)$Mode<- as.factor(values[match(sample_data(ps_rare)$Mode, index)])
 
 
 T1_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Mode")
@@ -412,10 +419,17 @@ Tax_glom_Subset <- function (physeq, y = "taxLevel", nreturns = "Number of retur
   return(ps_1_sub)
 }
 
+
 ps_rare_family_top25<-Tax_glom_Subset(physeq = ps_rare, nreturns = 25, y = "Family")
+
+myTaxa <- names(sort(taxa_sums(ps_rare), decreasing = TRUE)[1:25])
+ps_rare_asv_top25 <- prune_taxa(myTaxa, ps_rare)
+
 
 #explore top 25 taxa with plot bar
 plot_bar(ps_rare_family_top25, x= "herb_time", fill = "Family") + scale_fill_manual(values = col_vector) + geom_bar(stat="identity")
+plot_bar(ps_rare_family_top25, x= "Time", fill = "Family") + scale_fill_manual(values = col_vector) + geom_bar(stat="identity")
+plot_bar(ps_rare_family_top25, x= "Herbicide", fill = "Family") + scale_fill_manual(values = col_vector) + geom_bar(stat="identity")
 
 
 #write function to wrangle data prior to anova
@@ -433,6 +447,8 @@ abund_aov_wrangle <- function (physeq, y = "Tax_Level"){
 }            
 
 test<-abund_aov_wrangle(ps_rare_family_top25, y = "Family")
+
+
 
 mod_abund<-function(count_tab, IV = "Groups to be tested") {
    for(j in 1:length(unique(count_tab[,"Herbicide"]))){
