@@ -100,11 +100,13 @@ ps_adonis<-function(physeq){
 
 ```{r}
 ps_adonis(ps_rare_sub)
+#remove one sample with no vegetation measurement. 
 ps_rare_sub_57<-subset_samples(ps_rare_sub, sample_names(ps_rare_sub) != "G065SG")
 ps_adonis(ps_rare_sub_57)
 ps_adonis(ps_trans_sub)
+ps_dmn_57<-subset_samples(ps_dmn, sample_names(ps_dmn) != "G065SG")
 ps_adonis(ps_dmn)
-
+ps_adonis(ps_dmn_57)
 ```
 
 Ordination plots DMN by time point
