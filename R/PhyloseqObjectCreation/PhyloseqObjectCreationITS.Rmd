@@ -1,0 +1,43 @@
+---
+title: "Phyloseq Objects 16S"
+output: html_notebook
+---
+
+```{r}
+require(phyloseq)
+```
+
+16S
+```{r}
+load("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Sequence_data/ITS/Nov_21/CNVRG_Herbpt1_ITS_VI_model_w_param_est.RData")
+```
+
+rarefy - chose 3000. This dropped 5 samples 
+```{r}
+sort(sample_sums(ps_fungal))
+Herbpt1_rare<-rarefy_even_depth(physeq = ps_fungal, sample.size = 1000)
+```
+
+hellinger transform
+```{r}
+Herbpt1_hel_trans<- transform_sample_counts(ps_fungal, function(x) sqrt(x / sum(x)))
+```
+
+CNVRG DMN estimates
+```{r}
+rownames(forExport)<-rownames(dat3)
+dmn_est<-forExport[,4:ncol(forExport)]
+names(dmn_est)<-stringr::str_replace(names(dmn_est), pattern = "[.]", replacement = "=")
+otu_table(ps_fungal) <- otu_table(dmn_est, taxa_are_rows = F)
+```
+
+
+save phyloseq objects
+```{r}
+saveRDS(Herbpt1_hel_trans, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_hel_trans_ITS.Rdata")
+
+saveRDS(Herbpt1_rare, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_rare_ITS.Rdata")
+
+saveRDS(ps_fungal, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/DMN_ests_ITS.Rdata")
+```
+
