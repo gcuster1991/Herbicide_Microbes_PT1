@@ -1,6 +1,8 @@
 
 library(phyloseq)
 library(CNVRG)
+
+#moved the raw objects to the 16S and ITS data folders of the repo. 
 load("./Herb16S_PS_Orig.RData")
 
 #21300 taxa in original
@@ -112,4 +114,4 @@ for(j in unique(median_top10$herbicide)){
   axis(side = 1, at = c(1,2,3), labels = c(1,2,3))
 
 }
-#Yup CEntroid 8 is very variable. 
+#Yup centroid 8 is very variable.
