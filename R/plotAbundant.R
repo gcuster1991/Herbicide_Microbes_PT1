@@ -118,7 +118,7 @@ for(j in unique(median_top10$herbicide)){
 #Yup centroid 8 is very variable.
 
 
-#futher examination into taxonomy of those top taxa
+#further examination into taxonomy of those top taxa
 centroid_list<-names(median_top10)[2:(ncol(median_top10)-3)]
 centroid_list<-str_replace(centroid_list, pattern = "[[.]]", replacement = "=")
 
@@ -126,3 +126,18 @@ table(rownames(tax_table(HerbPt1_PS_Orig)) %in% centroid_list)
 top25_abund<-subset_taxa(physeq = HerbPt1_PS_Orig,  rownames(tax_table(HerbPt1_PS_Orig)) %in% centroid_list)
 top25_abund_tax<-data.frame(tax_table(top25_abund))
 write.csv(top25_abund_tax, "../../Top25_16S_tax.csv")
+
+#look at diversity within these plots. 
+sort(sample_sums(top25_abund))
+sample_data(top25_abund)$herb_time <- paste(sample_data(top25_abund)$Herbicide,sample_data(top25_abund)$Time, sep = "_" )
+top25_abund_rare<-rarefy_even_depth(top25_abund, sample.size = 500)
+
+plot_richness(top25_abund_rare, x = "herb_time", measures = c("Shannon", "Simpson", "Observed"), color = "Herbicide") + geom_boxplot()
+ggsave("../../../Figures/16S_top25_abund.pdf")
+
+table(data.frame(tax_table(top25_abund_rare))[,2])
+table(data.frame(tax_table(top25_abund_rare))[,3])
+table(data.frame(tax_table(top25_abund_rare))[,4])
+table(data.frame(tax_table(top25_abund_rare))[,5])
+table(data.frame(tax_table(top25_abund_rare))[,6])
+
