@@ -1,6 +1,7 @@
 
 library(phyloseq)
 library(CNVRG)
+library(tidyverse)
 
 #moved the raw objects to the 16S and ITS data folders of the repo. 
 load("./Herb16S_PS_Orig.RData")
@@ -115,3 +116,13 @@ for(j in unique(median_top10$herbicide)){
 
 }
 #Yup centroid 8 is very variable.
+
+
+#futher examination into taxonomy of those top taxa
+centroid_list<-names(median_top10)[2:(ncol(median_top10)-3)]
+centroid_list<-str_replace(centroid_list, pattern = "[[.]]", replacement = "=")
+
+table(rownames(tax_table(HerbPt1_PS_Orig)) %in% centroid_list)
+top25_abund<-subset_taxa(physeq = HerbPt1_PS_Orig,  rownames(tax_table(HerbPt1_PS_Orig)) %in% centroid_list)
+top25_abund_tax<-data.frame(tax_table(top25_abund))
+write.csv(top25_abund_tax, "../../Top25_16S_tax.csv")
