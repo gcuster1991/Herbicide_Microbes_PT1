@@ -70,4 +70,32 @@ medianFinder(x = T1, 25)
 medianFinder(T2, 25)
 medianFinder(T3, 25)
 
-Next need to build models for each taxon and output the results
+#Next need to build models for each taxon and output the results
+
+#Get the unique abundant taxa
+tomodel <- unique(c(names(medianFinder(x = T1, 25)),
+              names(medianFinder(T2, 25)),
+                names(medianFinder(T3, 25))))
+tomodel <- tomodel[-1] #remove treatments_full
+
+#Make a few new fields in dat_rare_with_treatment just so we are sure to not mess some indexing up. 
+dat_rare_with_treatment$time <- gsub("(T[123]).*","\\1", dat_rare_with_treatment$treatments_full)
+dat_rare_with_treatment$herbicide <- gsub("T[123]_(.*)","\\1", dat_rare_with_treatment$treatments_full)
+dat_rare_with_treatment$herbicide <- relevel(as.factor(dat_rare_with_treatment$herbicide), ref = "Non-Treated")
+
+regressionresults <- data.frame(matrix(ncol = 10, nrow = 1))
+
+k <- 1
+for(i in tomodel){
+  reg <- lm(dat_rare_with_treatment[,names(dat_rare_with_treatment) == i]~ 
+     dat_rare_with_treatment$time + dat_rare_with_treatment$herbicide)
+     regressionresults[k, 1] <- i
+     regressionresults[k, 2:10] <- c(summary(reg)$coefficients[,1],
+                              summary(reg)$r.squared, 
+                              summary(reg)$adj.r.squared)
+     k <- k + 1
+}
+
+names(regressionresults) <- c("taxon", "intercept", "timeT2", "timeT3", "Aatrex", "Clarity","Hand","Round Up", "R squared", "Adj. R squared")
+#Note that R2 is less thatn 10% for ALL taxa. 
+regressionresults
