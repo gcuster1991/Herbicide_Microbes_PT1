@@ -361,13 +361,11 @@ TukeyHSD(aov_t3, &quot;Herbicide&quot;)</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3BzX2Fkb25pcyhwc19yYXJlX3N1YilcbiNyZW1vdmUgb25lIHNhbXBsZSB3aXRoIG5vIHZlZ2V0YXRpb24gbWVhc3VyZW1lbnQuIFxucHNfcmFyZV9zdWJfNTc8LXN1YnNldF9zYW1wbGVzKHBzX3JhcmVfc3ViLCBzYW1wbGVfbmFtZXMocHNfcmFyZV9zdWIpICE9IFwiRzA2NVNHXCIpXG5wc19hZG9uaXMocHNfcmFyZV9zdWJfNTcpXG5gYGAifQ== -->
-<pre class="r"><code>#ps_adonis(ps_rare_sub)
-#remove one sample with no vegetation measurement. 
-ps_rare_sub_57&lt;-subset_samples(ps_rare_sub, sample_names(ps_rare_sub) != &quot;G065SG&quot;)
-ps_adonis(ps_rare_sub_57)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNfYWRvbmlzKHBzX3JhcmVfc3ViXzU3KVxuXG5gYGAifQ== -->
+<pre class="r"><code>ps_adonis(ps_rare_sub_57)
+</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiQW5hbHlzaXMgb2YgVmFyaWFuY2UgVGFibGVcblxuUmVzcG9uc2U6IERpc3RhbmNlc1xuICAgICAgICAgICBEZiAgU3VtIFNxICAgTWVhbiBTcSBGIHZhbHVlIFByKD5GKVxuR3JvdXBzICAgICAgNCAwLjAxMjgxIDAuMDAzMjAxOCAgMC41MDg0IDAuNzI5NlxuUmVzaWR1YWxzIDE1MSAwLjk1MDk4IDAuMDA2Mjk3OSAgICAgICAgICAgICAgIFxuXG5DYWxsOlxudmVnYW46OmFkb25pcyhmb3JtdWxhID0gcGh5c2VxX2Rpc3QgfiBIZXJiaWNpZGUgKiBUaW1lICsgVG90YWxfV2VlZF9WZWcsICAgICAgZGF0YSA9IG1kX3RhYiwgcGVybXV0YXRpb25zID0gMTAwMCkgXG5cblBlcm11dGF0aW9uOiBmcmVlXG5OdW1iZXIgb2YgcGVybXV0YXRpb25zOiAxMDAwXG5cblRlcm1zIGFkZGVkIHNlcXVlbnRpYWxseSAoZmlyc3QgdG8gbGFzdClcblxuICAgICAgICAgICAgICAgIERmIFN1bXNPZlNxcyBNZWFuU3FzIEYuTW9kZWwgICAgICBSMiAgIFByKD5GKSAgIFxuSGVyYmljaWRlICAgICAgICA0ICAgIDAuNDY2OCAwLjExNjY5IDAuOTk2NDMgMC4wMjUxNyAwLjQ2MDUzOSAgIFxuVGltZSAgICAgICAgICAgICAyICAgIDAuMzU2MyAwLjE3ODE1IDEuNTIxMjUgMC4wMTkyMSAwLjAwOTk5MCAqKlxuVG90YWxfV2VlZF9WZWcgICAxICAgIDAuMjE2MSAwLjIxNjExIDEuODQ1NDQgMC4wMTE2NSAwLjAwNzk5MiAqKlxuSGVyYmljaWRlOlRpbWUgICA4ICAgIDEuMTA5OCAwLjEzODcyIDEuMTg0NTUgMC4wNTk4NCAwLjAzNjk2MyAqIFxuUmVzaWR1YWxzICAgICAgMTQwICAgMTYuMzk0OSAwLjExNzExICAgICAgICAgMC44ODQxMiAgICAgICAgICAgIFxuVG90YWwgICAgICAgICAgMTU1ICAgMTguNTQzOCAgICAgICAgICAgICAgICAgMS4wMDAwMCAgICAgICAgICAgIFxuLS0tXG5TaWduaWYuIGNvZGVzOiAgMCDigJgqKirigJkgMC4wMDEg4oCYKirigJkgMC4wMSDigJgq4oCZIDAuMDUg4oCYLuKAmSAwLjEg4oCYIOKAmSAxXG4ifQ== -->
+<!-- rnb-output-begin eyJkYXRhIjoiQW5hbHlzaXMgb2YgVmFyaWFuY2UgVGFibGVcblxuUmVzcG9uc2U6IERpc3RhbmNlc1xuICAgICAgICAgICBEZiAgU3VtIFNxICAgTWVhbiBTcSBGIHZhbHVlIFByKD5GKVxuR3JvdXBzICAgICAgNCAwLjAxMjgxIDAuMDAzMjAxOCAgMC41MDg0IDAuNzI5NlxuUmVzaWR1YWxzIDE1MSAwLjk1MDk4IDAuMDA2Mjk3OSAgICAgICAgICAgICAgIFxuXG5DYWxsOlxudmVnYW46OmFkb25pcyhmb3JtdWxhID0gcGh5c2VxX2Rpc3QgfiBIZXJiaWNpZGUgKiBUaW1lICsgVG90YWxfV2VlZF9WZWcsICAgICAgZGF0YSA9IG1kX3RhYiwgcGVybXV0YXRpb25zID0gMTAwMCkgXG5cblBlcm11dGF0aW9uOiBmcmVlXG5OdW1iZXIgb2YgcGVybXV0YXRpb25zOiAxMDAwXG5cblRlcm1zIGFkZGVkIHNlcXVlbnRpYWxseSAoZmlyc3QgdG8gbGFzdClcblxuICAgICAgICAgICAgICAgIERmIFN1bXNPZlNxcyBNZWFuU3FzIEYuTW9kZWwgICAgICBSMiAgIFByKD5GKSAgIFxuSGVyYmljaWRlICAgICAgICA0ICAgIDAuNDY2OCAwLjExNjY5IDAuOTk2NDMgMC4wMjUxNyAwLjQ5MTUwOCAgIFxuVGltZSAgICAgICAgICAgICAyICAgIDAuMzU2MyAwLjE3ODE1IDEuNTIxMjUgMC4wMTkyMSAwLjAxNDk4NSAqIFxuVG90YWxfV2VlZF9WZWcgICAxICAgIDAuMjE2MSAwLjIxNjExIDEuODQ1NDQgMC4wMTE2NSAwLjAwNjk5MyAqKlxuSGVyYmljaWRlOlRpbWUgICA4ICAgIDEuMTA5OCAwLjEzODcyIDEuMTg0NTUgMC4wNTk4NCAwLjAzNDk2NSAqIFxuUmVzaWR1YWxzICAgICAgMTQwICAgMTYuMzk0OSAwLjExNzExICAgICAgICAgMC44ODQxMiAgICAgICAgICAgIFxuVG90YWwgICAgICAgICAgMTU1ICAgMTguNTQzOCAgICAgICAgICAgICAgICAgMS4wMDAwMCAgICAgICAgICAgIFxuLS0tXG5TaWduaWYuIGNvZGVzOiAgMCDigJgqKirigJkgMC4wMDEg4oCYKirigJkgMC4wMSDigJgq4oCZIDAuMDUg4oCYLuKAmSAwLjEg4oCYIOKAmSAxXG4ifQ== -->
 <pre><code>Analysis of Variance Table
 
 Response: Distances
@@ -384,44 +382,12 @@ Number of permutations: 1000
 Terms added sequentially (first to last)
 
                 Df SumsOfSqs MeanSqs F.Model      R2   Pr(&gt;F)   
-Herbicide        4    0.4668 0.11669 0.99643 0.02517 0.460539   
-Time             2    0.3563 0.17815 1.52125 0.01921 0.009990 **
-Total_Weed_Veg   1    0.2161 0.21611 1.84544 0.01165 0.007992 **
-Herbicide:Time   8    1.1098 0.13872 1.18455 0.05984 0.036963 * 
+Herbicide        4    0.4668 0.11669 0.99643 0.02517 0.491508   
+Time             2    0.3563 0.17815 1.52125 0.01921 0.014985 * 
+Total_Weed_Veg   1    0.2161 0.21611 1.84544 0.01165 0.006993 **
+Herbicide:Time   8    1.1098 0.13872 1.18455 0.05984 0.034965 * 
 Residuals      140   16.3949 0.11711         0.88412            
 Total          155   18.5438                 1.00000            
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3BzX2Fkb25pcyhwc190cmFuc19zdWIpXG5wc19kbW5fNTc8LXN1YnNldF9zYW1wbGVzKHBzX2Rtbiwgc2FtcGxlX25hbWVzKHBzX2RtbikgIT0gXCJHMDY1U0dcIilcbiNwc19hZG9uaXMocHNfZG1uKVxucHNfYWRvbmlzKHBzX2Rtbl81NylcbmBgYCJ9 -->
-<pre class="r"><code>#ps_adonis(ps_trans_sub)
-ps_dmn_57&lt;-subset_samples(ps_dmn, sample_names(ps_dmn) != &quot;G065SG&quot;)
-#ps_adonis(ps_dmn)
-ps_adonis(ps_dmn_57)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiQW5hbHlzaXMgb2YgVmFyaWFuY2UgVGFibGVcblxuUmVzcG9uc2U6IERpc3RhbmNlc1xuICAgICAgICAgICBEZiAgU3VtIFNxICAgTWVhbiBTcSBGIHZhbHVlIFByKD5GKVxuR3JvdXBzICAgICAgNCAwLjAxMDczIDAuMDAyNjgxNyAgMC40MzQxIDAuNzgzOFxuUmVzaWR1YWxzIDE1NyAwLjk2OTg4IDAuMDA2MTc3NiAgICAgICAgICAgICAgIFxuXG5DYWxsOlxudmVnYW46OmFkb25pcyhmb3JtdWxhID0gcGh5c2VxX2Rpc3QgfiBIZXJiaWNpZGUgKiBUaW1lICsgVG90YWxfV2VlZF9WZWcsICAgICAgZGF0YSA9IG1kX3RhYiwgcGVybXV0YXRpb25zID0gMTAwMCkgXG5cblBlcm11dGF0aW9uOiBmcmVlXG5OdW1iZXIgb2YgcGVybXV0YXRpb25zOiAxMDAwXG5cblRlcm1zIGFkZGVkIHNlcXVlbnRpYWxseSAoZmlyc3QgdG8gbGFzdClcblxuICAgICAgICAgICAgICAgIERmIFN1bXNPZlNxcyAgTWVhblNxcyBGLk1vZGVsICAgICAgUjIgICBQcig+RikgICBcbkhlcmJpY2lkZSAgICAgICAgNCAgICAwLjM4NzUgMC4wOTY4NzcgMC45NDQxNiAwLjAyMjczIDAuNjU0MzQ2ICAgXG5UaW1lICAgICAgICAgICAgIDIgICAgMC4zNTg5IDAuMTc5NDMyIDEuNzQ4NzUgMC4wMjEwNSAwLjAwMTk5OCAqKlxuVG90YWxfV2VlZF9WZWcgICAxICAgIDAuMjIzMiAwLjIyMzI0MyAyLjE3NTczIDAuMDEzMDkgMC4wMDM5OTYgKipcbkhlcmJpY2lkZTpUaW1lICAgOCAgICAxLjEwMTcgMC4xMzc3MTMgMS4zNDIxNSAwLjA2NDYxIDAuMDAzOTk2ICoqXG5SZXNpZHVhbHMgICAgICAxNDYgICAxNC45ODA0IDAuMTAyNjA2ICAgICAgICAgMC44Nzg1MyAgICAgICAgICAgIFxuVG90YWwgICAgICAgICAgMTYxICAgMTcuMDUxOCAgICAgICAgICAgICAgICAgIDEuMDAwMDAgICAgICAgICAgICBcbi0tLVxuU2lnbmlmLiBjb2RlczogIDAg4oCYKioq4oCZIDAuMDAxIOKAmCoq4oCZIDAuMDEg4oCYKuKAmSAwLjA1IOKAmC7igJkgMC4xIOKAmCDigJkgMVxuIn0= -->
-<pre><code>Analysis of Variance Table
-
-Response: Distances
-           Df  Sum Sq   Mean Sq F value Pr(&gt;F)
-Groups      4 0.01073 0.0026817  0.4341 0.7838
-Residuals 157 0.96988 0.0061776               
-
-Call:
-vegan::adonis(formula = physeq_dist ~ Herbicide * Time + Total_Weed_Veg,      data = md_tab, permutations = 1000) 
-
-Permutation: free
-Number of permutations: 1000
-
-Terms added sequentially (first to last)
-
-                Df SumsOfSqs  MeanSqs F.Model      R2   Pr(&gt;F)   
-Herbicide        4    0.3875 0.096877 0.94416 0.02273 0.654346   
-Time             2    0.3589 0.179432 1.74875 0.02105 0.001998 **
-Total_Weed_Veg   1    0.2232 0.223243 2.17573 0.01309 0.003996 **
-Herbicide:Time   8    1.1017 0.137713 1.34215 0.06461 0.003996 **
-Residuals      146   14.9804 0.102606         0.87853            
-Total          161   17.0518                  1.00000            
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</code></pre>
 <!-- rnb-output-end -->

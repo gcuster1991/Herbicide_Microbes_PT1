@@ -10,6 +10,7 @@ require(phyloseq)
 require(reshape2)
 require(dplyr)
 require(ggplot2)
+require(vegan)
 ```
 
 Load data
