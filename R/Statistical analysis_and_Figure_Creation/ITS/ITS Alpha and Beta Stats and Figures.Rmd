@@ -11,22 +11,23 @@ require(reshape2)
 require(dplyr)
 require(ggplot2)
 require(microbiome)
+require(vegan)
 ```
 
 Load data
 ```{r}
 ps_dmn <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/DMN_ests_ITS.Rdata")
-sample_data(ps_dmn)$Herbicide <- factor(sample_data(ps_dmn)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
+sample_data(ps_dmn)$Herbicide <- factor(sample_data(ps_dmn)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
 sample_data(ps_dmn)$herb_time<-paste(sample_data(ps_dmn)$Herbicide, sample_data(ps_dmn)$Time, sep = "_")
 
 
 ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_rare_ITS.Rdata")
-sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
+sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
 sample_data(ps_rare)$herb_time<-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = "_")
 
 
 ps_trans <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_hel_trans_ITS.Rdata")
-sample_data(ps_trans)$Herbicide <- factor(sample_data(ps_trans)$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"))
+sample_data(ps_trans)$Herbicide <- factor(sample_data(ps_trans)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
 sample_data(ps_trans)$herb_time<-paste(sample_data(ps_trans)$Herbicide, sample_data(ps_trans)$Time, sep = "_")
 ```
 
@@ -99,13 +100,13 @@ ps_adonis<-function(physeq){
 ```
 
 ```{r}
-ps_adonis(ps_rare_sub)
+#ps_adonis(ps_rare_sub)
 #remove one sample with no vegetation measurement. 
 ps_rare_sub_57<-subset_samples(ps_rare_sub, sample_names(ps_rare_sub) != "G065SG")
 ps_adonis(ps_rare_sub_57)
-ps_adonis(ps_trans_sub)
+#ps_adonis(ps_trans_sub)
 ps_dmn_57<-subset_samples(ps_dmn, sample_names(ps_dmn) != "G065SG")
-ps_adonis(ps_dmn)
+#ps_adonis(ps_dmn)
 ps_adonis(ps_dmn_57)
 ```
 
@@ -146,10 +147,40 @@ ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/
 
 
 ord_t3_rare<-ordinate(physeq = subset_samples(ps_rare_sub, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
-T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_data(subset_samples(ps_rare_sub, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T3_rare$plot + theme_classic()
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T3.pdf")
 ```
+
+CAP ordination plots rarefied
+```{r}
+t1_dist <- distance(subset_samples(ps_rare, Time=="T1"), method="bray") #get wUnifrac and save
+t1_table<-as.matrix(dist(t1_dist)) #transform wUnifrac index
+ord_t1_rare_cap <- capscale(t1_table ~ Herbicide, data.frame(sample_data(subset_samples(ps_rare, Time == "T1"))))
+T1_rare<-ggordiplots::gg_ordiplot(ord = ord_t1_rare_cap, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T1_rare$plot + theme_classic()
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T1_cap.pdf")
+
+
+t2_dist <- distance(subset_samples(ps_rare, Time=="T2"), method="bray") #get wUnifrac and save
+t2_table<-as.matrix(dist(t2_dist)) #transform wUnifrac index
+ord_t2_rare_cap <- capscale(t2_table ~ Herbicide, data.frame(sample_data(subset_samples(ps_rare, Time == "T2"))))
+T2_rare<-ggordiplots::gg_ordiplot(ord = ord_t2_rare_cap, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T2")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T2_rare$plot + theme_classic()
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T2_cap.pdf")
+
+
+#G166SG identified as outlier based on plots with it included. Removed to create plot. 
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G166SG")
+t3_dist <- distance(subset_samples(ps_rare, Time=="T3"), method="bray") #get wUnifrac and save
+t3_table<-as.matrix(dist(t3_dist)) #transform wUnifrac index
+ord_t3_rare_cap <- capscale(t3_table ~ Herbicide, data.frame(sample_data(subset_samples(ps_rare, Time == "T3"))))
+T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare_cap, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
+T3_rare$plot + theme_classic()
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T3_cap.pdf")
+
+```
+
 
 Pairwise adonis testing no needed becasue of insignificant gloabal test. 
 ```{#r}
