@@ -1,0 +1,47 @@
+---
+title: "Simper"
+output: html_notebook
+---
+
+```{r}
+ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
+sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
+sample_data(ps_rare)$herb_time<-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = "_")
+
+#remove outlier samples and prune rare taxa
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != c("G166SG", "G065SG"))
+ps_rare_abund<-prune_taxa(taxa_sums(ps_rare) > 50, ps_rare)
+```
+
+```{r}
+ps_rare1 <- subset_samples(ps_rare_abund, Time == "T1")
+ps_rare2 <- subset_samples(ps_rare_abund, Time == "T2")
+ps_rare3 <- subset_samples(ps_rare_abund, Time == "T3")
+```
+
+```{r}
+#shitty switch 
+ps<-ps_rare3
+
+df <- data.frame(t(otu_table(ps)))
+md <- data.frame(sample_data(ps))
+tax <- data.frame(tax_table(ps))
+rownames(tax)<-str_replace(rownames(tax), pattern = "[[.]]", replacement = "=")
+```
+
+run simper
+```{r}
+sim<-with(md, simper(df, Herbicide, permutations = 1000))
+summary(sim)
+```
+
+Extract taxa of interest
+```{r}
+example<-summary(sim)
+example<-example$Clarity_Hand[1:20,]
+taxatokeep<-rownames(example)
+
+test <- subset_taxa(ps, taxa_names(ps) %in% taxatokeep)
+#Stopping here for today. Will start on combining top 20 from each comparision. 
+```
+
