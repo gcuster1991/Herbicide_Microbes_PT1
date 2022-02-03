@@ -100,7 +100,7 @@ signOTU_scale <- scale(t(signOTUtable), center = TRUE, scale = TRUE) #calculatin
 signOTU_scale <- as.data.frame(t(signOTU_scale)) #data cosmetics 
 
 
-````
+```
 
 ready taxa for heatmap
 ```{r}
