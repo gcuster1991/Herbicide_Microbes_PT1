@@ -1,0 +1,152 @@
+---
+title: "Important Taxa with Boruta algo 16S"
+output: html_notebook
+---
+
+
+```{r}
+library(randomForest)
+library(Boruta)
+library(phyloseq)
+library(stats)
+library(dplyr)
+library(readr)
+library(pheatmap)
+library(tidyverse)
+```
+
+read in rarefied data
+```{r}
+ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
+sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
+sample_data(ps_rare)$herb_time<-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = "_")
+
+#remove outlier samples and prune rare taxa
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != c("G166SG", "G065SG"))
+ps_rare_abund<-prune_taxa(taxa_sums(ps_rare) > 50, ps_rare)
+```
+split by time point
+```{r}
+ps_rare1 <- subset_samples(ps_rare_abund, Time == "T1")
+ps_rare2 <- subset_samples(ps_rare_abund, Time == "T2")
+ps_rare3 <- subset_samples(ps_rare_abund, Time == "T3")
+```
+
+
+extract relevant info
+```{r}
+#shitty switch 
+ps<-ps_rare3
+
+df <- data.frame(t(otu_table(ps)))
+md <- data.frame(sample_data(ps))
+tax <- data.frame(tax_table(ps))
+rownames(tax)<-str_replace(rownames(tax), pattern = "[[.]]", replacement = "=")
+```
+
+# Running Boruta, testing for variables that are differentially distributed 
+# among the two layers (That is why I used my_factors$Layer). If you want to run the analysis
+# with the other factor use "my_factors$Treatment" instead.
+```{r}
+boruta_layer <- Boruta(df , factor(md$Herbicide), 
+                      doTrace = 1, ntree = 1000, maxRuns = 1000) # adjust factor!!!!
+```
+
+```{r}
+# The boruta_layer object has different results inside.
+# You can extract the results using the following lines of code
+
+# To extract a table with the decisions 
+B1 <- data.frame(boruta_layer$finalDecision)  
+```
+
+```{r}
+# To extract a table with the decisions, a number that tells you how likely is that 
+# your variable is a significant predictor. The $ImpHistory results will 
+# tell you the score for each round that Random forests use, here I am reporting the average 
+# for all the rounds. The ones that are very low and non-significant will appear as -inf
+# So do not worry about those
+B2 <- data.frame(apply(boruta_layer$ImpHistory, 2, mean))
+
+# Then I change the names in the table , join them together and export the 
+# results as another .csv file which can be opened in excel
+
+names(B1) <- "Layer_decision"
+names(B2) <- "Layer_importance"
+BB1 <- merge(B1, B2, by="row.names", all.x=TRUE)
+```
+
+
+```{r}
+#sorting the results
+BB1_sort <- BB1[order(BB1$Layer_importance, decreasing = TRUE),] ## this is to give an overwiew and choose cutoff
+#picking up important with cutoff
+BB1_sort_cutoff <- filter(BB1, Layer_importance >= 2) ## number is your importance cutoff
+
+#picking up OTUs from full otutable
+signOTU <- as.matrix(BB1_sort_cutoff$Row.names) #vector with OTUs
+signOTU<-str_replace(signOTU, pattern = "[[.]]", replacement = ".")
+tmy_data <- as.data.frame(cbind(row.names(t(df)),t(df))) #data cosmetics - transposition , rownames to col, dataframe
+signOTUtable <- filter(tmy_data, V1 %in% signOTU) # there is automatically generated colname it can be problematic
+rownames(signOTUtable) <- signOTUtable[,1]#data cosmetics
+signOTUtable <- signOTUtable[,-1]#data cosmetics
+signOTUtable_rnames<-rownames(signOTUtable)
+str(signOTUtable)
+signOTUtable<-as.data.frame(lapply(signOTUtable, as.numeric))
+rownames(signOTUtable)<-signOTUtable_rnames
+str(signOTUtable)
+#z-score
+signOTU_scale <- scale(t(signOTUtable), center = TRUE, scale = TRUE) #calculating z-score
+signOTU_scale <- as.data.frame(t(signOTU_scale)) #data cosmetics 
+
+
+````
+
+ready taxa for heatmap
+```{r}
+#my_taxa
+tax$OTU <-rownames(tax)
+
+#my_taxa = (read.csv("OC_taxtable.csv", header=TRUE, row.names=1))
+#my_taxa <- as.data.frame(cbind(row.names(my_taxa),(my_taxa))) #data cosmetics
+#colnames(my_taxa) <- c("OTU","Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+
+signOTU<-str_replace(signOTU, pattern = "[[.]]", replacement = "=")
+signmy_taxa <- filter(tax, OTU %in% signOTU) 
+```
+
+Explore plotting options
+```{r}
+ordered_data<-data.frame(t(signOTU_scale))
+ordered_data$Herbicide <- md$Herbicide
+ordered_data <- ordered_data[order(ordered_data$Herbicide),]
+ordered_data$Herbicide = NULL
+sorted_sign_otu_scale<-data.frame(t(ordered_data))  
+rownames(sorted_sign_otu_scale) <- paste(signmy_taxa$OTU, signmy_taxa$Kingdom, signmy_taxa$Phylum, signmy_taxa$Class, signmy_taxa$Order, signmy_taxa$Family, signmy_taxa$Genus, signmy_taxa$Species, sep = ";")
+Bac.factorsDS <- select(md, Herbicide)
+
+#HMP1<-pheatmap(sorted_sign_otu_scale, cluster_rows = TRUE, cluster_cols = FALSE, scale = "row", cellwidth = 10, cellheigh = 10, fontsize = 10, color = colorRampPalette(c("blue", "white", "red"))(11), annotation_col = Bac.factorsDS)
+
+#HMP2<-pheatmap(sorted_sign_otu_scale, cluster_rows = TRUE, cluster_cols = FALSE, scale = "row", cellwidth = 10, cellheigh = 10, fontsize = 10, color = colorRampPalette(c("blue", "white", "red"))(11), annotation_col = Bac.factorsDS)
+
+
+HMP3<-pheatmap(sorted_sign_otu_scale, cluster_rows = TRUE, cluster_cols = FALSE, scale = "row", cellwidth = 10, cellheigh = 10, fontsize = 10, color = colorRampPalette(c("blue", "white", "red"))(11), annotation_col = Bac.factorsDS)
+
+
+save_pheatmap_pdf <- function(x, filename, width=30, height=10) {
+   stopifnot(!missing(x))
+   stopifnot(!missing(filename))
+   pdf(filename, width=width, height=height)
+   grid::grid.newpage()
+   grid::grid.draw(x$gtable)
+   dev.off()
+}
+
+
+save_pheatmap_pdf(HMP1, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Time1_RF_Taxa.pdf")
+save_pheatmap_pdf(HMP2, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Time2_RF_Taxa.pdf")
+save_pheatmap_pdf(HMP3, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Time3_RF_Taxa.pdf")
+
+```
+
+
