@@ -237,7 +237,7 @@ ps_betadispr<-function(physeq, groupingvar = "Groupingvar"){
         ## Perform test
                 print(anova(mod))
         ## Permutation test for F
-                pmod <- permutest(mod, permutations = 1000, pairwise = TRUE)
+                pmod <- vegan::permutest(mod, permutations = 1000, pairwise = TRUE)
                 print(pmod)
 }
 ```
@@ -248,6 +248,15 @@ permute test of disperson
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T1"), groupingvar = "Mode")
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T2"), groupingvar = "Mode")
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T3"), groupingvar = "Mode")
+
+
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Roundup Powermax"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Aatrex"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Clarity"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Hand"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Non-Treated"), groupingvar = "Time")
+
+ps_betadispr(ps_rare_sub, groupingvar = "Time")
 ```
 
 box and whisker plots of pairwise distance 
