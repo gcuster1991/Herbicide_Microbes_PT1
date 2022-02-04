@@ -198,6 +198,7 @@ ps_pairwiseadonis(ps_t3)
 box and whisker plots of distance 
 within group distances
 ```{r}
+#remotes::install_github("antonioggsousa/micrUBIfuns")
 library(micrUBIfuns)
 T1_beta<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Herbicide")
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_withingroup_beta.pdf")
@@ -290,11 +291,11 @@ TukeyHSD(m3, "group")
 boxplot(beta_div_value ~ group, data = T3_beta_df_chemical_combined)
 
 
-beta_div__chemical_combined_T1_T2_T3 <- rbind(T1_beta_df_chemical_combined, T2_beta_df_chemical_combined, T3_beta_df_chemical_combined)
+beta_div_chemical_combined_T1_T2_T3 <- rbind(T1_beta_df_chemical_combined, T2_beta_df_chemical_combined, T3_beta_df_chemical_combined)
 
-beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Chemical")
-beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Hand")
-beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Non-Treated")
+beta_anova(beta_div_chemical_combined_T1_T2_T3, Herbicide = "Chemical")
+beta_anova(beta_div_chemical_combined_T1_T2_T3, Herbicide = "Hand")
+beta_anova(beta_div_chemical_combined_T1_T2_T3, Herbicide = "Non-Treated")
 ```
 
 treatment to control 
@@ -447,7 +448,7 @@ ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/
 ```
 
 
-Linear modeling of abundant taxa
+Linear modeling of abundant taxa. 
 ```{r}
 
 Tax_glom_Subset <- function (physeq, y = "taxLevel", nreturns = "Number of returns"){
