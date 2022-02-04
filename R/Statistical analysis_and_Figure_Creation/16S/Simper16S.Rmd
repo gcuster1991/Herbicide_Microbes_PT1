@@ -35,6 +35,7 @@ simper_phyloseq<-function(physeq = "Phyloseq object"){
   tax <- data.frame(tax_table(physeq))
   rownames(tax)<-str_replace(rownames(tax), pattern = "[[.]]", replacement = "=")
   #run simper
+  #this could be changed to 1000 if we decide more permutations is worhtwhile, but while running on my laptop, I've gone with 100. 
   sim<-with(md, simper(df, Herbicide, permutations = 100))
   sim_out<-summary(sim)
   
@@ -56,7 +57,7 @@ ps_rare_t1_important_taxa <- simper_phyloseq(ps_rare1)
 ps_rare_t2_important_taxa <- simper_phyloseq(ps_rare2)
 ps_rare_t3_important_taxa <- simper_phyloseq(ps_rare3)
 ```
-extract all unique taxa names
+extract all unique taxa names and subset phyloseq object
 ```{r}
 tax_names<-c(taxa_names(ps_rare_t1_important_taxa), taxa_names(ps_rare_t3_important_taxa), taxa_names(ps_rare_t3_important_taxa))
 unique_taxa_names<-unique(tax_names_unique)
