@@ -2,6 +2,13 @@
 title: "Simper"
 output: html_notebook
 ---
+```{r}
+require(tidyverse)
+require(vegan)
+require(phyloseq)
+```
+
+
 
 ```{r}
 ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
@@ -19,29 +26,41 @@ ps_rare2 <- subset_samples(ps_rare_abund, Time == "T2")
 ps_rare3 <- subset_samples(ps_rare_abund, Time == "T3")
 ```
 
+define simper funciton
 ```{r}
-#shitty switch 
-ps<-ps_rare3
-
-df <- data.frame(t(otu_table(ps)))
-md <- data.frame(sample_data(ps))
-tax <- data.frame(tax_table(ps))
-rownames(tax)<-str_replace(rownames(tax), pattern = "[[.]]", replacement = "=")
+simper_phyloseq<-function(physeq = "Phyloseq object"){
+  #prep data
+  df <- data.frame(t(otu_table(physeq)))
+  md <- data.frame(sample_data(physeq))
+  tax <- data.frame(tax_table(physeq))
+  rownames(tax)<-str_replace(rownames(tax), pattern = "[[.]]", replacement = "=")
+  #run simper
+  sim<-with(md, simper(df, Herbicide, permutations = 100))
+  sim_out<-summary(sim)
+  
+  taxatokeep <- list()
+          for (i in 1:length(sim_out)){
+              ttk <- sim_out[[i]] %>% filter(p <= 0.01) %>% rownames()
+              ttk <-str_replace(ttk, pattern = "[[.]]", replacement = "=")
+              taxatokeep <- c(taxatokeep, ttk)
+              taxatokeep <<- taxatokeep
+} 
+ return(subset_taxa(physeq, taxa_names(physeq) %in% taxatokeep))
+}
 ```
 
-run simper
+
+
 ```{r}
-sim<-with(md, simper(df, Herbicide, permutations = 1000))
-summary(sim)
+ps_rare_t1_important_taxa <- simper_phyloseq(ps_rare1)
+ps_rare_t2_important_taxa <- simper_phyloseq(ps_rare2)
+ps_rare_t3_important_taxa <- simper_phyloseq(ps_rare3)
 ```
-
-Extract taxa of interest
+extract all unique taxa names
 ```{r}
-example<-summary(sim)
-example<-example$Clarity_Hand[1:20,]
-taxatokeep<-rownames(example)
+tax_names<-c(taxa_names(ps_rare_t1_important_taxa), taxa_names(ps_rare_t3_important_taxa), taxa_names(ps_rare_t3_important_taxa))
+unique_taxa_names<-unique(tax_names_unique)
 
-test <- subset_taxa(ps, taxa_names(ps) %in% taxatokeep)
-#Stopping here for today. Will start on combining top 20 from each comparision. 
+ps_simper_output<-subset_taxa(ps_rare_abund, taxa_names(ps_rare_abund) %in% unique_taxa_names)
 ```
 
