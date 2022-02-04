@@ -33,7 +33,7 @@ ps_rare3 <- subset_samples(ps_rare_abund, Time == "T3")
 ```
 
 
-Function for phylsoeq object
+Function for phylsoeq object. This can likely be cleaned up significantly. Theres some extra steps for sure. I more or less just took it from the plotting script and went from there. Full plotting script can be found below (2-4-22, gc.) 
 ```{r}
 baruta_phyloseq<-function(physeq = "Phyloseq object", GroupingVar = "Grouping variable"){
   #prep data
@@ -115,7 +115,7 @@ saveRDS(merged_baruta_simper, "/Users/gordoncuster/Desktop/Git_Projects/Herbicid
 
 
 
-
+Full plotting script below. 
 Used to test initial walk through. Not being used now. Might revist if we decide to make heatmaps.
 ```{r}
 #shitty switch 
