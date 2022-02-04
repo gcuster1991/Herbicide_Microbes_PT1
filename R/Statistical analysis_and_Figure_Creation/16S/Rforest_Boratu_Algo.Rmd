@@ -33,7 +33,90 @@ ps_rare3 <- subset_samples(ps_rare_abund, Time == "T3")
 ```
 
 
-extract relevant info
+Function for phylsoeq object
+```{r}
+baruta_phyloseq<-function(physeq = "Phyloseq object", GroupingVar = "Grouping variable"){
+  #prep data
+  df <- data.frame(t(otu_table(physeq)))
+  md <- data.frame(sample_data(physeq))
+  tax <- data.frame(tax_table(physeq))
+  rownames(tax)<-str_replace(rownames(tax), pattern = "[[.]]", replacement = "=")
+  #run simper
+ 
+                  boruta_layer <- Boruta(df , factor(md[,GroupingVar]), 
+                      doTrace = 1, ntree = 1000, maxRuns = 1000) # adjust factor!!!!
+
+                  B1 <- data.frame(boruta_layer$finalDecision)  
+                  B2 <- data.frame(apply(boruta_layer$ImpHistory, 2, mean))
+                  names(B1) <- "Layer_decision"
+                  names(B2) <- "Layer_importance"
+                  BB1 <- merge(B1, B2, by="row.names", all.x=TRUE)
+                  #sorting the results
+                  BB1_sort <- BB1[order(BB1$Layer_importance, decreasing = TRUE),] ## this is to give an overwiew and choose cutoff
+                  #picking up important with cutoff
+                  BB1_sort_cutoff <- filter(BB1, Layer_importance >= 2) ## number is your importance cutoff
+
+                        #picking up OTUs from full otutable
+                        signOTU <- as.matrix(BB1_sort_cutoff$Row.names) #vector with OTUs
+                        signOTU<-str_replace(signOTU, pattern = "[[.]]", replacement = ".")
+                        #my_taxa
+                        tax$OTU <-rownames(tax)
+                        signOTU<-str_replace(signOTU, pattern = "[[.]]", replacement = "=")
+                        signmy_taxa <- filter(tax, OTU %in% signOTU) 
+                        signmy_taxa <- as.data.frame(signmy_taxa)
+                        taxa_keep<-signmy_taxa$OTU
+return(taxa_keep)
+}
+
+```
+
+
+```{r}
+baruta_t1_taxa<-baruta_phyloseq(ps_rare1, GroupingVar = "Herbicide")
+baruta_t2_taxa<-baruta_phyloseq(ps_rare2, GroupingVar = "Herbicide")
+baruta_t3_taxa<-baruta_phyloseq(ps_rare3, GroupingVar = "Herbicide")
+```
+
+
+
+```{r}
+ps_baruta_t1 <- subset_taxa(ps_rare_abund, taxa_names(ps_rare_abund) %in% baruta_t1_taxa)
+ps_baruta_t2 <- subset_taxa(ps_rare_abund, taxa_names(ps_rare_abund) %in% baruta_t2_taxa)
+ps_baruta_t3 <- subset_taxa(ps_rare_abund, taxa_names(ps_rare_abund) %in% baruta_t3_taxa)
+
+merged_baruta<-merge_phyloseq(ps_baruta_t1, ps_baruta_t2, ps_baruta_t3)
+```
+
+
+```{r}
+saveRDS(merged_baruta, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/Baruta_taxa_rareified.Rdata")
+```
+
+
+Merge phyloseq objects for Linera modeling efforts by Josh
+```{r}
+#clean env but keep merged Baruta object. Read in Simper object
+merged_simper<-readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/Simper_taxa_rareified.Rdata")
+```
+
+```{r}
+merged_baruta_simper <- merge_phyloseq(merged_baruta, merged_simper)
+saveRDS(merged_baruta_simper, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/merged_simper_baruta.Rdata")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+Used to test initial walk through. Not being used now. Might revist if we decide to make heatmaps.
 ```{r}
 #shitty switch 
 ps<-ps_rare3
@@ -114,6 +197,12 @@ tax$OTU <-rownames(tax)
 signOTU<-str_replace(signOTU, pattern = "[[.]]", replacement = "=")
 signmy_taxa <- filter(tax, OTU %in% signOTU) 
 ```
+
+
+
+
+
+
 
 Explore plotting options
 ```{r}

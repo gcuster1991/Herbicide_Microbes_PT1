@@ -6,29 +6,59 @@ output: html_notebook
 ```{r}
 require(phyloseq)
 require(tidyverse)
-require(phyloseq)
 require(reshape2)
 require(dplyr)
 require(ggplot2)
 require(vegan)
 ```
 
-Load data
+Load data order, factors, and create a mode (chemical, hand, non-treated) column.
 ```{r}
 ps_dmn <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/DMN_ests_16S.Rdata")
 sample_data(ps_dmn)$Herbicide <- factor(sample_data(ps_dmn)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
 sample_data(ps_dmn)$herb_time<-paste(sample_data(ps_dmn)$Herbicide, sample_data(ps_dmn)$Time, sep = "_")
 
+#regroup all chemical treatments together and rerun betadiv calcs within group. 
+sample_data(ps_dmn)$Mode<-sample_data(ps_dmn)$Herbicide
+
+index <- c("Clarity", "Roundup Powermax", "Aatrex", "Hand", "Non-Treated")
+values <- c("Chemical", "Chemical", "Chemical", "Hand", "Non-Treated")
+
+sample_data(ps_dmn)$Mode<- as.factor(values[match(sample_data(ps_dmn)$Mode, index)])
+
+
+
 ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata")
 sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
 sample_data(ps_rare)$herb_time<-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = "_")
 
+
+#regroup all chemical treatments together and rerun betadiv calcs within group. 
+sample_data(ps_rare)$Mode<-sample_data(ps_rare)$Herbicide
+
+index <- c("Clarity", "Roundup Powermax", "Aatrex", "Hand", "Non-Treated")
+values <- c("Chemical", "Chemical", "Chemical", "Hand", "Non-Treated")
+
+sample_data(ps_rare)$Mode<- as.factor(values[match(sample_data(ps_rare)$Mode, index)])
+
+
+
 ps_trans <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_hel_trans_16S.Rdata")
 sample_data(ps_trans)$Herbicide <- factor(sample_data(ps_trans)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
 sample_data(ps_trans)$herb_time<-paste(sample_data(ps_trans)$Herbicide, sample_data(ps_trans)$Time, sep = "_")
+
+#regroup all chemical treatments together and rerun betadiv calcs within group. 
+sample_data(ps_trans)$Mode<-sample_data(ps_trans)$Herbicide
+
+index <- c("Clarity", "Roundup Powermax", "Aatrex", "Hand", "Non-Treated")
+values <- c("Chemical", "Chemical", "Chemical", "Hand", "Non-Treated")
+
+sample_data(ps_trans)$Mode<- as.factor(values[match(sample_data(ps_trans)$Mode, index)])
 ```
 
-create alphadiversity tables
+
+
+create alpha diversity tables
 ```{r}
 alpha_div <- estimate_richness(physeq = ps_rare, measures = c("Observed", "Shannon", "Chao1"))
 #pull out metadata and concatonate with alpha diversity metrics
@@ -195,7 +225,32 @@ ps_pairwiseadonis(ps_t2)
 ps_pairwiseadonis(ps_t3)
 ```
 
-box and whisker plots of distance 
+Pairwise betadispr by treatment, time and mode
+```{r}
+ps_betadispr<-function(physeq, groupingvar = "Groupingvar"){
+  otu_tab<-data.frame(phyloseq::otu_table(physeq))
+  md_tab<-data.frame(phyloseq::sample_data(physeq))
+    if(taxa_are_rows(physeq)== T){
+       physeq_dist<-parallelDist::parDist(as.matrix(t(otu_tab)), method = "bray")}
+            else{physeq_dist<-parallelDist::parDist(as.matrix(otu_tab), method = "bray")}
+                mod<-vegan::betadisper(physeq_dist, md_tab[,groupingvar])
+        ## Perform test
+                print(anova(mod))
+        ## Permutation test for F
+                pmod <- permutest(mod, permutations = 1000, pairwise = TRUE)
+                print(pmod)
+}
+```
+
+
+permute test of disperson 
+```{r}
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T1"), groupingvar = "Mode")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T2"), groupingvar = "Mode")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T3"), groupingvar = "Mode")
+```
+
+box and whisker plots of pairwise distance 
 within group distances
 ```{r}
 #remotes::install_github("antonioggsousa/micrUBIfuns")
@@ -257,6 +312,8 @@ index <- c("Clarity", "Roundup Powermax", "Aatrex", "Hand", "Non-Treated")
 values <- c("Chemical", "Chemical", "Chemical", "Hand", "Non-Treated")
 
 sample_data(ps_rare)$Mode<- as.factor(values[match(sample_data(ps_rare)$Mode, index)])
+
+
 
 
 T1_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Mode")

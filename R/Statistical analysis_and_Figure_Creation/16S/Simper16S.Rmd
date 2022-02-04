@@ -36,7 +36,7 @@ simper_phyloseq<-function(physeq = "Phyloseq object"){
   rownames(tax)<-str_replace(rownames(tax), pattern = "[[.]]", replacement = "=")
   #run simper
   #this could be changed to 1000 if we decide more permutations is worhtwhile, but while running on my laptop, I've gone with 100. 
-  sim<-with(md, simper(df, Herbicide, permutations = 100))
+  sim<-with(md, simper(df, Herbicide, permutations = 1000))
   sim_out<-summary(sim)
   
   taxatokeep <- list()
@@ -60,8 +60,10 @@ ps_rare_t3_important_taxa <- simper_phyloseq(ps_rare3)
 extract all unique taxa names and subset phyloseq object
 ```{r}
 tax_names<-c(taxa_names(ps_rare_t1_important_taxa), taxa_names(ps_rare_t3_important_taxa), taxa_names(ps_rare_t3_important_taxa))
-unique_taxa_names<-unique(tax_names_unique)
+unique_taxa_names<-unique(tax_names)
 
 ps_simper_output<-subset_taxa(ps_rare_abund, taxa_names(ps_rare_abund) %in% unique_taxa_names)
+
+saveRDS(ps_simper_output, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/Simper_taxa_rareified.Rdata")
 ```
 
