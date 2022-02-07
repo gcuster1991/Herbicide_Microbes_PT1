@@ -249,6 +249,10 @@ ps_betadispr(subset_samples(ps_rare_sub, Time == "T1"), groupingvar = "Mode")
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T2"), groupingvar = "Mode")
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T3"), groupingvar = "Mode")
 
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T1"), groupingvar = "Herbicide")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T2"), groupingvar = "Herbicide")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T3"), groupingvar = "Herbicide")
+
 
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Roundup Powermax"), groupingvar = "Time")
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Aatrex"), groupingvar = "Time")
