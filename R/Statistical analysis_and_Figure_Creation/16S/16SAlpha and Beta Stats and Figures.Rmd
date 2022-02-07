@@ -256,6 +256,8 @@ ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Clarity"), groupingvar = 
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Hand"), groupingvar = "Time")
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Non-Treated"), groupingvar = "Time")
 
+ps_betadispr(ps_rare_sub, groupingvar = "Herbicide")
+ps_betadispr(ps_rare_sub, groupingvar = "Mode")
 ps_betadispr(ps_rare_sub, groupingvar = "Time")
 ```
 
