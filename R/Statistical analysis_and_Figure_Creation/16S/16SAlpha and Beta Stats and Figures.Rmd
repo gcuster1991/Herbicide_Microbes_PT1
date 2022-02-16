@@ -257,10 +257,16 @@ ps_betadispr(subset_samples(ps_rare_sub, Time == "T1"), groupingvar = "Mode")
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T2"), groupingvar = "Mode")
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T3"), groupingvar = "Mode")
 
+<<<<<<< HEAD
 ps_betadispr(subset_samples(ps_rare_sub, Mode == "Chemical"), groupingvar = "Time")
 ps_betadispr(subset_samples(ps_rare_sub, Mode == "Non-Treated"), groupingvar = "Time")
 ps_betadispr(subset_samples(ps_rare_sub, Mode == "Hand"), groupingvar = "Time")
 
+=======
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T1"), groupingvar = "Herbicide")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T2"), groupingvar = "Herbicide")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T3"), groupingvar = "Herbicide")
+>>>>>>> f5ac44f5f757f844ce8f9d92d42912700880b744
 
 
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Roundup Powermax"), groupingvar = "Time")
@@ -269,6 +275,8 @@ ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Clarity"), groupingvar = 
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Hand"), groupingvar = "Time")
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Non-Treated"), groupingvar = "Time")
 
+ps_betadispr(ps_rare_sub, groupingvar = "Herbicide")
+ps_betadispr(ps_rare_sub, groupingvar = "Mode")
 ps_betadispr(ps_rare_sub, groupingvar = "Time")
 ```
 

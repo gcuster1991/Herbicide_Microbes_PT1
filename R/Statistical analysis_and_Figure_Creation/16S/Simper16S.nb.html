@@ -226,21 +226,15 @@ require(phyloseq)</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNfcmFyZSA8LSByZWFkUkRTKFwiL1VzZXJzL2dvcmRvbmN1c3Rlci9EZXNrdG9wL0dpdF9Qcm9qZWN0cy9IZXJiaWNpZGVfTWljcm9iZXNfUFQxL2RhdGEvUGh5bG9zZXFPYmplY3RzLzE2Uy9IZXJiUHQxX3JhcmVfMTZTLlJkYXRhXCIpXG5zYW1wbGVfZGF0YShwc19yYXJlKSRIZXJiaWNpZGUgPC0gZmFjdG9yKHNhbXBsZV9kYXRhKHBzX3JhcmUpJEhlcmJpY2lkZSwgbGV2ZWxzID0gYyhcIkFhdHJleFwiLCBcIkNsYXJpdHlcIiwgXCJIYW5kXCIsXCJOb24tVHJlYXRlZFwiLFwiUm91bmR1cCBQb3dlcm1heFwiKSlcbnNhbXBsZV9kYXRhKHBzX3JhcmUpJGhlcmJfdGltZTwtcGFzdGUoc2FtcGxlX2RhdGEocHNfcmFyZSkkSGVyYmljaWRlLCBzYW1wbGVfZGF0YShwc19yYXJlKSRUaW1lLCBzZXAgPSBcIl9cIilcblxuI3JlbW92ZSBvdXRsaWVyIHNhbXBsZXMgYW5kIHBydW5lIHJhcmUgdGF4YVxucHNfcmFyZSA8LSAgc3Vic2V0X3NhbXBsZXMocHNfcmFyZSwgc2FtcGxlX25hbWVzKHBzX3JhcmUpICE9IGMoXCJHMTY2U0dcIiwgXCJHMDY1U0dcIikpXG5gYGAifQ== -->
-<pre class="r"><code>ps_rare &lt;- readRDS(&quot;/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/HerbPt1_rare_16S.Rdata&quot;)
-sample_data(ps_rare)$Herbicide &lt;- factor(sample_data(ps_rare)$Herbicide, levels = c(&quot;Aatrex&quot;, &quot;Clarity&quot;, &quot;Hand&quot;,&quot;Non-Treated&quot;,&quot;Roundup Powermax&quot;))
-sample_data(ps_rare)$herb_time&lt;-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = &quot;_&quot;)
-
-#remove outlier samples and prune rare taxa
-ps_rare &lt;-  subset_samples(ps_rare, sample_names(ps_rare) != c(&quot;G166SG&quot;, &quot;G065SG&quot;))</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3JlbW92ZSBvdXRsaWVyIHNhbXBsZXMgYW5kIHBydW5lIHJhcmUgdGF4YVxucHNfcmFyZSA8LSAgc3Vic2V0X3NhbXBsZXMocHNfcmFyZSwgc2FtcGxlX25hbWVzKHBzX3JhcmUpICE9IGMoXCJHMTY2U0dcIiwgXCJHMDY1U0dcIikpXG5cbmBgYCJ9 -->
+<pre class="r"><code>#remove outlier samples and prune rare taxa
+ps_rare &lt;-  subset_samples(ps_rare, sample_names(ps_rare) != c(&quot;G166SG&quot;, &quot;G065SG&quot;))
+</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZyBpbiBzYW1wbGVfbmFtZXMocHNfcmFyZSkgIT0gYyhcIkcxNjZTR1wiLCBcIkcwNjVTR1wiKSA6XG4gIGxvbmdlciBvYmplY3QgbGVuZ3RoIGlzIG5vdCBhIG11bHRpcGxlIG9mIHNob3J0ZXIgb2JqZWN0IGxlbmd0aFxuIn0= -->
 <pre><code>Warning in sample_names(ps_rare) != c(&quot;G166SG&quot;, &quot;G065SG&quot;) :
   longer object length is not a multiple of shorter object length</code></pre>
 <!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNfcmFyZV9hYnVuZDwtcHJ1bmVfdGF4YSh0YXhhX3N1bXMocHNfcmFyZSkgPiA1MCwgcHNfcmFyZSlcbmBgYCJ9 -->
-<pre class="r"><code>ps_rare_abund&lt;-prune_taxa(taxa_sums(ps_rare) &gt; 50, ps_rare)</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
@@ -255,57 +249,37 @@ ps_rare3 &lt;- subset_samples(ps_rare_abund, Time == &quot;T3&quot;)</code></pre
 <p>define simper funciton</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2ltcGVyX3BoeWxvc2VxPC1mdW5jdGlvbihwaHlzZXEgPSBcIlBoeWxvc2VxIG9iamVjdFwiKXtcbiAgI3ByZXAgZGF0YVxuICBkZiA8LSBkYXRhLmZyYW1lKHQob3R1X3RhYmxlKHBoeXNlcSkpKVxuICBtZCA8LSBkYXRhLmZyYW1lKHNhbXBsZV9kYXRhKHBoeXNlcSkpXG4gIHRheCA8LSBkYXRhLmZyYW1lKHRheF90YWJsZShwaHlzZXEpKVxuICByb3duYW1lcyh0YXgpPC1zdHJfcmVwbGFjZShyb3duYW1lcyh0YXgpLCBwYXR0ZXJuID0gXCJbWy5dXVwiLCByZXBsYWNlbWVudCA9IFwiPVwiKVxuICAjcnVuIHNpbXBlclxuICAjdGhpcyBjb3VsZCBiZSBjaGFuZ2VkIHRvIDEwMDAgaWYgd2UgZGVjaWRlIG1vcmUgcGVybXV0YXRpb25zIGlzIHdvcmh0d2hpbGUsIGJ1dCB3aGlsZSBydW5uaW5nIG9uIG15IGxhcHRvcCwgSSd2ZSBnb25lIHdpdGggMTAwLiBcbiAgc2ltPC13aXRoKG1kLCBzaW1wZXIoZGYsIEhlcmJpY2lkZSwgcGVybXV0YXRpb25zID0gMTAwMCkpXG4gIHNpbV9vdXQ8LXN1bW1hcnkoc2ltKVxuICBcbiAgdGF4YXRva2VlcCA8LSBsaXN0KClcbiAgICAgICAgICBmb3IgKGkgaW4gMTpsZW5ndGgoc2ltX291dCkpe1xuICAgICAgICAgICAgICB0dGsgPC0gc2ltX291dFtbaV1dICU+JSBmaWx0ZXIocCA8PSAwLjAxKSAlPiUgcm93bmFtZXMoKVxuICAgICAgICAgICAgICB0dGsgPC1zdHJfcmVwbGFjZSh0dGssIHBhdHRlcm4gPSBcIltbLl1dXCIsIHJlcGxhY2VtZW50ID0gXCI9XCIpXG4gICAgICAgICAgICAgIHRheGF0b2tlZXAgPC0gYyh0YXhhdG9rZWVwLCB0dGspXG4gICAgICAgICAgICAgIHRheGF0b2tlZXAgPDwtIHRheGF0b2tlZXBcbn0gXG4gcmV0dXJuKHN1YnNldF90YXhhKHBoeXNlcSwgdGF4YV9uYW1lcyhwaHlzZXEpICVpbiUgdGF4YXRva2VlcCkpXG59XG5gYGAifQ== -->
-<pre class="r"><code>simper_phyloseq&lt;-function(physeq = &quot;Phyloseq object&quot;){
-  #prep data
-  df &lt;- data.frame(t(otu_table(physeq)))
-  md &lt;- data.frame(sample_data(physeq))
-  tax &lt;- data.frame(tax_table(physeq))
-  rownames(tax)&lt;-str_replace(rownames(tax), pattern = &quot;[[.]]&quot;, replacement = &quot;=&quot;)
-  #run simper
-  #this could be changed to 1000 if we decide more permutations is worhtwhile, but while running on my laptop, I&#39;ve gone with 100. 
-  sim&lt;-with(md, simper(df, Herbicide, permutations = 1000))
-  sim_out&lt;-summary(sim)
-  
-  taxatokeep &lt;- list()
-          for (i in 1:length(sim_out)){
-              ttk &lt;- sim_out[[i]] %&gt;% filter(p &lt;= 0.01) %&gt;% rownames()
-              ttk &lt;-str_replace(ttk, pattern = &quot;[[.]]&quot;, replacement = &quot;=&quot;)
-              taxatokeep &lt;- c(taxatokeep, ttk)
-              taxatokeep &lt;&lt;- taxatokeep
-} 
- return(subset_taxa(physeq, taxa_names(physeq) %in% taxatokeep))
-}</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI3NoaXR0eSBzd2l0Y2ggXG5wczwtcHNfcmFyZTNcblxuZGYgPC0gZGF0YS5mcmFtZSh0KG90dV90YWJsZShwcykpKVxubWQgPC0gZGF0YS5mcmFtZShzYW1wbGVfZGF0YShwcykpXG50YXggPC0gZGF0YS5mcmFtZSh0YXhfdGFibGUocHMpKVxucm93bmFtZXModGF4KTwtc3RyX3JlcGxhY2Uocm93bmFtZXModGF4KSwgcGF0dGVybiA9IFwiW1suXV1cIiwgcmVwbGFjZW1lbnQgPSBcIj1cIilcbmBgYCJ9 -->
+<pre class="r"><code>#shitty switch 
+ps&lt;-ps_rare3
+
+df &lt;- data.frame(t(otu_table(ps)))
+md &lt;- data.frame(sample_data(ps))
+tax &lt;- data.frame(tax_table(ps))
+rownames(tax)&lt;-str_replace(rownames(tax), pattern = &quot;[[.]]&quot;, replacement = &quot;=&quot;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNfcmFyZV90M19pbXBvcnRhbnRfdGF4YVxuXG5gYGAifQ== -->
-<pre class="r"><code>ps_rare_t3_important_taxa
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNfcmFyZV90MV9pbXBvcnRhbnRfdGF4YSA8LSBzaW1wZXJfcGh5bG9zZXEocHNfcmFyZTEpXG5wc19yYXJlX3QyX2ltcG9ydGFudF90YXhhIDwtIHNpbXBlcl9waHlsb3NlcShwc19yYXJlMilcbnBzX3JhcmVfdDNfaW1wb3J0YW50X3RheGEgPC0gc2ltcGVyX3BoeWxvc2VxKHBzX3JhcmUzKVxuYGBgIn0= -->
+<pre class="r"><code>ps_rare_t1_important_taxa &lt;- simper_phyloseq(ps_rare1)
+ps_rare_t2_important_taxa &lt;- simper_phyloseq(ps_rare2)
+ps_rare_t3_important_taxa &lt;- simper_phyloseq(ps_rare3)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoicGh5bG9zZXEtY2xhc3MgZXhwZXJpbWVudC1sZXZlbCBvYmplY3Rcbm90dV90YWJsZSgpICAgT1RVIFRhYmxlOiAgICAgICAgIFsgMTY5IHRheGEgYW5kIDU0IHNhbXBsZXMgXVxuc2FtcGxlX2RhdGEoKSBTYW1wbGUgRGF0YTogICAgICAgWyA1NCBzYW1wbGVzIGJ5IDUyIHNhbXBsZSB2YXJpYWJsZXMgXVxudGF4X3RhYmxlKCkgICBUYXhvbm9teSBUYWJsZTogICAgWyAxNjkgdGF4YSBieSA3IHRheG9ub21pYyByYW5rcyBdXG4ifQ== -->
-<pre><code>phyloseq-class experiment-level object
-otu_table()   OTU Table:         [ 169 taxa and 54 samples ]
-sample_data() Sample Data:       [ 54 samples by 52 sample variables ]
-tax_table()   Taxonomy Table:    [ 169 taxa by 7 taxonomic ranks ]</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>extract all unique taxa names and subset phyloseq object</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNfc2ltcGVyX291dHB1dFxuXG5gYGAifQ== -->
-<pre class="r"><code>ps_simper_output
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGF4X25hbWVzPC1jKHRheGFfbmFtZXMocHNfcmFyZV90MV9pbXBvcnRhbnRfdGF4YSksIHRheGFfbmFtZXMocHNfcmFyZV90M19pbXBvcnRhbnRfdGF4YSksIHRheGFfbmFtZXMocHNfcmFyZV90M19pbXBvcnRhbnRfdGF4YSkpXG51bmlxdWVfdGF4YV9uYW1lczwtdW5pcXVlKHRheF9uYW1lcylcblxucHNfc2ltcGVyX291dHB1dDwtc3Vic2V0X3RheGEocHNfcmFyZV9hYnVuZCwgdGF4YV9uYW1lcyhwc19yYXJlX2FidW5kKSAlaW4lIHVuaXF1ZV90YXhhX25hbWVzKVxuXG5zYXZlUkRTKHBzX3NpbXBlcl9vdXRwdXQsIFwiL1VzZXJzL2dvcmRvbmN1c3Rlci9EZXNrdG9wL0dpdF9Qcm9qZWN0cy9IZXJiaWNpZGVfTWljcm9iZXNfUFQxL2RhdGEvUGh5bG9zZXFPYmplY3RzLzE2Uy9TaW1wZXJfdGF4YV9yYXJlaWZpZWQuUmRhdGFcIilcbmBgYCJ9 -->
+<pre class="r"><code>tax_names&lt;-c(taxa_names(ps_rare_t1_important_taxa), taxa_names(ps_rare_t3_important_taxa), taxa_names(ps_rare_t3_important_taxa))
+unique_taxa_names&lt;-unique(tax_names)
+
+ps_simper_output&lt;-subset_taxa(ps_rare_abund, taxa_names(ps_rare_abund) %in% unique_taxa_names)
+
+saveRDS(ps_simper_output, &quot;/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/16S/Simper_taxa_rareified.Rdata&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoicGh5bG9zZXEtY2xhc3MgZXhwZXJpbWVudC1sZXZlbCBvYmplY3Rcbm90dV90YWJsZSgpICAgT1RVIFRhYmxlOiAgICAgICAgIFsgMzE0IHRheGEgYW5kIDE2MyBzYW1wbGVzIF1cbnNhbXBsZV9kYXRhKCkgU2FtcGxlIERhdGE6ICAgICAgIFsgMTYzIHNhbXBsZXMgYnkgNTIgc2FtcGxlIHZhcmlhYmxlcyBdXG50YXhfdGFibGUoKSAgIFRheG9ub215IFRhYmxlOiAgICBbIDMxNCB0YXhhIGJ5IDcgdGF4b25vbWljIHJhbmtzIF1cbiJ9 -->
-<pre><code>phyloseq-class experiment-level object
-otu_table()   OTU Table:         [ 314 taxa and 163 samples ]
-sample_data() Sample Data:       [ 163 samples by 52 sample variables ]
-tax_table()   Taxonomy Table:    [ 314 taxa by 7 taxonomic ranks ]</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
