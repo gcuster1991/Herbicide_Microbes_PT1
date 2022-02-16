@@ -20,32 +20,62 @@ ps_dmn <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_P
 sample_data(ps_dmn)$Herbicide <- factor(sample_data(ps_dmn)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
 sample_data(ps_dmn)$herb_time<-paste(sample_data(ps_dmn)$Herbicide, sample_data(ps_dmn)$Time, sep = "_")
 
+#regroup all chemical treatments together and rerun betadiv calcs within group. 
+sample_data(ps_dmn)$Mode<-sample_data(ps_dmn)$Herbicide
+
+index <- c("Clarity", "Roundup Powermax", "Aatrex", "Hand", "Non-Treated")
+values <- c("Chemical", "Chemical", "Chemical", "Hand", "Non-Treated")
+
+sample_data(ps_dmn)$Mode<- as.factor(values[match(sample_data(ps_dmn)$Mode, index)])
+
 
 ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_rare_ITS.Rdata")
 sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
 sample_data(ps_rare)$herb_time<-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = "_")
 
 
+#regroup all chemical treatments together and rerun betadiv calcs within group. 
+sample_data(ps_rare)$Mode<-sample_data(ps_rare)$Herbicide
+
+index <- c("Clarity", "Roundup Powermax", "Aatrex", "Hand", "Non-Treated")
+values <- c("Chemical", "Chemical", "Chemical", "Hand", "Non-Treated")
+
+sample_data(ps_rare)$Mode<- as.factor(values[match(sample_data(ps_rare)$Mode, index)])
+
+
 ps_trans <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_hel_trans_ITS.Rdata")
 sample_data(ps_trans)$Herbicide <- factor(sample_data(ps_trans)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
 sample_data(ps_trans)$herb_time<-paste(sample_data(ps_trans)$Herbicide, sample_data(ps_trans)$Time, sep = "_")
+
+
+#regroup all chemical treatments together and rerun betadiv calcs within group. 
+sample_data(ps_trans)$Mode<-sample_data(ps_trans)$Herbicide
+
+index <- c("Clarity", "Roundup Powermax", "Aatrex", "Hand", "Non-Treated")
+values <- c("Chemical", "Chemical", "Chemical", "Hand", "Non-Treated")
+
+sample_data(ps_trans)$Mode<- as.factor(values[match(sample_data(ps_trans)$Mode, index)])
 ```
 
-ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transformed to successfully ordinate. At this point, the transformed data will not ordinate. This section is full dataset ordinations. 
+Remove samples that are outlines or under sequenced. 
 ```{r}
 ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_dmn) != "G009SG")
 ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_dmn) != "G095SG")
 ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_dmn) != "G123SG")
 ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_dmn) != "G129SG")
 
-ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit = 1000)
-
-
 ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G009SG")
 ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G095SG")
 ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G123SG")
 ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G129SG")
 ps_rare_sub<-prune_taxa(taxa_sums(ps_rare) > 2, ps_rare)
+```
+
+ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transformed to successfully ordinate. At this point, the transformed data will not ordinate. This section is full dataset ordinations. 
+```{r}
+
+ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit = 1000)
+
 ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit = 1000)
 
 ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.01, ps_trans)
@@ -207,6 +237,47 @@ ps_pairwiseadonis(ps_t1)
 ps_pairwiseadonis(ps_t2)
 ps_pairwiseadonis(ps_t3)
 ```
+
+Pairwise betadispr by treatment, time and mode
+```{r}
+ps_betadispr<-function(physeq, groupingvar = "Groupingvar"){
+  otu_tab<-data.frame(phyloseq::otu_table(physeq))
+  md_tab<-data.frame(phyloseq::sample_data(physeq))
+    if(taxa_are_rows(physeq)== T){
+       physeq_dist<-parallelDist::parDist(as.matrix(t(otu_tab)), method = "bray")}
+            else{physeq_dist<-parallelDist::parDist(as.matrix(otu_tab), method = "bray")}
+                mod<-vegan::betadisper(physeq_dist, md_tab[,groupingvar])
+        ## Perform test
+                print(anova(mod))
+        ## Permutation test for F
+                pmod <- vegan::permutest(mod, permutations = 1000, pairwise = TRUE)
+                print(pmod)
+                print(boxplot(mod))
+}
+```
+
+
+permute test of dispersion 
+```{r}
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T1"), groupingvar = "Mode")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T2"), groupingvar = "Mode")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T3"), groupingvar = "Mode")
+
+ps_betadispr(subset_samples(ps_rare_sub, Mode == "Chemical"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Mode == "Non-Treated"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Mode == "Hand"), groupingvar = "Time")
+
+
+
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Roundup Powermax"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Aatrex"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Clarity"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Hand"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Non-Treated"), groupingvar = "Time")
+
+ps_betadispr(ps_rare_sub, groupingvar = "Time")
+```
+
 
 Box and whisker plots of distance 
 within group distances

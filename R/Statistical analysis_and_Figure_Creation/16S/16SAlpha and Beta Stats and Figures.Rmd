@@ -86,19 +86,28 @@ plot(aov_t3$residuals)
 summary(aov_t3)
 ```
 
-ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transfomred to sucessfully ordinate. At this point, the transformed data will not ordinate. 
+remove outliers and rare reads with less than 2 total reads
 ```{r}
 ps_dmn <-  subset_samples(ps_dmn, sample_names(ps_rare) != "G166SG")
-ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit=1000)
 
 ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G166SG")
 ps_rare_sub<-prune_taxa(taxa_sums(ps_rare) > 2, ps_rare)
+
+ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.05, ps_trans)
+
+```
+
+
+ordinations and adonis testing with three separate objects (i.e., dmn, rarefied, transformed). Rare taxa are removed from rarefied and transfomred to sucessfully ordinate. At this point, the transformed data will not ordinate. 
+```{r}
+
+ord_dmn<-ordinate(physeq = ps_dmn, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit=1000)
+
+
 ord_rare<-ordinate(physeq = ps_rare_sub, method = "NMDS", distance = "bray", k=3, trymax= 300, maxit=1000)
 full_ord_rare<-ggordiplots::gg_ordiplot(ord = ord_rare, groups = data.frame(sample_data(ps_rare))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 full_ord_rare$plot + theme_classic()
 
-
-ps_trans_sub<-prune_taxa(taxa_sums(ps_trans) > 0.05, ps_trans)
 ord_transformed<-ordinate(physeq = ps_trans_sub, method = "NMDS", distance = "bray", trymax= 300, maxit=1000)
 ```
 
@@ -115,13 +124,11 @@ ps_adonis<-function(physeq){
 }
 ```
 
+remove one sample with no vegetation measurement. 
 ```{r}
-#ps_adonis(ps_rare_sub)
-#remove one sample with no vegetation measurement. 
 ps_rare_sub_57<-subset_samples(ps_rare_sub, sample_names(ps_rare_sub) != "G065SG")
 ps_adonis(ps_rare_sub_57)
-#ps_adonis(ps_trans_sub)
-#ps_adonis(ps_dmn)
+
 ps_dmn_57<-subset_samples(ps_dmn, sample_names(ps_dmn) != "G065SG")
 ps_adonis(ps_dmn_57)
 ```
@@ -239,6 +246,7 @@ ps_betadispr<-function(physeq, groupingvar = "Groupingvar"){
         ## Permutation test for F
                 pmod <- vegan::permutest(mod, permutations = 1000, pairwise = TRUE)
                 print(pmod)
+                print(boxplot(mod))
 }
 ```
 
@@ -248,6 +256,11 @@ permute test of disperson
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T1"), groupingvar = "Mode")
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T2"), groupingvar = "Mode")
 ps_betadispr(subset_samples(ps_rare_sub, Time == "T3"), groupingvar = "Mode")
+
+ps_betadispr(subset_samples(ps_rare_sub, Mode == "Chemical"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Mode == "Non-Treated"), groupingvar = "Time")
+ps_betadispr(subset_samples(ps_rare_sub, Mode == "Hand"), groupingvar = "Time")
+
 
 
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Roundup Powermax"), groupingvar = "Time")
