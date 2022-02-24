@@ -33,6 +33,10 @@ dat[1:5,1:10]
 # Hellinger standardize 
 dat_rare <- sqrt(dat / rowSums(dat))
 
+#Or calculate the probability a taxon is in a sample of 500...a multinomial 
+#dat_rare <- data.frame(vegan::drarefy(dat, 500))
+
+
 dat_rare_with_treatment <- data.frame(treatments_full, dat_rare)
 
 #Make a few new fields in dat_rare_with_treatment just so we are sure to not mess some indexing up. 

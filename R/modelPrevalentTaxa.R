@@ -87,6 +87,7 @@ regressionresults <- data.frame(matrix(ncol = 10, nrow = 1))
 
 k <- 1
 for(i in tomodel){
+  #This is not quite right if the response is between 0 and 1
   reg <- lm(dat_rare_with_treatment[,names(dat_rare_with_treatment) == i]~ 
      dat_rare_with_treatment$time + dat_rare_with_treatment$herbicide)
      regressionresults[k, 1] <- i
