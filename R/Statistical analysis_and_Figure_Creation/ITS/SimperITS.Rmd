@@ -1,0 +1,74 @@
+---
+title: "SimperITS"
+output: html_notebook
+---
+```{r}
+require(tidyverse)
+require(vegan)
+require(phyloseq)
+```
+
+
+
+```{r}
+ps_rare <- readRDS("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/HerbPt1_rare_ITS.Rdata")
+sample_data(ps_rare)$Herbicide <- factor(sample_data(ps_rare)$Herbicide, levels = c("Aatrex", "Clarity", "Hand","Non-Treated","Roundup Powermax"))
+sample_data(ps_rare)$herb_time<-paste(sample_data(ps_rare)$Herbicide, sample_data(ps_rare)$Time, sep = "_")
+
+#remove outlier samples and prune rare taxa
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G009SG")
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G095SG")
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G123SG")
+ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G129SG")
+ps_rare_abund<-prune_taxa(taxa_sums(ps_rare) > 2, ps_rare)
+```
+
+```{r}
+ps_rare1 <- subset_samples(ps_rare_abund, Time == "T1")
+ps_rare2 <- subset_samples(ps_rare_abund, Time == "T2")
+ps_rare3 <- subset_samples(ps_rare_abund, Time == "T3")
+```
+
+define simper function
+```{r}
+simper_phyloseq<-function(physeq = "Phyloseq object"){
+  #prep data
+  df <- data.frame(t(otu_table(physeq)))
+  md <- data.frame(sample_data(physeq))
+  tax <- data.frame(tax_table(physeq))
+  rownames(tax)<-str_replace(rownames(tax), pattern = "[[.]]", replacement = "=")
+  #run simper
+  #this could be changed to 1000 if we decide more permutations is worhtwhile, but while running on my laptop, I've gone with 100. 
+  sim<-with(md, simper(df, Herbicide, permutations = 1000))
+  sim_out<-summary(sim)
+  
+  taxatokeep <- list()
+          for (i in 1:length(sim_out)){
+              ttk <- sim_out[[i]] %>% filter(p <= 0.01) %>% rownames()
+              ttk <-str_replace(ttk, pattern = "[[.]]", replacement = "=")
+              taxatokeep <- c(taxatokeep, ttk)
+              taxatokeep <<- taxatokeep
+} 
+ return(subset_taxa(physeq, taxa_names(physeq) %in% taxatokeep))
+}
+```
+
+
+
+```{r}
+ps_rare_t1_important_taxa <- simper_phyloseq(ps_rare1)
+ps_rare_t2_important_taxa <- simper_phyloseq(ps_rare2)
+ps_rare_t3_important_taxa <- simper_phyloseq(ps_rare3)
+```
+
+
+extract all unique taxa names and subset phyloseq object
+```{r}
+tax_names<-c(taxa_names(ps_rare_t1_important_taxa), taxa_names(ps_rare_t3_important_taxa), taxa_names(ps_rare_t3_important_taxa))
+unique_taxa_names<-unique(tax_names)
+
+ps_simper_output<-subset_taxa(ps_rare_abund, taxa_names(ps_rare_abund) %in% unique_taxa_names)
+
+saveRDS(ps_simper_output, "/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/data/PhyloseqObjects/ITS/Simper_taxa_ITS_rareified.Rdata")
+```
+
