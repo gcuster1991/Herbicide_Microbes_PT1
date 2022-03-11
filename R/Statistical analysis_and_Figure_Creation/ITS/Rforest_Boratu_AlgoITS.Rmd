@@ -127,14 +127,27 @@ micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_herb, rm_na = T, tax_rank = 
 merged_baruta_simper_time<- merge_samples(merged_baruta_simper, group = "Time")
 micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = T, tax_rank = "Genus",scale_by = "taxa", cluster_rows=F, cluster_columns = T)
 
-micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = F, tax_rank = "Family",scale_by = "taxa", cluster_rows=F, cluster_columns = T, show_column_names = T, column_names_side = "bottom",, column_names_rot = 80, )
+micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = F, tax_rank = "Family",scale_by = "taxa", cluster_rows=F, cluster_columns = T, show_column_names = T,)
+
+
+merged_baruta_simper_time_tax <- tax_table(merged_baruta_simper_time)
+merged_baruta_simper_time_tax<-data.frame(merged_baruta_simper_time_tax)
+
+merged_baruta_simper_time_tax$Class[is.na(merged_baruta_simper_time_tax$Class)]<-"Unknown"
+merged_baruta_simper_time_tax$Family[is.na(merged_baruta_simper_time_tax$Family)]<-"Unknown"
+
+merged_baruta_simper_time@tax_table <- tax_table(merged_baruta_simper_time_tax)
 
 
 fam_names<-data.frame(gsub("column", "", tax_table(merged_baruta_simper_time)[,3]))
 
-fam_names$Class[is.na(fam_names$Class)]<-"Unknown"
+#fam_names<-data.frame(fam_names)
+#fam_names$Class[is.na(fam_names$Class)]<-"Unknown"
 
-micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = F,scale_by = "taxa", cluster_rows=F, cluster_columns = T , column_labels = tax_table(merged_baruta_simper_time)[,3], row_dend_reorder = TRUE, column_order = sort(fam_names[,1]))
+
+micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = F,scale_by = "taxa", cluster_rows=F, cluster_columns = T ,column_labels = tax_table(merged_baruta_simper_time)[,3], row_dend_reorder = TRUE, column_order = order(as.character(fam_names$ta3)))
+
+micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = F,scale_by = "taxa", cluster_rows=F, cluster_columns = T ,column_labels = tax_table(merged_baruta_simper_time)[,3] )
 ```
 
 
