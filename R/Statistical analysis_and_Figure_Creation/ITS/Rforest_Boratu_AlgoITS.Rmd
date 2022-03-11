@@ -113,6 +113,20 @@ saveRDS(merged_baruta_simper, "/Users/gordoncuster/Desktop/Git_Projects/Herbicid
 
 
 
+```{r}
+rowSums(data.frame(otu_table(merged_baruta_simper)))
+
+
+merged_baruta_simper_herb_time <- merge_samples(merged_baruta_simper, group = "herb_time")
+micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_herb_time, rm_na = T, scale_by = "taxa",annot_samples = "herb_time", cluster_rows=F, cluster_columns = T)
+
+
+merged_baruta_simper_herb<- merge_samples(merged_baruta_simper, group = "Herbicide")
+micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_herb, rm_na = T, scale_by = "taxa",annot_samples = "Herbicide", cluster_rows=F, cluster_columns = T)
+
+merged_baruta_simper_time<- merge_samples(merged_baruta_simper, group = "Time")
+micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = T, scale_by = "taxa", annot_samples = "Time", cluster_rows=F, cluster_columns = T)
+```
 
 
 
