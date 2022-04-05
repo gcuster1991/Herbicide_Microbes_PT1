@@ -145,7 +145,7 @@ fam_names<-data.frame(gsub("column", "", tax_table(merged_baruta_simper_time)[,3
 #fam_names$Class[is.na(fam_names$Class)]<-"Unknown"
 
 
-micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = F,scale_by = "taxa", cluster_rows=F, cluster_columns = T ,column_labels = tax_table(merged_baruta_simper_time)[,3], row_dend_reorder = TRUE, column_order = order(as.character(fam_names$ta3)))
+micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = F,scale_by = "taxa", cluster_rows=F, cluster_columns = T ,column_labels = tax_table(merged_baruta_simper_time)[,3], row_dend_reorder = TRUE)
 
 micrUBIfuns::plot_taxa_heatmap(merged_baruta_simper_time, rm_na = F,scale_by = "taxa", cluster_rows=F, cluster_columns = T ,column_labels = tax_table(merged_baruta_simper_time)[,3] )
 ```
