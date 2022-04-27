@@ -1,0 +1,1178 @@
+---
+title: "GLM enzymes with global test and dunnetts"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(MASS)
+library(multcomp)
+library(tidyr)
+library(vegan)
+library(parallelDist)
+library(ggordiplots)
+library(lmtest)
+library(psych)
+library(lme4)
+library(nlme)
+library(multcomp)
+```
+Read in data
+```{r}
+total<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/merged_metadata_herbicide_EPSCOR_2018.csv")
+enz <- read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme_Summary_W_percent_Change.csv")
+enz_only<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme.csv")
+
+wide_total <-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Wide_merged_GLM.csv")
+```
+
+Split data by herbicide and time so we can look at each individually
+```{r}
+#enz_only$Herbicide<-factor(enz_only$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"), ordered = T)
+enz_only$Herbicide<-factor(enz_only$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+str(enz_only$Total_Weed_Veg)
+#checks out its numeric here. 
+
+Aatrex<-filter(enz_only, Herbicide == "Aatrex")
+Clarity<-filter(enz_only, Herbicide == "Clarity")
+Roundup<-filter(enz_only, Herbicide == "Roundup Powermax")
+
+Handweed<-filter(enz_only, Herbicide != c("Aatrex"))
+Handweed<-filter(Handweed, Herbicide != c("Roundup Powermax"))
+Handweed<-filter(Handweed, Herbicide != c("Clarity"))
+Handweed<-filter(Handweed, Herbicide != c("Non-Treated"))
+
+NonTreat<-filter(enz_only, Herbicide == "Non-Treated")
+
+  
+Time1<-filter(enz_only, Time == "T1")
+Time2<-filter(enz_only, Time == "T2")
+Time3<-filter(enz_only, Time == "T3")
+Time2_3<-filter(enz_only, Time != "T1")
+Time1_2<-filter(enz_only, Time != "T3")
+```
+
+Create summary tables
+```{r}
+sub_enz_data<-enz_only[,c("Herbicide", "Time", "BG", "BX", "CBH", "AG", "NAG", "LAP", "PHOS" )]
+enz_summary<-describeBy(sub_enz_data, list(sub_enz_data$Herbicide, sub_enz_data$Time), mat = T)
+
+#write.csv(enz_summary, "/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Writing/Tables/enz_summary.csv")
+#IC_summary2<-do.call("rbind", IC_summary)
+```
+
+glm global test of enzymes time 1 against handweeded plots
+F stat for overall model signficance compared to intercept only model. Only if the more complex model is signficnat are the predictors kept. 
+#https://statisticsbyjim.com/regression/interpret-f-test-overall-significance-regression/
+```{r}
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_Time1 <- Time1[!is.na(Time1$LAP),]
+#sets order for handweed to be first category so dunnets compares to this. 
+sub_Time1$Herbicide<-factor(sub_Time1$Herbicide, levels = c( "Hand", "Non-Treated", "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Herbicide + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Time1)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Time1)
+  ##3rd model? 
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`[2], glob_sig$Df[2], glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF", "F", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Herbicide="Dunnett")))
+         # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+
+models_out
+p.predict
+out
+
+
+```
+
+glm global test of enzymes time 1 agaist non-treated plots
+```{r}
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_Time1 <- Time1[!is.na(Time1$LAP),]
+sub_Time1$Herbicide<-factor(sub_Time1$Herbicide, levels = c( "Non-Treated", "Hand",  "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Herbicide + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Time1)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Time1)
+  ##3rd model? 
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`[2], glob_sig$Df[2], glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF", "F", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Herbicide="Dunnett")))
+         # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+
+models_out
+p.predict
+out
+
+#drop1(mod_herb, test = "F")
+```
+
+adonis2 and graphs
+```{r}
+#convert to long format for ggplot
+subtime1_long <- sub_Time1[,c("Herbicide", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")] %>% 
+  gather(key = "Enzyme", value = "Activity",BG, CBH, PHOS, NAG, BX, AG, LAP )
+
+data_long<-enz_only[,c("Herbicide", "Time","BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")] %>% 
+  gather(key = "Enzyme", value = "Activity", BG, CBH, PHOS, NAG, BX, AG, LAP )
+
+dose.labs <- c("Time one","Time two","Time three")
+names(dose.labs) <- c("T1", "T2", "T3")
+
+phos_T1<-ggplot(data_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot(data=subset(data_long,Enzyme=="PHOS")) + theme_classic() + facet_wrap(.~ Time, labeller = labeller(Time = dose.labs)) +
+#ggplot(subtime1_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot() +theme_classic() + facet_wrap(~ Enzyme, scales = "free_y")  +
+  theme(plot.title= element_text( hjust = 0.5, size = 15)) + ylab("Activity (nmol/h/g)") + xlab("Weed removal treatment") + scale_fill_discrete(name = "Weed removal\n treatment", labels = c( "Nontreated", "Handweeded", "Aatrex", "Clarity", "Roundup\nPowermax")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=13)) + ylim(50,180) + theme(legend.position="none") +  theme(strip.text.x = element_text(size =  12)) +ggtitle("PHOS Activity")
+                                                                                                                                                                                                                                                                 
+bgTime<-ggplot(data_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot(data=subset(data_long,Enzyme=="BG")) + theme_classic() + facet_wrap(.~ Time, labeller = labeller(Time = dose.labs)) +
+#ggplot(subtime1_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot() +theme_classic() + facet_wrap(~ Enzyme, scales = "free_y")  +
+  theme(plot.title= element_text( hjust = 0.5, size = 15)) + ylab("Activity (nmol/h/g)") + xlab("Weed removal treatment") + scale_fill_discrete(name = "Weed removal\n treatment", labels = c( "Nontreated", "Handweeded", "Aatrex", "Clarity", "Roundup\nPowermax")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=13)) + theme(legend.position="none") +  theme(strip.text.x = element_text(size =  12))+ggtitle("BG Activity")
+
+lapTime<-ggplot(data_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot(data=subset(data_long,Enzyme=="LAP")) + theme_classic() + facet_wrap(.~ Time, labeller = labeller(Time = dose.labs)) +
+#ggplot(subtime1_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot() +theme_classic() + facet_wrap(~ Enzyme, scales = "free_y")  +
+  theme(plot.title= element_text( hjust = 0.5, size = 15)) + ylab("Activity (nmol/h/g)") + xlab("Weed removal treatment") + scale_fill_discrete(name = "Weed removal\n treatment", labels = c( "Nontreated", "Handweeded", "Aatrex", "Clarity", "Roundup\nPowermax")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=13)) #+ theme(legend.position="none") +  theme(strip.text.x = element_text(size =  12))+ggtitle("LAP Activity")
+
+grid.arrange(phos_T1, bgTime, lapTime)
+
+#multivariate
+enz_table<-sub_Time1[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_Time1[,c("Herbicide", "Treatment", "Total_Weed_Veg")]
+
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Herbicide + Total_Weed_Veg, data = data.frame(samp_data), permutations = 1000)
+
+time1_ord<-metaMDS(na.omit(sub_Time1[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]), distance = "bray" )
+stressplot(time1_ord)
+
+ord<-time1_ord
+#make the plot with everything 
+d <- gg_ordiplot(ord, samp_data$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1) 
+#pull out the ellipses
+df_ellipse <- d$df_ellipse
+ellipseG1 <- subset(df_ellipse, Group == "Hand", droplevels= TRUE)
+ellipseG2 <- subset(df_ellipse, Group == "Non-Treated", droplevels= TRUE)
+ellipseG3 <- subset(df_ellipse, Group == "Aatrex", droplevels= TRUE)
+ellipseG4 <- subset(df_ellipse, Group == "Clarity", droplevels= TRUE)
+ellipseG5 <- subset(df_ellipse, Group == "Roundup Powermax", droplevels= TRUE)
+
+
+#make the dataframe and subset out samples you dont want to plot
+test<-d$df_ord
+test$Sample_ID<-rownames(test)
+#test$Group=NULL
+names(test)<-c("x", "y","Herbicide")
+
+#make the ggplot scatter plot
+plot_test<-ggplot(test, aes(x=test$x, y=test$y), color=Herbicide)  + scale_color_manual(values=c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")) + geom_point(aes(color= Herbicide))
+#add paths, color, and size, of the hulls
+plot_test <- plot_test +
+    geom_path(data= ellipseG1, aes(x=x, y=y), color="#F8766D", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG2, aes(x=x, y=y), color="#A3A500", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG3, aes(x=x, y=y), color="#00BF7D", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG4, aes(x=x, y=y), color="#00B0F6", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG5, aes(x=x, y=y), color="#E76BF3", linetype="solid", size=1.0) 
+#theme it on up
+plot_test<- plot_test + theme_classic()
+m<-plot_test 
+#m <-m + annotate("text", x = -0.05, y = -0.012, label = "Time 2")
+#m <-m + annotate("text", x = 0.01, y = -0.01, label = "Time 3")
+#m <-m + annotate("text", x = 0.045, y = -0.023, label = "Time 1")
+#m <-m + annotate("text", x = 0.4, y = -0.5, label = "Time: P  > 0.8")
+m<- m + labs(x= "NMDS2", y="NMDS1")
+g <- m + ggtitle("") + theme(plot.title = element_text(hjust = 0.5, size = 22))  + scale_fill_discrete(name = "Herbicide", labels = c("Handweeded", "Nontreated", "Aatrex", "Clarity", "Roundup\nPowermax")) 
+g
+```
+Time 2 comparison to handweed
+```{r}
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_Time2 <- Time2[!is.na(Time2$LAP),]
+sub_Time2$Herbicide<-factor(sub_Time2$Herbicide, levels = c( "Hand", "Non-Treated", "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+#univariate
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Herbicide + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Time2)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Time2)
+  ##3rd model? 
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`[2], glob_sig$Df[2], glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF", "F", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Herbicide="Dunnett")))
+         # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+
+
+models_out
+p.predict
+out
+```
+
+Time 2 comparison to non-treated
+```{r}
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_Time2 <- Time2[!is.na(Time2$LAP),]
+sub_Time2$Herbicide<-factor(sub_Time2$Herbicide, levels = c(  "Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Herbicide + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Time2)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Time2)
+  ##3rd model? 
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`[2], glob_sig$Df[2], glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF", "F", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Herbicide="Dunnett")))
+         # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+
+
+models_out
+p.predict
+out
+```
+
+```{r}
+#convert to long format for ggplot
+subTime2_long <- sub_Time2[,c("Herbicide", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")] %>% 
+  gather(key = "Enzyme", value = "Activity",BG, CBH, PHOS, NAG, BX, AG, LAP )
+
+BG_T2<-ggplot(subTime2_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot(data=subset(subtime1_long,Enzyme=="BG")) + theme_classic() + #facet_wrap(~ Enzyme, scales = "free_y") +
+   ggtitle("") + theme(plot.title= element_text( hjust = 0.5, size = 22)) + ylab("Activity (nmol/h/g)") + xlab("Weed removal treatment") + scale_fill_discrete(name = "Weed removal\n treatment", labels = c("Handweeded", "Nontreated", "Aatrex", "Clarity", "Roundup\nPowermax")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=15)) 
+
+
+phos_T2<-ggplot(subTime2_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot(data=subset(subTime2_long,Enzyme=="PHOS")) + theme_classic()+
+#ggplot(subtime1_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot() +theme_classic() + facet_wrap(~ Enzyme, scales = "free_y")  +
+  theme(plot.title= element_text( hjust = 0.5, size = 22)) + ylab("")  + scale_fill_discrete(name = "Weed removal\n treatment", labels = c("Handweeded", "Nontreated", "Aatrex", "Clarity", "Roundup\nPowermax")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 14))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=15)) + ylim(50,180)+ theme(legend.position="none") + xlab("Weed removal treatment")
+
+#multivariate
+enz_table<-sub_Time2[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_Time2[,c("Herbicide", "Treatment", "Total_Weed_Veg", "LQ_PW", "PW_Tot")]
+
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Herbicide + Total_Weed_Veg, data = data.frame(samp_data), permutations = 1000)
+
+Time2_ord<-metaMDS(na.omit(sub_Time2[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]), distance = "bray" )
+stressplot(Time2_ord)
+
+
+
+ord<-Time2_ord
+#make the plot with everything 
+d <- gg_ordiplot(ord, samp_data$Total_Weed_Veg, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1) 
+#pull out the ellipses
+df_ellipse <- d$df_ellipse
+ellipseG1 <- subset(df_ellipse, Group == "Hand", droplevels= TRUE)
+ellipseG2 <- subset(df_ellipse, Group == "Non-Treated", droplevels= TRUE)
+ellipseG3 <- subset(df_ellipse, Group == "Aatrex", droplevels= TRUE)
+ellipseG4 <- subset(df_ellipse, Group == "Clarity", droplevels= TRUE)
+ellipseG5 <- subset(df_ellipse, Group == "Roundup Powermax", droplevels= TRUE)
+
+
+#make the dataframe and subset out samples you dont want to plot
+test<-d$df_ord
+test$Sample_ID<-rownames(test)
+test$LQ_PW<-samp_data$LQ_PW
+test$PW_Tot<-samp_data$PW_Tot
+#test$Group=NULL
+names(test)<-c("x", "y","Total Weedy Vegetation", "Sample_ID", "LQ_PW" , "PW_Tot")
+
+#make the ggplot scatter plot
+plot_test<-ggplot(test, aes(x=test$x, y=test$y, size=`Total Weedy Vegetation`, color=PW_Tot))  +# scale_color_manual(values=c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")) + 
+geom_point()
+#add paths, color, and size, of the hulls
+plot_test <- plot_test +
+    geom_path(data= ellipseG1, aes(x=x, y=y), color="#F8766D", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG2, aes(x=x, y=y), color="#A3A500", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG3, aes(x=x, y=y), color="#00BF7D", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG4, aes(x=x, y=y), color="#00B0F6", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG5, aes(x=x, y=y), color="#E76BF3", linetype="solid", size=1.0) 
+#theme it on up
+plot_test<- plot_test + theme_classic()
+m<-plot_test 
+#m <-m + annotate("text", x = -0.05, y = -0.012, label = "Time 2")
+#m <-m + annotate("text", x = 0.01, y = -0.01, label = "Time 3")
+#m <-m + annotate("text", x = 0.045, y = -0.023, label = "Time 1")
+#m <-m + annotate("text", x = 0.4, y = -0.5, label = "Time: P  > 0.8")
+m<- m + labs(x= "NMDS2", y="NMDS1")
+g <- m + ggtitle("") + theme(plot.title = element_text(hjust = 0.5, size = 22))  + scale_fill_discrete(name = "Herbicide", labels = c("Handweeded", "Nontreated", "Aatrex", "Clarity", "Roundup\nPowermax")) 
+g
+```
+Time 3 comparison to handweed 
+```{r}
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_Time3 <- Time2[!is.na(Time3$LAP),]
+sub_Time3$Herbicide<-factor(sub_Time3$Herbicide, levels = c( "Hand", "Non-Treated", "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Herbicide + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Time3)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Time3)
+  ##3rd model? 
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`[2], glob_sig$Df[2], glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF", "F", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Herbicide="Dunnett")))
+         # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+
+
+models_out
+p.predict
+out
+```
+Time 3 to non-treated
+```{r}
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_Time3 <- Time2[!is.na(Time3$LAP),]
+sub_Time3$Herbicide<-factor(sub_Time3$Herbicide, levels = c(  "Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Herbicide + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Time3)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Time3)
+  ##3rd model? 
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`[2], glob_sig$Df[2], glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF", "F", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Herbicide="Dunnett")))
+         # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+
+
+models_out
+p.predict
+out
+```
+
+```{r}
+#convert to long format for ggplot
+subTime3_long <- sub_Time3[,c("Herbicide", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")] %>% 
+  gather(key = "Enzyme", value = "Activity",BG, CBH, PHOS, NAG, BX, AG, LAP )
+
+PHOS_T3<-ggplot(subTime3_long, aes_string(x = "Herbicide", y= "Activity", fill="Herbicide")) + geom_boxplot(data=subset(subtime1_long,Enzyme=="PHOS")) + theme_classic() + #facet_wrap(~ Enzyme, scales = "free_y") +
+   ggtitle("") + theme(plot.title= element_text( hjust = 0.5, size = 22)) + ylab("") + xlab("") + scale_fill_discrete(name = "Weed removal\n treatment", labels = c("Handweeded", "Nontreated", "Aatrex", "Clarity", "Roundup\nPowermax")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=15)) + ylim(50,180) + theme(legend.position="none")
+
+
+
+#multivariate
+enz_table<-sub_Time3[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_Time3[,c("Herbicide", "Treatment", "Total_Weed_Veg")]
+
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Herbicide + Total_Weed_Veg, data = data.frame(samp_data), permutations = 1000)
+
+Time3_ord<-metaMDS(na.omit(sub_Time3[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]), distance = "bray" )
+stressplot(Time3_ord)
+
+ord<-Time3_ord
+#make the plot with everything 
+d <- gg_ordiplot(ord, samp_data$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1) 
+#pull out the ellipses
+df_ellipse <- d$df_ellipse
+ellipseG1 <- subset(df_ellipse, Group == "Hand", droplevels= TRUE)
+ellipseG2 <- subset(df_ellipse, Group == "Non-Treated", droplevels= TRUE)
+ellipseG3 <- subset(df_ellipse, Group == "Aatrex", droplevels= TRUE)
+ellipseG4 <- subset(df_ellipse, Group == "Clarity", droplevels= TRUE)
+ellipseG5 <- subset(df_ellipse, Group == "Roundup Powermax", droplevels= TRUE)
+
+
+#make the dataframe and subset out samples you dont want to plot
+test<-d$df_ord
+test$Sample_ID<-rownames(test)
+#test$Group=NULL
+names(test)<-c("x", "y","Herbicide")
+
+#make the ggplot scatter plot
+plot_test<-ggplot(test, aes(x=test$x, y=test$y), color=Herbicide)  + scale_color_manual(values=c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")) + geom_point(aes(color= Herbicide))
+
+
+#add paths, color, and size, of the hulls
+plot_test <- plot_test +
+    geom_path(data= ellipseG1, aes(x=x, y=y), color="#F8766D", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG2, aes(x=x, y=y), color="#A3A500", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG3, aes(x=x, y=y), color="#00BF7D", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG4, aes(x=x, y=y), color="#00B0F6", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG5, aes(x=x, y=y), color="#E76BF3", linetype="solid", size=1.0) 
+#theme it on up
+plot_test<- plot_test + theme_classic()
+m<-plot_test 
+#m <-m + annotate("text", x = -0.05, y = -0.012, label = "Time 2")
+#m <-m + annotate("text", x = 0.01, y = -0.01, label = "Time 3")
+#m <-m + annotate("text", x = 0.045, y = -0.023, label = "Time 1")
+#m <-m + annotate("text", x = 0.4, y = -0.5, label = "Time: P  > 0.8")
+m<- m + labs(x= "NMDS2", y="NMDS1")
+g <- m + ggtitle("") + theme(plot.title = element_text(hjust = 0.5, size = 22))  + scale_fill_discrete(name = "Herbicide", labels = c("Handweeded", "Nontreated", "Aatrex", "Clarity", "Roundup\nPowermax")) 
+g
+```
+
+
+```{r}
+library(gridExtra)
+grid.arrange(phos_T1, phos_T2, PHOS_T3, nrow=1)
+```
+
+
+#Split by herbicide
+
+All Together:
+```{r}
+#Aatrex
+#names(Aatrex)
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+#Aatrex$Herbicide<-factor(Aatrex$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+#univariate
+sub_enz_only <- enz_only[!is.na(enz_only$LAP),]
+sub_enz_only <- sub_enz_only[!sub_enz_only$Herbicide=="Non-Treated",]
+sub_enz_only <- sub_enz_only[!sub_enz_only$Time=="T1",]
+
+
+#convert to long format for ggplot
+subenz_long <- sub_enz_only[,c("Time", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")] %>% 
+  gather(key = "Enzyme", value = "Activity",BG, CBH, PHOS, NAG, BX, AG, LAP )
+
+ggplot(subenz_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("All samples by time") + theme(plot.title= element_text( hjust = 0.5, size = 22))
+
+#multivariate
+enz_table<-sub_enz_only[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_enz_only[,c("Time", "Treatment", "Total_Weed_Veg")]
+
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Treatment + Total_Weed_Veg, data = data.frame(samp_data), permutations = 1000)
+
+Aatrex_ord<-metaMDS(na.omit(sub_enz_only[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]), distance = "bray" )
+stressplot(Aatrex_ord)
+
+ord<-Aatrex_ord
+#make the plot with everything 
+d <- gg_ordiplot(ord, samp_data$Time, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1) 
+#pull out the ellipses
+df_ellipse <- d$df_ellipse
+ellipseG1 <- subset(df_ellipse, Group == "T1", droplevels= TRUE)
+ellipseG2 <- subset(df_ellipse, Group == "T2", droplevels= TRUE)
+ellipseG3 <- subset(df_ellipse, Group == "T3", droplevels= TRUE)
+
+
+#make the dataframe and subset out samples you dont want to plot
+test<-d$df_ord
+test$Sample_ID<-rownames(test)
+#test$Group=NULL
+names(test)<-c("x", "y","Time")
+
+#make the ggplot scatter plot
+plot_test<-ggplot(test, aes(x=test$x, y=test$y), color=Time)  + scale_color_manual(values=c("#F564E3", "#619CFF", "#F8766D", "#009E73", "#000000")) + geom_point(aes(color= Time))
+#add paths, color, and size, of the hulls
+plot_test <- plot_test +
+    geom_path(data= ellipseG1, aes(x=x, y=y), color="#F564E3", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG2, aes(x=x, y=y), color="#619CFF", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG3, aes(x=x, y=y), color="#F8766D", linetype="solid", size=1.0) 
+
+#theme it on up
+plot_test<- plot_test + theme_classic()
+m<-plot_test 
+#m <-m + annotate("text", x = -0.05, y = -0.012, label = "Time 2")
+#m <-m + annotate("text", x = 0.01, y = -0.01, label = "Time 3")
+#m <-m + annotate("text", x = 0.045, y = -0.023, label = "Time 1")
+#m <-m + annotate("text", x = 0.4, y = -0.5, label = "Time: P  > 0.8")
+m<- m + labs(x= "NMDS2", y="NMDS1")
+g <- m + ggtitle("Aatrex by time") + theme(plot.title = element_text(hjust = 0.5, size = 22))  
+g
+
+
+#adonis2 testing and pairwise comparisons for all t2 t3 samples 
+library(pairwiseAdonis)
+sub_enz_only <- enz_only[!is.na(enz_only$LAP),]
+#sub_enz_only <- sub_enz_only[!sub_enz_only$Herbicide=="Non-Treated",]
+sub_enz_only <- sub_enz_only[!sub_enz_only$Time=="T1",]
+enz_table<-sub_enz_only[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_enz_only[,c("Time", "Treatment")]
+samp_data$Treatment<-as.factor(samp_data$Treatment)
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Treatment, data = data.frame(samp_data), permutations = 1000)
+pairwise_treat<-pairwise.adonis2(psdist ~ Treatment, data = samp_data, perm=1000, p.adjust.methods="bonferroni")
+
+
+#examination of changes over time. 
+sub_enz_only <- enz_only[!is.na(enz_only$LAP),]
+#sub_enz_only <- sub_enz_only[!sub_enz_only$Herbicide=="Non-Treated",]
+sub_enz_only <- sub_enz_only[sub_enz_only$Herbicide=="Hand",]
+enz_table<-sub_enz_only[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_enz_only[,c("Time", "Treatment")]
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+adonis2(psdist ~ Time , data = data.frame(samp_data), permutations = 1000)
+pairwise_time<-pairwise.adonis2(psdist ~ Time, data = samp_data, perm=1000, p.adjust.methods="bonferroni")
+pairwise_time
+```
+
+
+Aatrex with global test. 
+```{r}
+#Aatrex
+#names(Aatrex)
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+#Aatrex$Herbicide<-factor(Aatrex$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+#univariate
+sub_Aatrex <- Aatrex[!is.na(Aatrex$LAP),]
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Time + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Aatrex)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Aatrex)
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`, glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF_null", "F-stat", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Time="Tukey")))
+    # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+models_out
+p.predict
+out
+
+#convert to long format for ggplot
+subAatrex_long <- sub_Aatrex[,c("Time", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP", "C.N_enz")] %>% 
+  gather(key = "Enzyme", value = "Activity",BG, CBH, PHOS, NAG, BX, AG, LAP, C.N_enz )
+
+#ggplot(subAatrex_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Aatrex by time") + theme(plot.title= element_text( hjust = 0.5, size = 22))
+
+dose.labs <- c("AG","BG","BX","PHOS", "C enzymes : N enzymes")
+names(dose.labs) <- c("AG","BG", "BX", "PHOS", "C.N_enz")
+
+aaUV1<-ggplot(subAatrex_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y", labeller = labeller(Enzyme = dose.labs)) + theme_classic() +
+   ggtitle("") + theme(plot.title= element_text( hjust = 0.5, size = 22)) + ylab("Activity (nmol/h/g)") + xlab("Sampling time")  + scale_fill_discrete(name = "Sampling time", labels = c("Time one", "Time two", "Time three")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=15))  +  theme(strip.text.x = element_text(size =  12)) #theme(legend.position="none") + 
+
+#multivariate
+enz_table<-sub_Aatrex[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_Aatrex[,c("Time", "Treatment", "Total_Weed_Veg")]
+
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Time + Total_Weed_Veg, data = data.frame(samp_data), permutations = 1000)
+
+Aatrex_ord<-metaMDS(na.omit(sub_Aatrex[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]), distance = "bray" )
+stressplot(Aatrex_ord)
+
+ord<-Aatrex_ord
+#make the plot with everything 
+d <- gg_ordiplot(ord, samp_data$Time, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1) 
+#pull out the ellipses
+df_ellipse <- d$df_ellipse
+ellipseG1 <- subset(df_ellipse, Group == "T1", droplevels= TRUE)
+ellipseG2 <- subset(df_ellipse, Group == "T2", droplevels= TRUE)
+ellipseG3 <- subset(df_ellipse, Group == "T3", droplevels= TRUE)
+
+
+#make the dataframe and subset out samples you dont want to plot
+test<-d$df_ord
+test$Sample_ID<-rownames(test)
+#test$Group=NULL
+names(test)<-c("x", "y","Time")
+
+#make the ggplot scatter plot
+plot_test<-ggplot(test, aes(x=test$x, y=test$y), color=Time)  + scale_color_manual(values=c("#F564E3", "#619CFF", "#F8766D", "#009E73", "#000000")) + geom_point(aes(color= Time))
+#add paths, color, and size, of the hulls
+plot_test <- plot_test +
+    geom_path(data= ellipseG1, aes(x=x, y=y), color="#F564E3", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG2, aes(x=x, y=y), color="#619CFF", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG3, aes(x=x, y=y), color="#F8766D", linetype="solid", size=1.0) 
+
+#theme it on up
+plot_test<- plot_test + theme_classic()
+m<-plot_test 
+#m <-m + annotate("text", x = -0.05, y = -0.012, label = "Time 2")
+#m <-m + annotate("text", x = 0.01, y = -0.01, label = "Time 3")
+#m <-m + annotate("text", x = 0.045, y = -0.023, label = "Time 1")
+#m <-m + annotate("text", x = 0.4, y = -0.5, label = "Time: P  > 0.8")
+m<- m + labs(x= "NMDS2", y="NMDS1")
+g <- m + ggtitle("Aatrex by time") + theme(plot.title = element_text(hjust = 0.5, size = 22))  
+g
+```
+
+Clarity
+```{r}
+#Clarity
+#names(Clarity)
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_Clarity <- Clarity[!is.na(Clarity$LAP),]
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Time + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Clarity)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Clarity)
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`, glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF_null", "F-stat", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Time="Tukey")))
+    # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+models_out
+p.predict
+out
+
+#convert to long format for ggplot
+subClarity_long <- sub_Clarity[,c("Time", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP", "C.N_enz")] %>% 
+  gather(key = "Enzyme", value = "Activity",BG, CBH, PHOS, NAG, BX, AG, LAP,C.N_enz )
+
+#ggplot(subClarity_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Clarity by time") + theme(plot.title= element_text( hjust = 0.5, size = 22))
+
+
+dose.labs <- c("AG","BG","BX","PHOS", "C enzymes : N enzymes")
+names(dose.labs) <- c("AG","BG", "BX", "PHOS", "C.N_enz")
+
+clUV1<-ggplot(subClarity_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y", labeller = labeller(Enzyme = dose.labs)) + theme_classic() +
+   ggtitle("") + theme(plot.title= element_text( hjust = 0.5, size = 22)) + ylab("Activity (nmol/h/g)") + xlab("Sampling time")  + scale_fill_discrete(name = "Sampling time", labels = c("Time one", "Time two", "Time three")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=15))  +  theme(strip.text.x = element_text(size =  12)) #theme(legend.position="none") + 
+
+#multivariate
+enz_table<-sub_Clarity[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_Clarity[,c("Time", "Treatment", "Total_Weed_Veg")]
+
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Time + Total_Weed_Veg, data = data.frame(samp_data), permutations = 1000)
+
+Clarity_ord<-metaMDS(na.omit(sub_Clarity[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]), distance = "bray" )
+stressplot(Clarity_ord)
+
+ord<-Clarity_ord
+#make the plot with everything 
+d <- gg_ordiplot(ord, samp_data$Time, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1) 
+#pull out the ellipses
+df_ellipse <- d$df_ellipse
+ellipseG1 <- subset(df_ellipse, Group == "T1", droplevels= TRUE)
+ellipseG2 <- subset(df_ellipse, Group == "T2", droplevels= TRUE)
+ellipseG3 <- subset(df_ellipse, Group == "T3", droplevels= TRUE)
+
+
+#make the dataframe and subset out samples you dont want to plot
+test<-d$df_ord
+test$Sample_ID<-rownames(test)
+#test$Group=NULL
+names(test)<-c("x", "y","Time")
+
+#make the ggplot scatter plot
+plot_test<-ggplot(test, aes(x=test$x, y=test$y), color=Time)  + scale_color_manual(values=c("#F564E3", "#619CFF", "#F8766D", "#009E73", "#000000")) + geom_point(aes(color= Time))
+#add paths, color, and size, of the hulls
+plot_test <- plot_test +
+    geom_path(data= ellipseG1, aes(x=x, y=y), color="#F564E3", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG2, aes(x=x, y=y), color="#619CFF", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG3, aes(x=x, y=y), color="#F8766D", linetype="solid", size=1.0) 
+
+#theme it on up
+plot_test<- plot_test + theme_classic()
+m<-plot_test 
+#m <-m + annotate("text", x = -0.05, y = -0.012, label = "Time 2")
+#m <-m + annotate("text", x = 0.01, y = -0.01, label = "Time 3")
+#m <-m + annotate("text", x = 0.045, y = -0.023, label = "Time 1")
+#m <-m + annotate("text", x = 0.4, y = -0.5, label = "Time: P  > 0.8")
+m<- m + labs(x= "NMDS2", y="NMDS1")
+g <- m + ggtitle("Clarity by time") + theme(plot.title = element_text(hjust = 0.5, size = 22))  
+g
+```
+
+Handweed
+```{r}
+#Handweed
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_Handweed <- Handweed[!is.na(Handweed$LAP),]
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Time + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Handweed)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Handweed)
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`, glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF_null", "F-stat", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Time="Tukey")))
+    # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+models_out
+p.predict
+out
+#convert to long format for ggplot
+subHandweed_long <- sub_Handweed[,c("Time", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP", "C.N_enz")] %>% 
+  gather(key = "Enzyme", value = "Activity",AG,BG, PHOS, LAP, BX, C.N_enz )
+
+HW_UV<-ggplot(subHandweed_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y") + theme(axis.text.x = element_text(angle = 45, hjust = 1))  + ggtitle("Handweed by time") + theme(plot.title= element_text( hjust = 0.5, size = 22))
+
+subHandweed_long$Enzyme<-factor(subHandweed_long$Enzyme, levels = c("AG", "BG", "BX", "PHOS", "LAP", "C.N_enz"))
+
+dose.labs <- c("AG","BG","BX","PHOS", "LAP",  "C enzymes : N enzymes")
+names(dose.labs) <- c("AG","BG", "BX", "PHOS", "LAP", "C.N_enz")
+
+HW_UV1<-ggplot(subHandweed_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y", labeller = labeller(Enzyme = dose.labs)) + theme_classic() +
+   ggtitle("Handweeded") + theme(plot.title= element_text( hjust = 0.5, size = 15)) + ylab("Activity (nmol/h/g)") + xlab("Sampling time")  + scale_fill_discrete(name = "Sampling time", labels = c("Time one", "Time two", "Time three")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=15))  +  theme(strip.text.x = element_text(size =  12)) #theme(legend.position="none") + 
+
+#multivariate
+enz_table<-sub_Handweed[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_Handweed[,c("Time", "Treatment", "Total_Weed_Veg")]
+
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Time + Total_Weed_Veg, data = data.frame(samp_data), permutations = 1000)
+
+pairwise_time_handweed<-pairwise.adonis2(psdist ~ Time, data = samp_data, perm=1000, p.adjust.methods="bonferroni")
+pairwise_time_handweed
+
+Handweed_ord<-metaMDS(na.omit(sub_Handweed[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]), distance = "bray" )
+stressplot(Handweed_ord)
+
+ord<-Handweed_ord
+#make the plot with everything 
+d <- gg_ordiplot(ord, samp_data$Time, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1) 
+#pull out the ellipses
+df_ellipse <- d$df_ellipse
+ellipseG1 <- subset(df_ellipse, Group == "T1", droplevels= TRUE)
+ellipseG2 <- subset(df_ellipse, Group == "T2", droplevels= TRUE)
+ellipseG3 <- subset(df_ellipse, Group == "T3", droplevels= TRUE)
+
+
+#make the dataframe and subset out samples you dont want to plot
+test<-d$df_ord
+test$Sample_ID<-rownames(test)
+#test$Group=NULL
+names(test)<-c("x", "y","Time")
+
+#make the ggplot scatter plot
+plot_test<-ggplot(test, aes(x=test$x, y=test$y), color=Time)  + scale_color_manual(values=c("#F8766D", "#00BA38", "#619CFF", "#009E73", "#000000")) + geom_point(aes(color= Time))
+#add paths, color, and size, of the hulls
+plot_test <- plot_test +
+    geom_path(data= ellipseG1, aes(x=x, y=y), color="#F8766D", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG2, aes(x=x, y=y), color="#00BA38", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG3, aes(x=x, y=y), color="#619CFF", linetype="solid", size=1.0) 
+
+#theme it on up
+plot_test<- plot_test + theme_classic()
+m<-plot_test 
+#m <-m + annotate("text", x = -0.05, y = -0.012, label = "Time 2")
+#m <-m + annotate("text", x = 0.01, y = -0.01, label = "Time 3")
+#m <-m + annotate("text", x = 0.045, y = -0.023, label = "Time 1")
+#m <-m + annotate("text", x = 0.4, y = -0.5, label = "Time: P  > 0.8")
+m<- m + labs(x= "NMDS2", y="NMDS1")
+m <- m + annotate("text", label="Sampling time:\np < 0.01", x = 0.12, y = -0.055)
+g <- m + ggtitle("") + theme(plot.title = element_text(hjust = 0.5, size = 22))  + theme(axis.title.x = element_text(size=15)) + theme(axis.title.y = element_text(size=15)) + scale_fill_discrete(name = "Sampling time", labels = c("Time 1", "Time 2", "Time 3"))
+g
+
+HW_MV<-g
+
+```
+
+```{r}
+#Roundup
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_Roundup <- Roundup[!is.na(Roundup$LAP),]
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Time + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_Roundup)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_Roundup)
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`, glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF_null", "F-stat", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Time="Tukey")))
+    # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+models_out
+p.predict
+out
+
+#convert to long format for ggplot
+subRoundup_long <- sub_Roundup[,c("Time", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP", "C.N_enz")] %>% 
+  gather(key = "Enzyme", value = "Activity", AG, BG, BX, PHOS, LAP, C.N_enz )
+
+subRoundup_long$Enzyme<-factor(subRoundup_long$Enzyme, levels = c("AG", "BG", "BX", "PHOS", "LAP", "C.N_enz"))
+
+dose.labs <- c("AG","BG","BX","PHOS", "LAP",  "C enzymes : N enzymes")
+names(dose.labs) <- c("AG","BG", "BX", "PHOS", "LAP", "C.N_enz")
+
+RUUV1<-ggplot(subRoundup_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y", labeller = labeller(Enzyme = dose.labs)) + theme_classic() +
+   ggtitle("Roundup Powermax") + theme(plot.title= element_text( hjust = 0.5, size = 15)) + ylab("Activity (nmol/h/g)") + xlab("Sampling time")  + scale_fill_discrete(name = "Sampling time", labels = c("Time one", "Time two", "Time three")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=15))  +  theme(strip.text.x = element_text(size =  12)) #theme(legend.position="none") + 
+
+#ggplot(subRoundup_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Roundup Powermax by time") + theme(plot.title= element_text( hjust = 0.5, size = 22))
+
+
+Phos_RU<-ggplot(subRoundup_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot(data=subset(subRoundup_long, subRoundup_long["Enzyme"] == "PHOS" )) + theme_classic() + #facet_wrap(~ Edaphic, scales = "free_y") + 
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 15)) + ggtitle("") + theme(plot.title= element_text( hjust = 0.5, size = 20)) + theme(axis.title.y = element_text(size = 15), axis.text.y = element_text(size = 12))+ ylab("Activity\n(nmol/hr/g dry soil)") + xlab("Sampling Time") + scale_fill_discrete(name = "Sampling time", labels = c("Time 1", "Time 2", "Time 3"))
+
+#multivariate
+enz_table<-sub_Roundup[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_Roundup[,c("Time", "Treatment", "Total_Weed_Veg")]
+
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Time + Total_Weed_Veg, data = data.frame(samp_data), permutations = 1000)
+
+Roundup_ord<-metaMDS(na.omit(sub_Roundup[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]), distance = "bray" )
+stressplot(Roundup_ord)
+
+ord<-Roundup_ord
+#make the plot with everything 
+d <- gg_ordiplot(ord, samp_data$Time, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1) 
+#pull out the ellipses
+df_ellipse <- d$df_ellipse
+ellipseG1 <- subset(df_ellipse, Group == "T1", droplevels= TRUE)
+ellipseG2 <- subset(df_ellipse, Group == "T2", droplevels= TRUE)
+ellipseG3 <- subset(df_ellipse, Group == "T3", droplevels= TRUE)
+
+
+#make the dataframe and subset out samples you dont want to plot
+test<-d$df_ord
+test$Sample_ID<-rownames(test)
+#test$Group=NULL
+names(test)<-c("x", "y","Time")
+
+#make the ggplot scatter plot
+plot_test<-ggplot(test, aes(x=test$x, y=test$y), color=Time)  + scale_color_manual(values=c("#F564E3", "#619CFF", "#F8766D", "#009E73", "#000000")) + geom_point(aes(color= Time))
+#add paths, color, and size, of the hulls
+plot_test <- plot_test +
+    geom_path(data= ellipseG1, aes(x=x, y=y), color="#F564E3", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG2, aes(x=x, y=y), color="#619CFF", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG3, aes(x=x, y=y), color="#F8766D", linetype="solid", size=1.0) 
+
+#theme it on up
+plot_test<- plot_test + theme_classic()
+m<-plot_test 
+#m <-m + annotate("text", x = -0.05, y = -0.012, label = "Time 2")
+#m <-m + annotate("text", x = 0.01, y = -0.01, label = "Time 3")
+#m <-m + annotate("text", x = 0.045, y = -0.023, label = "Time 1")
+#m <-m + annotate("text", x = 0.4, y = -0.5, label = "Time: P  > 0.8")
+m<- m + labs(x= "NMDS2", y="NMDS1")
+g <- m + ggtitle("Roundup by time") + theme(plot.title = element_text(hjust = 0.5, size = 22))  
+g
+```
+
+```{r}
+#NonTreat
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+sub_NonTreat <- NonTreat[!is.na(NonTreat$LAP),]
+#univariate
+out<-list()
+models_out<-list()
+p.predict<-list()
+
+for(i in 1:(length(enzymes))){
+  mod_herb <- glm(formula = noquote(paste(enzymes[i], "~ Time + Total_Weed_Veg", sep = "")), family = gaussian(link = "identity"), data = sub_NonTreat)
+  mod_inter <- glm(formula = noquote(paste(enzymes[i], "~ 1", sep = "")), family = gaussian(link = "identity"), data = sub_NonTreat)
+  glob_sig<-anova(mod_inter, mod_herb, test = "F")
+    if(glob_sig$`Pr(>F)`[2]<=0.05){
+        test_stats<-c(glob_sig$`Resid. Df`, glob_sig$F[2], glob_sig$`Pr(>F)`[2])
+        names(test_stats) <- c("DF_res", "DF_null", "F-stat", "p-val")
+        sum_model<-summary(mod_herb)
+        post_hoc<-summary(glht(mod_herb, mcp(Time="Tukey")))
+    # p<-anova(mod_herb, mod_inter)
+        #  p.vals<-c(p.vals, list(p))
+        significance_predic<-drop1(mod_herb, test = "F")
+        out<-c(out, list(post_hoc), enzymes[i])
+        models_out <- c(models_out, enzymes[i], list(test_stats), list(sum_model))
+        p.predict <- c(p.predict, list(significance_predic), enzymes[i])
+    }
+
+}
+models_out
+p.predict
+out
+
+#convert to long format for ggplot
+subNonTreat_long <- sub_NonTreat[,c("Time", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP", "C.N_enz")] %>% 
+  gather(key = "Enzyme", value = "Activity",BG, CBH, PHOS, NAG, BX, AG, LAP, C.N_enz )
+
+
+dose.labs <- c("AG","BG","BX","PHOS", "C enzymes : N enzymes")
+names(dose.labs) <- c("AG","BG", "BX", "PHOS", "C.N_enz")
+
+aaUV1<-ggplot(subNonTreat_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y", labeller = labeller(Enzyme = dose.labs)) + theme_classic() +
+   ggtitle("") + theme(plot.title= element_text( hjust = 0.5, size = 22)) + ylab("Activity (nmol/h/g)") + xlab("Sampling time")  + scale_fill_discrete(name = "Sampling time", labels = c("Time one", "Time two", "Time three")) + theme(axis.text.y = element_text(size=12))  + 
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + 
+       theme(strip.text.x = element_text(size = 9, colour = "black", angle = 0)) + theme(axis.title.y = element_text(size=15))  +  theme(strip.text.x = element_text(size =  12)) #theme(legend.position="none") + 
+
+
+#ggplot(subNonTreat_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Non-treated by time") + theme(plot.title= element_text( hjust = 0.5, size = 22))
+
+
+#multivariate
+enz_table<-sub_NonTreat[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]
+samp_data <- sub_NonTreat[,c("Time", "Treatment", "Total_Weed_Veg")]
+
+psdist<-parDist(as.matrix(enz_table), method = "bray")
+
+adonis2(psdist ~ Time + Total_Weed_Veg, data = data.frame(samp_data), permutations = 1000)
+
+NonTreat_ord<-metaMDS(na.omit(sub_NonTreat[,c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")]), distance = "bray" )
+stressplot(NonTreat_ord)
+
+ord<-NonTreat_ord
+#make the plot with everything 
+d <- gg_ordiplot(ord, samp_data$Time, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1) 
+#pull out the ellipses
+df_ellipse <- d$df_ellipse
+ellipseG1 <- subset(df_ellipse, Group == "T1", droplevels= TRUE)
+ellipseG2 <- subset(df_ellipse, Group == "T2", droplevels= TRUE)
+ellipseG3 <- subset(df_ellipse, Group == "T3", droplevels= TRUE)
+
+
+#make the dataframe and subset out samples you dont want to plot
+test<-d$df_ord
+test$Sample_ID<-rownames(test)
+#test$Group=NULL
+names(test)<-c("x", "y","Time")
+
+#make the ggplot scatter plot
+plot_test<-ggplot(test, aes(x=test$x, y=test$y), color=Time)  + scale_color_manual(values=c("#F564E3", "#619CFF", "#F8766D", "#009E73", "#000000")) + geom_point(aes(color= Time))
+#add paths, color, and size, of the hulls
+plot_test <- plot_test +
+    geom_path(data= ellipseG1, aes(x=x, y=y), color="#F564E3", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG2, aes(x=x, y=y), color="#619CFF", linetype="solid", size=1.0) +
+    geom_path(data= ellipseG3, aes(x=x, y=y), color="#F8766D", linetype="solid", size=1.0) 
+
+#theme it on up
+plot_test<- plot_test + theme_classic()
+m<-plot_test 
+#m <-m + annotate("text", x = -0.05, y = -0.012, label = "Time 2")
+#m <-m + annotate("text", x = 0.01, y = -0.01, label = "Time 3")
+#m <-m + annotate("text", x = 0.045, y = -0.023, label = "Time 1")
+#m <-m + annotate("text", x = 0.4, y = -0.5, label = "Time: P  > 0.8")
+m<- m + labs(x= "NMDS2", y="NMDS1")
+g <- m + ggtitle("NonTreat by time") + theme(plot.title = element_text(hjust = 0.5, size = 22))  
+g
+```
+
+
+combine figures for manuscirpt
+```{r}
+
+subRoundup_long <- sub_Roundup[,c("Time", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP", "C.N_enz")] %>% 
+  gather(key = "Enzyme", value = "Activity", AG, BG, BX, PHOS, C.N_enz )
+
+RU_UV<-ggplot(subRoundup_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Glyphosate") + theme(plot.title= element_text( hjust = 0.5, size =17))  + ylab("") + xlab("") + scale_fill_discrete(name = "Sampling time", labels = c("Pre-treatment", "10-days post", "20-days post"))  + theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  + theme(strip.text.x = element_text(size = 10, colour = "black", angle = 0)) + theme(axis.text.y = element_text(size=14, angle=45)) + theme(axis.title.y = element_text(size=15))
+
+subHandweed_long <- sub_Handweed[,c("Time", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP", "C.N_enz")] %>% 
+  gather(key = "Enzyme", value = "Activity",, AG, BG, BX, PHOS, C.N_enz )
+
+HW_UV<-ggplot(subHandweed_long, aes_string(x = "Time", y= "Activity", fill="Time")) + geom_boxplot() + theme_classic() + facet_wrap(~ Enzyme, scales = "free_y") + theme(axis.text.x = element_text(angle = 45, hjust = 1))  + ggtitle("Handweeded") + theme(plot.title= element_text( hjust = 0.5, size = 17))  + ylab("") + xlab("") + scale_fill_discrete(name = "Sampling time", labels = c("Pre-treatment", "10 days post", "20 days post"))  + theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_text(size = 12))  +  theme(strip.text.x = element_text(size = 10, colour = "black", angle = 0))  + theme(axis.text.y = element_text(size=14, angle=45)) + theme(axis.title.y = element_text(size=15)) + theme(legend.position = "none") 
+
+
+#HW_MV <- HW_MV + theme(legend.position = "none") + ggtitle("Hand-weeded") + theme(plot.title= element_text( hjust = 0.5, size = 15)) + theme(axis.text.y = element_text(size=14, angle=0)) + theme(axis.text.x = element_text(size = 14))
+
+
+my_legend <- get_legend(RU_UV)
+as_ggplot(my_legend)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Enz_hump_activity_legend.pdf")
+RU_UV<-RU_UV+ theme(legend.position = "none") 
+RU_UV
+
+
+ggarrange(HW_UV, RU_UV,  nrow = 2, ncol = 1)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Enz_hump_activity.pdf", width = 7, height = 10)
+```
+
+
+#All together with conservative mixed models
+
+with time 1 values as a preditor and only time 2 and 3
+```{r}
+enz_only$block<-factor(substr(enz_only$Sample_ID, start = 1, stop = 1))
+dat <- enz_only[!is.na(enz_only$LAP),]
+
+#Good for shapiro test on residuals without log transform. I ran each model and checked the residuals for normailty using "shapiro.test(resid(test_model_lmer))". All of the follwing passed the shapiro wilk test : BG, CBH, AG, BX, PHOS, LAP, NAG
+
+dat<-dat[dat$Time != "T1", ]
+
+library(lmerTest)
+test_model_lmer<-lmer(NAG ~ Herbicide + BG_T1 + Time + (1|block) + (1|Time), data = dat)
+summary(test_model_lmer)
+summary(glht(test_model_lmer, mcp(Herbicide = "Tukey", Time = "Tukey")))
+anova(test_model_lmer)
+
+enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
+enzymes_t1<-c("BG_T1", "CBH_T1", "PHOS_T1", "NAG_T1", "BX_T1", "AG_T1", "LAP_T1")
+dat
+#univariate
+out<-list()
+models_out<-list()
+p.vals<-list()
+
+for(i in 1:(length(enzymes))){
+  mod <- lmer(formula = noquote(paste(enzymes[i], "~ Herbicide + Total_Weed_Veg +", enzymes_t1[i], "+ Time + Time*Herbicide + (1|Time)", sep = "")), data = dat)
+  sum_model<-summary(mod)
+  post_hoc<-summary(glht(mod, mcp(Herbicide = "Tukey", Time = "Tukey")))
+  p<-anova(mod)
+  p.vals<-c(p.vals, list(p))
+  out<-c(out, list(post_hoc))
+  models_out <- c(models_out, list(sum_model))
+}
+
+
+models_out
+out
+p.vals
+```
+
+
+
+Weed cover
+```{r}
+t1_mod<-glm(Total_Weed_Veg ~ Herbicide, data = Time1)
+summary(glht(t1_mod, mcp(Herbicide = "Tukey")))
+plot(Time1$Total_Weed_Veg ~ Time1$Herbicide)
+
+
+t2_mod<-glm(Total_Weed_Veg ~ Herbicide, data = Time2)
+summary(glht(t2_mod, mcp(Herbicide = "Tukey")))
+plot(Time2$Total_Weed_Veg ~ Time2$Herbicide)
+t3_mod<-glm(NO3_mg_kgdrysoil ~ Total_Weed_Veg, data = Time2)
+summary(t3_mod)
+
+t3_mod<-glm(NO3_mg_kgdrysoil ~ Herbicide, data = Time3)
+summary(t3_mod)
+summary(glht(t3_mod, mcp(Herbicide = "Tukey")))
+plot(Time3$Total_Weed_Veg ~ Time3$Herbicide)
+```
+

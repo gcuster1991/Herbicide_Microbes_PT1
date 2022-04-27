@@ -1,0 +1,155 @@
+---
+title: "Weed Cover"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(MASS)
+library(multcomp)
+library(tidyr)
+library(vegan)
+library(parallelDist)
+library(ggordiplots)
+library(lmtest)
+library(psych)
+library(lme4)
+library(nlme)
+library(multcomp)
+```
+
+Read in data
+```{r}
+total<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/merged_metadata_herbicide_EPSCOR_2018.csv")
+enz <- read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme_Summary_W_percent_Change.csv")
+enz_only<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme.csv")
+
+wide_total <-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Wide_merged_GLM.csv")
+```
+
+Pull weed columns, Time, Treatment
+```{r}
+names(enz_only)
+weedcover<- enz_only %>% dplyr::select(Herbicide, Time, Total_Weed_Veg, ClassPW, ClassNS, CLASSFT, CLASSLQ, CLASSU, Barcode_ID )
+
+
+```
+
+
+Split data by herbicide and time so we can look at each individually
+```{r}
+#weedcover$Herbicide<-factor(weedcover$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"), ordered = T)
+weedcover$Herbicide<-factor(weedcover$Herbicide, levels = c("Non-Treated", "Hand", "Aatrex", "Clarity", "Roundup Powermax"), ordered = F)
+str(weedcover$Total_Weed_Veg)
+#checks out its numeric here. 
+
+Aatrex<-filter(weedcover, Herbicide == "Aatrex")
+Clarity<-filter(weedcover, Herbicide == "Clarity")
+Roundup<-filter(weedcover, Herbicide == "Roundup Powermax")
+
+Handweed<-filter(weedcover, Herbicide != c("Aatrex"))
+Handweed<-filter(Handweed, Herbicide != c("Roundup Powermax"))
+Handweed<-filter(Handweed, Herbicide != c("Clarity"))
+Handweed<-filter(Handweed, Herbicide != c("Non-Treated"))
+
+NonTreat<-filter(weedcover, Herbicide == "Non-Treated")
+
+  
+Time1<-filter(weedcover, Time == "T1")
+Time2<-filter(weedcover, Time == "T2")
+Time3<-filter(weedcover, Time == "T3")
+Time2_3<-filter(weedcover, Time != "T1")
+Time1_2<-filter(weedcover, Time != "T3")
+```
+
+Total weedy cover by time point
+```{r}
+#total weedy vegeation at time 1
+mod1<-aov(Total_Weed_Veg ~ Herbicide, data = Time1)
+#passed
+shapiro.test(aov(Total_Weed_Veg ~ Herbicide, data = Time1)$residuals)
+summary(aov(Total_Weed_Veg ~ Herbicide, data = Time1))
+TukeyHSD(mod1, "Herbicide")
+
+#total weedy vegetaiton at time 2
+mod2<-aov(Total_Weed_Veg ~ Herbicide, data = Time2)
+#passed
+shapiro.test(aov(Total_Weed_Veg ~ Herbicide, data = Time2)$residuals)
+summary(aov(Total_Weed_Veg ~ Herbicide, data = Time2))
+Anova(mod2)
+TukeyHSD(mod2, "Herbicide")
+
+
+#total weedy vegeation time 3
+mod3<-aov(Total_Weed_Veg ~ Herbicide, data = Time3)
+#passed
+shapiro.test(aov(Total_Weed_Veg ~ Herbicide, data = Time3)$residuals)
+summary(aov(Total_Weed_Veg ~ Herbicide, data = Time3))
+TukeyHSD(mod3, "Herbicide")
+```
+```{r}
+library(car)
+datasets_herb <- list(Time1, Time2, Time3)
+names(datasets_herb) <- c("Time_1", "Time2", "Time3")
+weedcover_names<-c("Total_Weed_Veg", "ClassPW",  "CLASSLQ" )
+
+sig_enz<-list()
+models<-data.frame()
+pairwise_comps<-data.frame()
+coefficents<-data.frame()
+
+for (j in 1:length(datasets_herb)){
+  for (i in 1:length(weedcover_names)){
+global_test <- aov(formula = datasets_herb[[j]][[weedcover_names[i]]] ~  datasets_herb[[j]]$Herbicide)
+sum_test<-data.frame(Anova(global_test, type="II"))
+#sum_test<-data.frame(sum_test)
+sum_test$Herbicide<-weedcover_names[i]
+sum_test$Time<-names(datasets_herb[j])
+
+coef_gm<-data.frame(coef(global_test))
+coef_gm$Herbicide<-weedcover_names[i]
+coef_gm$Time<-names(datasets_herb[j])
+
+pairwise<-TukeyHSD(global_test, "datasets_herb[[j]]$Herbicide")
+pairwise<-data.frame(pairwise[1])
+pairwise$Herbicide<-weedcover_names[i]
+pairwise$Time<-names(datasets_herb[j])
+
+models<-rbind(models, sum_test)
+pairwise_comps<-rbind(pairwise_comps, pairwise)
+coefficents<-rbind(coefficents, coef_gm)
+  }
+}
+
+models$ENZ_HERB<-paste(models$Herbicide, models$Time, sep = "_")
+pairwise_comps$ENZ_HERB<-paste(pairwise_comps$Herbicide, pairwise_comps$Time, sep = "_")
+coefficents$ENZ_HERB<-paste(coefficents$Enzyme, coefficents$Herbicide, sep = "_")
+
+#keep only those models with a sigificant value for effect of herbicide
+sig_herb_models<-models[substr(rownames(models), start = 1, stop = 23) == "datasets_herb[[j]]$Herb" & models$Pr..F.<=0.05,]
+all_herb_models<-models[substr(rownames(models), start = 1, stop = 23) == "datasets_herb[[j]]$Herb",]
+#p_vals_df<-data.frame(1:36)
+#p_vals_df$vals<-paste(round(all_herb_models$Pr..F., digits = 3),  " (F 5,58 = ", round(all_herb_models$F.value, digits = 3), ")", sep = "")
+#p_vals_df
+#keep only those coefficeint from models with a signficant effect of herbicide
+coefficents_sig<-coefficents[coefficents$ENZ_HERB %in% sig_herb_models$ENZ_HERB, ]
+#keep only those pairwise comparisons that are significant and have a significant value for herbicide from global model
+pairwise_sig<-pairwise_comps[pairwise_comps$ENZ_HERB %in% sig_herb_models$ENZ_HERB & pairwise_comps$datasets_herb..j...Herbicide.p.adj <=0.05,]
+```
+
+```{r}
+plot(Time1$Total_Weed_Veg ~ Time1$Herbicide)
+plot(Time2$Total_Weed_Veg ~ Time2$Herbicide)
+plot(Time3$Total_Weed_Veg ~ Time3$Herbicide)
+```
+```{r}
+
+weedcover_names<-c("Total_Weed_Veg", "ClassPW",  "CLASSLQ" )
+t1_table <- tabular(Total_Weed_Veg + ClassPW + CLASSLQ   ~ Herbicide* (mean+sd), data=Time1 )
+t1_table
+t2_table <- tabular(Total_Weed_Veg + ClassPW + CLASSLQ    ~ Herbicide* (mean+sd), data=Time2 )
+t2_table
+t3_table <- tabular(Total_Weed_Veg + ClassPW + CLASSLQ    ~ Herbicide* (mean+sd), data=Time3 )
+t3_table
+```
+

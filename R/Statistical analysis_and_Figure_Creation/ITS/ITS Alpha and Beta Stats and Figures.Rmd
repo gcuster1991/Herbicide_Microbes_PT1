@@ -352,10 +352,10 @@ TukeyHSD(x = T3_betamod, which = "group")
 
 library(ggpubr)
 ggarrange(T1_beta_plot, T2_beta_plot, T3_beta_plot, ncol = 1)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta.pdf", width = 5, height = 10)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta.pdf", width = 7, height = 10)
 ```
 
-Examination of dissimliarity across time points by treatment and then again by all chemical treatments combined.
+Examination of dissimilarity across time points by treatment and then again by all chemical treatments combined.
 ```{r}
 T1_beta_df$Time<-"T1"
 T2_beta_df$Time<-"T2"
