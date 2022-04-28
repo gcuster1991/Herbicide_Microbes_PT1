@@ -297,6 +297,9 @@ ps_betadispr(subset_samples(ps_rare_sub, Mode == "Chemical"), groupingvar = "Tim
 ps_betadispr(subset_samples(ps_rare_sub, Mode == "Non-Treated"), groupingvar = "Time")
 ps_betadispr(subset_samples(ps_rare_sub, Mode == "Hand"), groupingvar = "Time")
 
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T1"), groupingvar = "Herbicide")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T2"), groupingvar = "Herbicide")
+ps_betadispr(subset_samples(ps_rare_sub, Time == "T3"), groupingvar = "Herbicide")
 
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Glyphosate"), groupingvar = "Time")
 ps_betadispr(subset_samples(ps_rare_sub, Herbicide == "Atrazine-Mesotrione"), groupingvar = "Time")
@@ -372,11 +375,11 @@ beta_anova<-function(data, Herbicide = "Herbicide"){
   boxplot(df_sub$beta_div_value ~ df_sub$Time)
 }
 
-beta_anova(beta_div_T1_T2_T3, Herbicide = "Non-Treated")
-beta_anova(beta_div_T1_T2_T3, Herbicide = "Handweeded")
-beta_anova(beta_div_T1_T2_T3, Herbicide = "Dicamba")
-beta_anova(beta_div_T1_T2_T3, Herbicide = "Atrazine-Mesotrione")
-beta_anova(beta_div_T1_T2_T3, Herbicide = "Glyphosate")
+#beta_anova(beta_div_T1_T2_T3, Herbicide = "Non-Treated")
+#beta_anova(beta_div_T1_T2_T3, Herbicide = "Handweeded")
+#beta_anova(beta_div_T1_T2_T3, Herbicide = "Dicamba")
+#beta_anova(beta_div_T1_T2_T3, Herbicide = "Atrazine-Mesotrione")
+#beta_anova(beta_div_T1_T2_T3, Herbicide = "Glyphosate")
 
 #regroup all chemical treatments together and rerun betadiv calcs within group. 
 sample_data(ps_rare)$Mode<-sample_data(ps_rare)$Herbicide
@@ -391,7 +394,7 @@ sample_data(ps_rare)$Mode<- as.factor(values[match(sample_data(ps_rare)$Mode, in
 
 T1_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Mode")
 T1_beta_chemical_combined_plot <- T1_beta_chemical_combined$plot 
-T1_beta_chemical_combined_plot<- T1_beta_chemical_combined_plot + theme_classic() + guides(color=guide_legend("Treatment")) + ylab("Bray-Curtis Dissimilarity") + xlab("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.5, 0.75) + scale_color_manual(values = c("#FFA500", "#00B0F6", "#E76BF3")) 
+T1_beta_chemical_combined_plot<- T1_beta_chemical_combined_plot + theme_classic() + guides(color=guide_legend("Treatment")) + ylab("Bray-Curtis Dissimilarity") + xlab("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.3, 0.75) + scale_color_manual(values = c("#FFA500", "#00B0F6", "#E76BF3")) 
 T1_beta_chemical_combined_plot
 my_legend <- get_legend(T1_beta_chemical_combined_plot)
 as_ggplot(my_legend)
@@ -402,14 +405,14 @@ T1_beta_chemical_combined_plot
 
 T2_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "bray", group = "Mode")
 T2_beta_chemical_combined_plot <- T2_beta_chemical_combined$plot 
-T2_beta_chemical_combined_plot<- T2_beta_chemical_combined_plot + theme_classic()+ theme(legend.position = "none") + ylab("Bray-Curtis Dissimilarity") + xlab("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.5, 0.75) + scale_color_manual(values = c("#FFA500", "#00B0F6", "#E76BF3")) 
+T2_beta_chemical_combined_plot<- T2_beta_chemical_combined_plot + theme_classic()+ theme(legend.position = "none") + ylab("Bray-Curtis Dissimilarity") + xlab("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.3, 0.75) + scale_color_manual(values = c("#FFA500", "#00B0F6", "#E76BF3")) 
 T2_beta_chemical_combined_plot
 
 
 
 T3_beta_chemical_combined<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T3"), method = "bray", group = "Mode")
 T3_beta_chemical_combined_plot <- T3_beta_chemical_combined$plot 
-T3_beta_chemical_combined_plot<- T3_beta_chemical_combined_plot + theme_classic()+ theme(legend.position = "none") + ylab("Bray-Curtis Dissimilarity") + xlab("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.5, 0.75) + scale_color_manual(values = c("#FFA500", "#00B0F6", "#E76BF3")) 
+T3_beta_chemical_combined_plot<- T3_beta_chemical_combined_plot + theme_classic()+ theme(legend.position = "none") + ylab("Bray-Curtis Dissimilarity") + xlab("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.3, 0.75) + scale_color_manual(values = c("#FFA500", "#00B0F6", "#E76BF3")) 
 T3_beta_chemical_combined_plot
 
 
