@@ -179,15 +179,19 @@ my_legend <- get_legend(T1_rare_plot)
 library(ggpubr)
 as_ggplot(my_legend)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordinationlegend.pdf")
+as_ggplot(my_legend)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordinationlegend.eps")
 T1_rare_plot<-T1_rare_plot + theme(legend.position = "none")
 T1_rare_plot
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T1.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T1.eps")
 
 ord_t2_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T2"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T2_rare<-ggordiplots::gg_ordiplot(ord = ord_t2_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T2")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T2_rare_plot<-T2_rare$plot + theme_classic() + xlim(-0.4, 0.4) + ylim(-0.4, 0.4)+ theme(legend.position = "none")  + xlab("NMDS 1") + ylab("NMDS 2")
 T2_rare_plot
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T2.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T2.eps")
 
 #G166SG identified as outlier based on plots with it included. Removed to create plot. 
 ps_rare <-  subset_samples(ps_rare, sample_names(ps_rare) != "G166SG")
@@ -196,12 +200,13 @@ T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_
 T3_rare_plot<-T3_rare$plot + theme_classic() + xlim(-0.4, 0.4) + ylim(-0.4, 0.4)+ theme(legend.position = "none")  + xlab("NMDS 1") + ylab("NMDS 2")
 T3_rare_plot
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T3.pdf")
-
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_ordination_rare_T3.eps")
 
 
 library(ggpubr)
 ggarrange(T1_rare_plot, T2_rare_plot, T3_rare_plot, ncol = 1)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_ordination.pdf", width = 5, height = 10)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_ordination.eps", width = 5, height = 10)
 ```
 
 CAP ordination plots rarefied - not used
@@ -308,12 +313,55 @@ ps_betadispr(ps_rare_sub, groupingvar = "Herbicide")
 ps_betadispr(ps_rare_sub, groupingvar = "Mode")
 ps_betadispr(ps_rare_sub, groupingvar = "Time")
 ```
+```{r}
+beta_boxplot<-function (physeq, method = "bray", group) 
+{
+  require("phyloseq")
+  require("ggplot2")
+  group2samp <- list()
+  group_list <- get_variable(sample_data(physeq), group)
+  for (groups in levels(group_list)) {
+    target_group <- which(group_list == groups)
+    group2samp[[groups]] <- sample_names(physeq)[target_group]
+  }
+  beta_div_dist <- phyloseq::distance(physeq = physeq, method = method)
+  beta_div_dist <- as(beta_div_dist, "matrix")
+  dist_df <- data.frame()
+  counter <- 1
+  for (groups in names(group2samp)) {
+    sub_dist <- beta_div_dist[group2samp[[groups]], group2samp[[groups]]]
+    no_samp_col <- ncol(sub_dist)
+    no_samp_row <- nrow(sub_dist)
+    for (cols in seq(no_samp_col)) {
+      if (cols > 1) {
+        for (rows in seq((cols - 1))) {
+          dist_df[counter, "sample_pair"] <- paste0(colnames(sub_dist)[cols], 
+            "-", rownames(sub_dist)[rows])
+          dist_df[counter, "group"] <- groups
+          dist_df[counter, "beta_div_method"] <- method
+          dist_df[counter, "beta_div_value"] <- sub_dist[rows, 
+            cols]
+          counter = counter + 1
+        }
+      }
+    }
+  }
+  plot_boxplot <- ggplot(data = dist_df, aes(x = group, y = beta_div_value, 
+    color = group)) + geom_boxplot(outlier.shape = NA) + 
+    geom_jitter() + theme_bw() + xlab(group) + ylab(method) + 
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+      hjust = 1))
+  list_Out <- list(data = dist_df, plot = plot_boxplot)
+  return(list_Out)
+}
+
+```
 
 box and whisker plots of pairwise distance 
 within group distances
 ```{r}
 #remotes::install_github("antonioggsousa/micrUBIfuns")
-library(micrUBIfuns)
+#library(micrUBIfuns)
 T1_beta<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T1"), method = "bray", group = "Herbicide")
 T1_beta_plot <- T1_beta$plot
 T1_beta_plot <- T1_beta_plot + theme_classic()+ guides(color=guide_legend("Treatment")) + ylab("Bray-Curtis Dissimilarity") + xlab("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.5, 0.75)
@@ -321,9 +369,11 @@ T1_beta_plot
 my_legend <- get_legend(T1_beta_plot)
 as_ggplot(my_legend)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_beta_legend.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_beta_legend.eps")
 T1_beta_plot<-T1_beta_plot+ theme(legend.position = "none") 
 T1_beta_plot
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_withingroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T1_rare_withingroup_beta.eps")
 T1_beta_df<- T1_beta$data
 T1_betamod<-aov(formula = beta_div_value ~ group ,data = T1_beta_df)
 summary(T1_betamod)
@@ -334,6 +384,7 @@ T2_beta_plot <- T2_beta$plot
 T2_beta_plot <- T2_beta_plot+ theme_classic() + theme(legend.position = "none") + ylab("Bray-Curtis Dissimilarity") + xlab("") + ggtitle("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.5, 0.75)
 T2_beta_plot
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_withingroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T2_rare_withingroup_beta.eps")
 T2_beta_df<- T2_beta$data
 T2_betamod<-aov(formula = beta_div_value ~ group ,data = T2_beta_df)
 summary(T2_betamod)
@@ -345,6 +396,7 @@ T3_beta_plot <- T3_beta$plot
 T3_beta_plot <- T3_beta_plot + theme_classic()+ theme(legend.position = "none") + ylab("Bray-Curtis Dissimilarity") + xlab("") + ggtitle("")
 T3_beta_plot <-T3_beta_plot + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.5, 0.75)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_withingroup_beta.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_T3_rare_withingroup_beta.eps")
 
 T3_beta_df<- T3_beta$data
 T3_betamod<-aov(formula = beta_div_value ~ group ,data = T3_beta_df)
@@ -354,6 +406,7 @@ TukeyHSD(x = T3_betamod, which = "group")
 library(ggpubr)
 ggarrange(T1_beta_plot, T2_beta_plot, T3_beta_plot, ncol = 1)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_within_group_beta.pdf", width = 5, height = 10)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_within_group_beta.eps", width = 5, height = 10)
 ```
 
 Examination of dissimliarity across time points by treatment and then again by all chemical treatments combined.
@@ -397,6 +450,7 @@ T1_beta_chemical_combined_plot
 my_legend <- get_legend(T1_beta_chemical_combined_plot)
 as_ggplot(my_legend)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_beta_combined_legend.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_beta_combined_legend.eps")
 T1_beta_chemical_combined_plot<-T1_beta_chemical_combined_plot+ theme(legend.position = "none")
 T1_beta_chemical_combined_plot
 
@@ -416,6 +470,7 @@ T3_beta_chemical_combined_plot
 
 ggarrange(T1_beta_chemical_combined_plot, T2_beta_chemical_combined_plot, T3_beta_chemical_combined_plot, ncol = 1)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_within_group_beta_chemical_combined.pdf", width = 5, height = 10)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/16S_combined_rare_within_group_beta_chemical_combined.eps", width = 5, height = 10)
 
 ```
 

@@ -1105,12 +1105,15 @@ HW_UV<-ggplot(subHandweed_long, aes_string(x = "Time", y= "Activity", fill="Time
 my_legend <- get_legend(RU_UV)
 as_ggplot(my_legend)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Enz_hump_activity_legend.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Enz_hump_activity_legend.eps")
 RU_UV<-RU_UV+ theme(legend.position = "none") 
 RU_UV
 
 
 ggarrange(HW_UV, RU_UV,  nrow = 2, ncol = 1)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Enz_hump_activity.eps", width = 7, height = 10)
 ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/Enz_hump_activity.pdf", width = 7, height = 10)
+
 ```
 
 
