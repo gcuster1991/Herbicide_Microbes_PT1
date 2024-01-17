@@ -16,23 +16,29 @@ library(psych)
 library(lme4)
 library(nlme)
 library(multcomp)
+library(car)
 ```
 
 Read in data
 ```{r}
-total<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/merged_metadata_herbicide_EPSCOR_2018.csv")
-enz <- read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme_Summary_W_percent_Change.csv")
-enz_only<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme.csv")
+#total<-read.csv("/Volumes/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/merged_metadata_herbicide_EPSCOR_2018.csv")
+#enz <- read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme_Summary_W_percent_Change.csv")
+#enz_only<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme.csv")
 
-wide_total <-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Wide_merged_GLM.csv")
+#wide_total <-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Wide_merged_GLM.csv")
+
+
+total<-read.csv("/Users/gordoncuster/Desktop/HerbPt1Analysis/merged_metadata_herbicide_EPSCOR_2018.csv")
+enz <- read.csv("/Users/gordoncuster/Desktop/HerbPt1Analysis/Enzyme_Summary_W_percent_Change.csv")
+enz_only<-read.csv("/Users/gordoncuster/Desktop/HerbPt1Analysis/Enzyme.csv")
+
+wide_total <-read.csv("/Users/gordoncuster/Desktop/HerbPt1Analysis/Wide_merged_GLM.csv")
 ```
 
 Pull weed columns, Time, Treatment
 ```{r}
 names(enz_only)
-weedcover<- enz_only %>% dplyr::select(Herbicide, Time, Total_Weed_Veg, ClassPW, ClassNS, CLASSFT, CLASSLQ, CLASSU, Barcode_ID )
-
-
+weedcover<- enz_only %>% dplyr::select(Herbicide, Time, Total_Weed_Veg, ClassPW, ClassNS, CLASSFT, CLASSLQ, CLASSU, Barcode_ID)
 ```
 
 
@@ -67,6 +73,7 @@ Total weedy cover by time point
 #total weedy vegeation at time 1
 mod1<-aov(Total_Weed_Veg ~ Herbicide, data = Time1)
 #passed
+summary(mod1)
 shapiro.test(aov(Total_Weed_Veg ~ Herbicide, data = Time1)$residuals)
 summary(aov(Total_Weed_Veg ~ Herbicide, data = Time1))
 TukeyHSD(mod1, "Herbicide")
@@ -88,7 +95,6 @@ summary(aov(Total_Weed_Veg ~ Herbicide, data = Time3))
 TukeyHSD(mod3, "Herbicide")
 ```
 ```{r}
-library(car)
 datasets_herb <- list(Time1, Time2, Time3)
 names(datasets_herb) <- c("Time_1", "Time2", "Time3")
 weedcover_names<-c("Total_Weed_Veg", "ClassPW",  "CLASSLQ" )
@@ -138,12 +144,44 @@ pairwise_sig<-pairwise_comps[pairwise_comps$ENZ_HERB %in% sig_herb_models$ENZ_HE
 ```
 
 ```{r}
-plot(Time1$Total_Weed_Veg ~ Time1$Herbicide)
-plot(Time2$Total_Weed_Veg ~ Time2$Herbicide)
-plot(Time3$Total_Weed_Veg ~ Time3$Herbicide)
-```
-```{r}
 
+index <- c("Clarity", "Roundup Powermax", "Aatrex", "Hand", "Non-Treated")
+values <- c("Dicamba", "Glyphosate", "Atrazine-Mesotrione", "Handweeded", "Non-Treated")
+Time1$Herbicide <- as.factor(values[match(Time1$Herbicide, index)])
+#Time1$Herbicide2<-factor(Time1$Herbicide, levels = c( "Atrazine-Mesotrione", "Dicamba", "Glyphosate", "Handweeded", "Non-Treated"), ordered = T)
+
+#plot(Time1$Total_Weed_Veg ~ Time1$Herbicide)
+veg_t1_plot <- ggplot(data = Time1, aes(x = Herbicide, y = Total_Weed_Veg, fill = Herbicide)) + geom_boxplot() + theme_classic()
+
+
+#plot(Time2$Total_Weed_Veg ~ Time2$Herbicide)
+Time2$Herbicide <- as.factor(values[match(Time2$Herbicide, index)])
+#Time2$Herbicide2<-factor(Time2$Herbicide, levels = c( "Atrazine-Mesotrione", "Dicamba", "Glyphosate", "Handweeded", "Non-Treated"), ordered = T)
+veg_t2_plot <- ggplot(data = Time2, aes(x = Herbicide, y = Total_Weed_Veg, fill = Herbicide)) + geom_boxplot() + theme_classic()
+
+#plot(Time3$Total_Weed_Veg ~ Time3$Herbicide)
+Time3$Herbicide <- as.factor(values[match(Time3$Herbicide, index)])
+#Time2$Herbicide2<-factor(Time2$Herbicide, levels = c( "Atrazine-Mesotrione", "Dicamba", "Glyphosate", "Handweeded", "Non-Treated"), ordered = T)
+veg_t3_plot <- ggplot(data = Time3, aes(x = Herbicide, y = Total_Weed_Veg, fill = Herbicide)) + geom_boxplot() + theme_classic()
+
+
+v1 <- veg_t1_plot + ylim(0,11) + theme(legend.position="none") + theme(axis.text=element_text(size=8, angle = 45, hjust =1), axis.title=element_text(size=10)) + xlab("") + ylab("Total Weedy Vegetation\n (Summed Cover Classes)")
+
+v2 <- veg_t2_plot + ylim(0,11) + theme(legend.position="none") + theme(axis.text=element_text(size=8, angle = 45, hjust =1), axis.title=element_text(size=10))+ xlab("") + ylab("")
+
+v3 <- veg_t3_plot + ylim(0,11) + theme(legend.position="none") + theme(axis.text=element_text(size=8, angle = 45, hjust =1), axis.title=element_text(size=10))+ xlab("") + ylab("")
+
+library(gridExtra)
+t<-arrangeGrob(v1, v2, v3, ncol =3)
+
+setEPS()
+postscript("/Users/gordoncuster/Desktop/Git_projects/Herbicide_Microbes_PT1/Figures/Combined_Veg_Cover.eps")
+plot(t)
+dev.off()
+```
+
+```{r}
+library(tables)
 weedcover_names<-c("Total_Weed_Veg", "ClassPW",  "CLASSLQ" )
 t1_table <- tabular(Total_Weed_Veg + ClassPW + CLASSLQ   ~ Herbicide* (mean+sd), data=Time1 )
 t1_table
