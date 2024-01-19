@@ -140,7 +140,7 @@ ps_adonis<-function(physeq){
        physeq_dist<-parallelDist::parDist(as.matrix(t(otu_tab)), method = "bray")}
             else{physeq_dist<-parallelDist::parDist(as.matrix(otu_tab), method = "bray")}
   print(anova(vegan::betadisper(physeq_dist, md_tab$Herbicide)))
-  vegan::adonis(physeq_dist ~ Herbicide * Time + Total_Weed_Veg , data = md_tab, permutations = 1000)
+  vegan::adonis2(physeq_dist ~ Herbicide * Time + Total_Weed_Veg , data = md_tab, permutations = 1000)
 }
 ```
 
@@ -153,6 +153,40 @@ ps_adonis(ps_rare_sub_57)
 ps_dmn_57<-subset_samples(ps_dmn, sample_names(ps_dmn) != "G065SG")
 #ps_adonis(ps_dmn)
 ps_adonis(ps_dmn_57)
+```
+effect of herbicide treatmnet at each timepoint as per significant interaction term.
+```{r}
+
+ps_adonis_split_by_timepoint<-function(physeq){
+  otu_tab<-data.frame(phyloseq::otu_table(physeq))
+  md_tab<-data.frame(phyloseq::sample_data(physeq))
+    if(taxa_are_rows(physeq)== T){
+       physeq_dist<-parallelDist::parDist(as.matrix(t(otu_tab)), method = "bray")}
+            else{physeq_dist<-parallelDist::parDist(as.matrix(otu_tab), method = "bray")}
+  print(anova(vegan::betadisper(physeq_dist, md_tab$Herbicide)))
+  vegan::adonis2(physeq_dist ~ Herbicide + Total_Weed_Veg , data = md_tab, permutations = 1000)
+}
+
+
+#rarefied
+ps_rare_sub_57_T1<-subset_samples(ps_rare_sub_57, Time=="T1")
+ps_adonis_split_by_timepoint(ps_rare_sub_57_T1)
+
+ps_rare_sub_57_T2<-subset_samples(ps_rare_sub_57, Time=="T2")
+ps_adonis_split_by_timepoint(ps_rare_sub_57_T2)
+
+ps_rare_sub_57_T3<-subset_samples(ps_rare_sub_57, Time=="T3")
+ps_adonis_split_by_timepoint(ps_rare_sub_57_T3)
+
+#DMN
+ps_dmn_sub_57_T1<-subset_samples(ps_dmn_57, Time=="T1")
+ps_adonis_split_by_timepoint(ps_dmn_sub_57_T1)
+
+ps_dmn_sub_57_T2<-subset_samples(ps_dmn_57, Time=="T2")
+ps_adonis_split_by_timepoint(ps_dmn_sub_57_T2)
+
+ps_dmn_sub_57_T3<-subset_samples(ps_dmn_57, Time=="T3")
+ps_adonis_split_by_timepoint(ps_dmn_sub_57_T3)
 ```
 
 Ordination plots DMN by time point

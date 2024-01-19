@@ -19,11 +19,18 @@ library(multcomp)
 ```
 Read in data
 ```{r}
-total<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/merged_metadata_herbicide_EPSCOR_2018.csv")
-enz <- read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme_Summary_W_percent_Change.csv")
-enz_only<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme.csv")
+#total<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/merged_metadata_herbicide_EPSCOR_2018.csv")
+#enz <- read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme_Summary_W_percent_Change.csv")
+#enz_only<-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Enzymes/Enzyme.csv")
 
-wide_total <-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Wide_merged_GLM.csv")
+#wide_total <-read.csv("/Users/gordoncuster/Desktop/Manuscript Submissions/Herbicide and Microbes/Herbicide_SAREC_2018/Wide_merged_GLM.csv")
+
+total<-read.csv("/Users/gordoncuster/Desktop/HerbPt1Analysis/merged_metadata_herbicide_EPSCOR_2018.csv")
+enz <- read.csv("/Users/gordoncuster/Desktop/HerbPt1Analysis/Enzyme_Summary_W_percent_Change.csv")
+enz_only<-read.csv("/Users/gordoncuster/Desktop/HerbPt1Analysis/Enzyme.csv")
+
+wide_total <-read.csv("/Users/gordoncuster/Desktop/HerbPt1Analysis/Wide_merged_GLM.csv")
+
 ```
 
 Split data by herbicide and time so we can look at each individually
@@ -62,7 +69,7 @@ enz_summary<-describeBy(sub_enz_data, list(sub_enz_data$Herbicide, sub_enz_data$
 ```
 
 glm global test of enzymes time 1 against handweeded plots
-F stat for overall model signficance compared to intercept only model. Only if the more complex model is signficnat are the predictors kept. 
+F stat for overall model signficance compared to intercept only model. Only if the more complex model is significant are the predictors kept. 
 #https://statisticsbyjim.com/regression/interpret-f-test-overall-significance-regression/
 ```{r}
 enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
@@ -101,7 +108,7 @@ out
 
 ```
 
-glm global test of enzymes time 1 agaist non-treated plots
+glm global test of enzymes time 1 against non-treated plots
 ```{r}
 enzymes<- c("BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")
 sub_Time1 <- Time1[!is.na(Time1$LAP),]
@@ -138,7 +145,7 @@ out
 #drop1(mod_herb, test = "F")
 ```
 
-adonis2 and graphs
+adonis2 and graphs for time 1
 ```{r}
 #convert to long format for ggplot
 subtime1_long <- sub_Time1[,c("Herbicide", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")] %>% 
@@ -292,6 +299,7 @@ p.predict
 out
 ```
 
+Adonis and ordination for time 2
 ```{r}
 #convert to long format for ggplot
 subTime2_long <- sub_Time2[,c("Herbicide", "BG", "CBH", "PHOS", "NAG", "BX", "AG", "LAP")] %>% 
@@ -507,7 +515,7 @@ grid.arrange(phos_T1, phos_T2, PHOS_T3, nrow=1)
 
 #Split by herbicide
 
-All Together:
+All Together
 ```{r}
 #Aatrex
 #names(Aatrex)
