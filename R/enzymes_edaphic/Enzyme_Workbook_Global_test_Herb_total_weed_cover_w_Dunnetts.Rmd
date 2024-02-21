@@ -1187,3 +1187,53 @@ summary(glht(t3_mod, mcp(Herbicide = "Tukey")))
 plot(Time3$Total_Weed_Veg ~ Time3$Herbicide)
 ```
 
+##line plots
+```{r}
+comb_dat<-rbind(Roundup, Handweed)
+comb_dat_sub <- comb_dat %>% dplyr::select("AG", "BG", "BX", "C.N_enz", "PHOS", "Herbicide", "Time")
+
+#gly - #00BF7D
+#HW - #00B0F6
+#phos
+PHOS_plot <- ggplot(comb_dat_sub, aes(x=Time, y=PHOS, colour=Herbicide)) + geom_boxplot(aes(x=Time, y=PHOS, colour=Herbicide), position = position_dodge(0.75)) +  theme_minimal_grid()+ scale_color_manual(values = c("#00B0F6", "#00BF7D"))
+PHOS_plot <- PHOS_plot + geom_smooth(data = comb_dat_sub, aes(group=Herbicide), se= F, method = "loess")
+PHOS_plot<- PHOS_plot + scale_x_discrete(labels=c("T1" = "Pre-treatment", "T2" = "10 days \npost-treatment",
+                              "T3" = "20 days \npost-treatment")) + xlab("Sampling Time") + ylab("PHOS Activity nmol/h/g") + theme(text = element_text(size=17), axis.text.x = element_text(size = 15),axis.text.y = element_text(size = 15))
+
+leg <-get_legend(PHOS_plot)
+leg2<-as_ggplot(leg)
+PHOS_plot <- PHOS_plot + theme(legend.position = "none")
+
+BX_plot <- ggplot(comb_dat_sub, aes(x=Time, y=BX, colour=Herbicide)) + geom_boxplot(aes(x=Time, y=BX, colour=Herbicide), position = position_dodge(0.75)) +  theme_minimal_grid()+ scale_color_manual(values = c("#00B0F6", "#00BF7D"))
+BX_plot <- BX_plot + geom_smooth(data = comb_dat_sub, aes(group=Herbicide),  se= F, method = "loess")
+BX_plot <- BX_plot+ scale_x_discrete(labels=c("T1" = "Pre-treatment", "T2" = "10 days \npost-treatment",
+                              "T3" = "20 days \npost-treatment"))+ xlab("Sampling Time") + ylab("BX Activity nmol/h/g")+ theme(legend.position = "none")+ theme(text = element_text(size=17), axis.text.x = element_text(size = 15),axis.text.y = element_text(size = 15))
+
+BG_plot <- ggplot(comb_dat_sub, aes(x=Time, y=BG, colour=Herbicide)) + geom_boxplot(aes(x=Time, y=BG, colour=Herbicide), position = position_dodge(0.75)) +  theme_minimal_grid()+ scale_color_manual(values = c("#00B0F6", "#00BF7D"))
+BG_plot <- BG_plot + geom_smooth(data = comb_dat_sub, aes(group=Herbicide),  se= F, method = "loess")
+BG_plot <-BG_plot + scale_x_discrete(labels=c("T1" = "Pre-treatment", "T2" = "10 days \npost-treatment",
+                              "T3" = "20 days \npost-treatment"))+ xlab("Sampling Time") + ylab("BG Activity nmol/h/g")+ theme(legend.position = "none")+ theme(text = element_text(size=17), axis.text.x = element_text(size = 15),axis.text.y = element_text(size = 15))
+
+
+C.N_enz_plot <- ggplot(comb_dat_sub, aes(x=Time, y=C.N_enz, colour=Herbicide)) + geom_boxplot(aes(x=Time, y=C.N_enz, colour=Herbicide), position = position_dodge(0.75)) +  theme_minimal_grid()+ scale_color_manual(values = c("#00B0F6", "#00BF7D"))
+C.N_enz_plot <- C.N_enz_plot + geom_smooth(data = comb_dat_sub, aes(group=Herbicide),  se= F, method = "loess")
+C.N_enz_plot <- C.N_enz_plot+ scale_x_discrete(labels=c("T1" = "Pre-treatment", "T2" = "10 days \npost-treatment",
+                              "T3" = "20 days \npost-treatment"))+ xlab("Sampling Time") + ylab("C:N Enzyme Ratio")+ theme(legend.position = "none")+ theme(text = element_text(size=17), axis.text.x = element_text(size = 15),axis.text.y = element_text(size = 15))
+
+AG_plot <- ggplot(comb_dat_sub, aes(x=Time, y=AG, colour=Herbicide)) + geom_boxplot(aes(x=Time, y=AG, colour=Herbicide), position = position_dodge(0.75)) +  theme_minimal_grid()+ scale_color_manual(values = c("#00B0F6", "#00BF7D"))
+AG_plot <- AG_plot + geom_smooth(data = comb_dat_sub, aes(group=Herbicide),  se= F, method = "loess")
+AG_plot <- AG_plot+ scale_x_discrete(labels=c("T1" = "Pre-treatment", "T2" = "10 days \npost-treatment",
+                              "T3" = "20 days \npost-treatment"))+ xlab("Sampling Time") + ylab("AG Activity nmol/h/g")+ theme(legend.position = "none")+ theme(text = element_text(size=17), axis.text.x = element_text(size = 15),axis.text.y = element_text(size = 15))
+
+
+
+#save all images
+ggsave("/Users/gordoncuster/Desktop/Git_projects/Herbicide_Microbes_PT1/Figures/FinalPlots/Individual Figures/AG.eps", AG_plot, dpi = 600, bg = "white")
+ggsave("/Users/gordoncuster/Desktop/Git_projects/Herbicide_Microbes_PT1/Figures/FinalPlots/Individual Figures/BX.eps", BX_plot, dpi = 600, bg = "white")
+ggsave("/Users/gordoncuster/Desktop/Git_projects/Herbicide_Microbes_PT1/Figures/FinalPlots/Individual Figures/BG.eps", BG_plot, dpi = 600, bg = "white")
+ggsave("/Users/gordoncuster/Desktop/Git_projects/Herbicide_Microbes_PT1/Figures/FinalPlots/Individual Figures/C_N.eps", C.N_enz_plot, dpi = 600, bg = "white")
+ggsave("/Users/gordoncuster/Desktop/Git_projects/Herbicide_Microbes_PT1/Figures/FinalPlots/Individual Figures/PHOS.eps", PHOS_plot, dpi = 600, bg = "white")
+ggsave("/Users/gordoncuster/Desktop/Git_projects/Herbicide_Microbes_PT1/Figures/FinalPlots/Individual Figures/legend.eps", leg2, dpi = 600, bg = "white")
+```
+
+

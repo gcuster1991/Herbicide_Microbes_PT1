@@ -114,7 +114,7 @@ Shannon Div plots - no significant differences among herbicide treatments at any
 ```{r}
 ggplot(data = alpha_div_md, aes(Herbicide, Shannon, color= Herbicide)) + facet_grid(. ~ Time) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust = 1) )
 
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_Shannon.pdf")
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/FinalPlots/ITS_Shannon.pdf")
 
 aov_t1<-aov(Shannon ~ Herbicide, data = alpha_div_md[alpha_div_md$Time == "T1",])
 plot(aov_t1$residuals)
@@ -190,7 +190,7 @@ ps_adonis_split_by_timepoint(ps_dmn_sub_57_T3)
 ```
 
 Ordination plots DMN by time point
-```{r}
+```{#r}
 ord_t1_dmn<-ordinate(physeq = subset_samples(ps_dmn, Time=="T1"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T1_dmn<-ggordiplots::gg_ordiplot(ord = ord_t1_dmn, groups = data.frame(sample_data(subset_samples(ps_dmn, Time == "T1")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T1_dmn$plot + theme_classic()
@@ -219,34 +219,40 @@ T1_rare<-ggordiplots::gg_ordiplot(ord = ord_t1_rare, groups = data.frame(sample_
 T1_rare_plot<-T1_rare$plot + theme_classic() + xlim(-0.5, 0.5) + ylim(-0.5, 0.5)  + guides(color=guide_legend("Treatment")) + xlab("NMDS 1") + ylab("NMDS 2")
 T1_rare_plot
 library(cowplot)
-my_legend <- get_legend(T1_rare_plot)
-library(ggpubr)
-as_ggplot(my_legend)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordinationlegend.pdf")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordinationlegend.eps")
+#my_legend <- get_legend(T1_rare_plot)
+#library(ggpubr)
+#as_ggplot(my_legend)
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordinationlegend.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordinationlegend.eps")
 T1_rare_plot<-T1_rare_plot + theme(legend.position = "none")
 T1_rare_plot
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T1.pdf")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T1.eps")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T1.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T1.eps")
 
 ord_t2_rare<-ordinate(physeq = subset_samples(ps_rare_sub, Time=="T2"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T2_rare<-ggordiplots::gg_ordiplot(ord = ord_t2_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T2")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T2_rare_plot<-T2_rare$plot + theme_classic() + xlim(-0.5, 0.5) + ylim(-0.5, 0.5) + theme(legend.position = "none")  + xlab("NMDS 1") + ylab("NMDS 2")
 T2_rare_plot
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T2.pdf")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T2.eps")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T2.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T2.eps")
 
 ord_t3_rare<-ordinate(physeq = subset_samples(ps_rare, Time=="T3"), method = "NMDS", distance = "bray", k=3, trymax= 100)
 T3_rare<-ggordiplots::gg_ordiplot(ord = ord_t3_rare, groups = data.frame(sample_data(subset_samples(ps_rare, Time == "T3")))$Herbicide, choices = c(1, 2), kind = c("se"), conf = 0.95, show.groups = "all", ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE, plot = TRUE, pt.size = 1)
 T3_rare_plot<-T3_rare$plot + theme_classic() + xlim(-0.5, 0.5) + ylim(-0.5, 0.5) + theme(legend.position = "none")  + xlab("NMDS 1") + ylab("NMDS 2")
 T3_rare_plot
 
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T3.pdf")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T3.eps")
-library(ggpubr)
-ggarrange(T1_rare_plot, T2_rare_plot, T3_rare_plot, ncol = 1)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_ordination.pdf", width = 5, height = 10)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_ordination.eps", width = 5, height = 10)
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T3.pdf")
+##ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_ordination_rare_T3.eps")
+#library(ggpubr)
+#ggarrange(T1_rare_plot, T2_rare_plot, T3_rare_plot, ncol = 1)
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_ordination.pdf", width = 5, height = 10)
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_ordination.eps", width = 5, height = 10)
+
+
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/FinalPlots/Individual Figures/ITS_ordination_rare_T1.eps", T1_rare_plot)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/FinalPlots/Individual Figures/ITS_ordination_rare_T2.eps", T2_rare_plot)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/FinalPlots/Individual Figures/ITS_ordination_rare_T3.eps", T3_rare_plot)
+
 ```
 
 CAP ordination plots rarefied
@@ -401,12 +407,12 @@ T1_beta_plot <- T1_beta_plot + theme_classic()+ guides(color=guide_legend("Treat
 T1_beta_plot
 my_legend <- get_legend(T1_beta_plot)
 as_ggplot(my_legend)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_beta_legend.pdf")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_beta_legend.eps")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_beta_legend.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_beta_legend.eps")
 T1_beta_plot<-T1_beta_plot+ theme(legend.position = "none") 
 T1_beta_plot
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T1_rare_withingroup_beta.pdf")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T1_rare_withingroup_beta.eps")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T1_rare_withingroup_beta.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T1_rare_withingroup_beta.eps")
 T1_beta_df<- T1_beta$data
 T1_betamod<-aov(formula = beta_div_value ~ group ,data = T1_beta_df)
 summary(T1_betamod)
@@ -416,8 +422,8 @@ T2_beta<-beta_boxplot(physeq = subset_samples(ps_rare, Time=="T2"), method = "br
 T2_beta_plot <- T2_beta$plot
 T2_beta_plot <- T2_beta_plot+ theme_classic() + theme(legend.position = "none") + ylab("Bray-Curtis Dissimilarity") + xlab("") + ggtitle("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.3, 0.75)
 T2_beta_plot
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T2_rare_withingroup_beta.pdf")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T2_rare_withingroup_beta.eps")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T2_rare_withingroup_beta.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T2_rare_withingroup_beta.eps")
 T2_beta_df<- T2_beta$data
 T2_betamod<-aov(formula = beta_div_value ~ group ,data = T2_beta_df)
 summary(T2_betamod)
@@ -428,8 +434,8 @@ T3_beta$plot #+ scale_color_manual(values = c("#F8766D", "#A3A500",  "#00BF7D", 
 T3_beta_plot <- T3_beta$plot
 T3_beta_plot <- T3_beta_plot + theme_classic()+ theme(legend.position = "none") + ylab("Bray-Curtis Dissimilarity") + xlab("") + ggtitle("")
 T3_beta_plot <-T3_beta_plot + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + ylim (0.3, 0.75)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T3_rare_withingroup_beta.pdf")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T3_rare_withingroup_beta.eps")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T3_rare_withingroup_beta.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_T3_rare_withingroup_beta.eps")
 
 T3_beta_df<- T3_beta$data
 T3_betamod<-aov(formula = beta_div_value ~ group ,data = T3_beta_df)
@@ -437,9 +443,10 @@ summary(T3_betamod)
 TukeyHSD(x = T3_betamod, which = "group")
 
 library(ggpubr)
-ggarrange(T1_beta_plot, T2_beta_plot, T3_beta_plot, ncol = 1)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta.pdf", width = 7, height = 10)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta.eps", width = 7, height = 10)
+plot_combined_treatment_beta_disper<-ggarrange(T1_beta_plot, T2_beta_plot, T3_beta_plot, ncol = 3)
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/FinalPlots/CombinedFigures/Supp_figure_ITS_combined_rare_within_group_beta.eps", plot_combined_treatment_beta_disper)
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta.pdf", width = 7, height = 10)
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta.eps", width = 7, height = 10)
 ```
 
 Examination of dissimilarity across time points by treatment and then again by all chemical treatments combined.
@@ -482,8 +489,8 @@ T1_beta_chemical_combined_plot<- T1_beta_chemical_combined_plot + theme_classic(
 T1_beta_chemical_combined_plot
 my_legend <- get_legend(T1_beta_chemical_combined_plot)
 as_ggplot(my_legend)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_beta_combined_legend.pdf")
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_beta_combined_legend.eps")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_beta_combined_legend.pdf")
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_beta_combined_legend.eps")
 T1_beta_chemical_combined_plot<-T1_beta_chemical_combined_plot+ theme(legend.position = "none")
 T1_beta_chemical_combined_plot
 
@@ -501,9 +508,32 @@ T3_beta_chemical_combined_plot<- T3_beta_chemical_combined_plot + theme_classic(
 T3_beta_chemical_combined_plot
 
 
-ggarrange(T1_beta_chemical_combined_plot, T2_beta_chemical_combined_plot, T3_beta_chemical_combined_plot, ncol = 1)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta_chemical_combined.pdf", width = 5, height = 10)
-ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta_chemical_combined.eps", width = 5, height = 10)
+#ggarrange(T1_beta_chemical_combined_plot, T2_beta_chemical_combined_plot, T3_beta_chemical_combined_plot, ncol = 1)
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta_chemical_combined.pdf", width = 5, height = 10)
+#ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/ITS_combined_rare_within_group_beta_chemical_combined.eps", width = 5, height = 10)
+
+
+#build combined plot 
+T1_beta_chemical_combined$data$Time <- "T1"
+T2_beta_chemical_combined$data$Time <- "T2"
+T3_beta_chemical_combined$data$Time <- "T3"
+
+datt1 <- T1_beta_chemical_combined$data
+
+datt2 <- T2_beta_chemical_combined$data
+
+datt3<- T3_beta_chemical_combined$data
+
+
+dat_combined <- rbind(datt1, datt2, datt3)
+
+#ggplot(data = dat_combined) + geom_boxplot(aes(x = Time, y = beta_div_value, fill = Time)) + facet_grid(cols = vars(group))
+
+beta_disper_Chemical_treatment_ITS <-ggplot() + geom_boxplot(data = dat_combined, aes(x = Time, y = beta_div_value, color = Time)) + 
+  geom_smooth(data = dat_combined, aes(x = Time, y = beta_div_value, group=group),  se= F, method = "lm", color = "black") + 
+  scale_x_discrete(labels=c("T1" = "Pre-treatment", "T2" = "10 days \npost-treatment", "T3" = "20 days \npost-treatment")) + ylab("Bray-Curtis dissimiliarity") +
+    facet_grid(cols = vars(group))  + theme_classic() + theme(strip.text = element_text(size = 20, color = "black"))
+ggsave("/Users/gordoncuster/Desktop/Git_Projects/Herbicide_Microbes_PT1/Figures/FinalPlots/betadisper_chemicaltreatmentITS.eps", beta_disper_Chemical_treatment_ITS, height = 4, width = 10, dpi = 600)
 ```
 
 
@@ -534,11 +564,31 @@ TukeyHSD(m3, "group")
 boxplot(beta_div_value ~ group, data = T3_beta_df_chemical_combined)
 
 
-beta_div__chemical_combined_T1_T2_T3 <- rbind(T1_beta_df_chemical_combined, T2_beta_df_chemical_combined, T3_beta_df_chemical_combined)
+beta_div_chemical_combined_T1_T2_T3 <- rbind(T1_beta_df_chemical_combined, T2_beta_df_chemical_combined, T3_beta_df_chemical_combined)
 
 beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Chemical")
-beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Hand")
+beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Handweeded")
 beta_anova(beta_div__chemical_combined_T1_T2_T3, Herbicide = "Non-Treated")
+
+
+beta_lm<-function(data, Herbicide = "Herbicide"){
+  df_sub<- data %>% filter(group == Herbicide)
+  mod<-lm(beta_div_value ~ Time, data = df_sub)
+  print(summary(mod))
+  print(coef(mod))
+  #print(TukeyHSD(mod, "Time"))
+  #boxplot(df_sub$beta_div_value ~ df_sub$Time)
+}
+
+beta_div_chemical_combined_T1_T2_T3$Time <- replace(beta_div_chemical_combined_T1_T2_T3$Time, beta_div_chemical_combined_T1_T2_T3$Time== "T1", 0)
+beta_div_chemical_combined_T1_T2_T3$Time <- replace(beta_div_chemical_combined_T1_T2_T3$Time, beta_div_chemical_combined_T1_T2_T3$Time== "T2", 10)
+beta_div_chemical_combined_T1_T2_T3$Time <- replace(beta_div_chemical_combined_T1_T2_T3$Time, beta_div_chemical_combined_T1_T2_T3$Time== "T3", 20)
+
+beta_div_chemical_combined_T1_T2_T3$Time <- as.numeric(beta_div_chemical_combined_T1_T2_T3$Time)
+
+beta_lm(beta_div_chemical_combined_T1_T2_T3, Herbicide = "Chemical")
+beta_lm(beta_div_chemical_combined_T1_T2_T3, Herbicide = "Handweeded")
+beta_lm(beta_div_chemical_combined_T1_T2_T3, Herbicide = "Non-Treated")
 ```
 
 treatment to control 
